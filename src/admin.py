@@ -3,19 +3,19 @@ from .models import Event, Group, CategoryGroup, Category
 
 
 class EventAdmin(admin.ModelAdmin):
-    pass
+	list_display = ('title',)
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+	list_display = ('title',)
 
 
 class CategoryGroupAdmin(admin.ModelAdmin):
-    pass
+	list_display = ('title',)
 
 
 class GroupAdmin(admin.ModelAdmin):
-    pass
+	list_display = ('title',)
 
 
 admin.site.register(Event, EventAdmin)

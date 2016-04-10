@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include('dummy.trojsten_calendar.urls')),
+    url(r'', include('mainapp.urls')),
     ]

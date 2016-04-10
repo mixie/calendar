@@ -8,23 +8,28 @@ from django.utils import timezone
 
 
 class Group(models.Model):
-    list_display = ('title')
     title = models.CharField(max_length=300,  default="")
+
+    def __str__(self):
+        return self.title
 
 
 class CategoryGroup(models.Model):
-    list_display = ('title')
     title = models.CharField(max_length=300,  default="")
+
+    def __str__(self):
+        return self.title
 
 
 class Category(models.Model):
-    list_display = ('title')
     title = models.CharField(max_length=300, default="")
     category_group = models.ForeignKey(CategoryGroup)
 
+    def __str__(self):
+        return self.title
+
 
 class Event(models.Model):
-    list_display = ('title')
     title = models.CharField(max_length=300)
     fromdate = models.DateField(default=timezone.now)
     todate = models.DateField(default=timezone.now)
@@ -32,3 +37,6 @@ class Event(models.Model):
     wholeday = models.BooleanField(default=True)
     category = models.ForeignKey(Category)
     organized_by = models.ManyToManyField(Group)
+
+    def __str__(self):
+        return self.title
