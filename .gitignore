@@ -1,5 +1,4 @@
 *.pyc
-js/
-src/migrations
+/js/node_modules
 *.sublime*
 *.sqlite3
