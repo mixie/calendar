@@ -31,12 +31,12 @@ class Category(models.Model):
 
 class Event(models.Model):
     title = models.CharField(max_length=300)
-    fromdate = models.DateField(default=timezone.now)
-    todate = models.DateField(default=timezone.now)
+    start = models.DateTimeField(default=timezone.now)
+    end = models.DateTimeField(default=timezone.now)
     public = models.BooleanField(default=True)
-    wholeday = models.BooleanField(default=True)
-    category = models.ForeignKey(Category)
-    organized_by = models.ManyToManyField(Group)
+    allDay = models.BooleanField(default=True)
+    categories = models.ManyToManyField(Category)
+    groups = models.ManyToManyField(Group)
 
     def __str__(self):
         return self.title
