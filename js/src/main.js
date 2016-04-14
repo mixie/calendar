@@ -8,7 +8,6 @@ import {} from 'qtip2'
 
 class Calendar extends React.Component{
 
-
     componentDidMount(){
         const {calendar} = this.refs;
         $(calendar).fullCalendar({
@@ -31,7 +30,7 @@ class Calendar extends React.Component{
                 text:'<a href="link"> asa</a>'
              }
          });
-        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 10000);
+        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 20000);
     }
 
     componentWillUnmount(){
@@ -63,7 +62,7 @@ class Group extends React.Component{
         var checked=(this.props.value ? "checked" : "");
         return (
           <li className="group">
-             <input type="checkbox" name="group" value={this.props.value} onChange={this.props.onChange} checked={checked} />{this.props.title} <br />
+             <label><input type="checkbox" name="group" value={this.props.value} onChange={this.props.onChange} checked={checked} />{this.props.title}</label> <br />
           </li>
         );
     }
@@ -76,7 +75,7 @@ class GroupList extends React.Component{
         var groups = this.props.data.map(function(group) {
           return (
             <Group title={group.title} key={group.id} 
-            data={group.id} value={group.value} 
+            value={group.value} 
             onChange={(e)=>this.props.groupChanged(group.id)}/>
           )
         }.bind(this))
@@ -90,10 +89,11 @@ class GroupList extends React.Component{
 
 class Category extends React.Component{
     render(){
+        var checked=(this.props.value ? "checked" : "");
         return(
-            <i>
-            <input type="checkbox" /><label>{this.props.title}</label>
-            </i>
+            <span>
+            <label><input type="checkbox" onChange={this.props.onChange} checked={checked} />{this.props.title}</label>
+            </span>
         );
     }
 }
@@ -103,7 +103,7 @@ class CategoryGroup extends React.Component{
         var categories = this.props.data.map(function(category){
             if(category.category_group===this.props.id){
                 return (
-                    <Category title={category.title} key={category.id} onChange={(e)=>this.props.onChange(category.id)}/>
+                    <Category title={category.title} value={category.value} key={category.id} onChange={(e)=>this.props.onChange(category.id)}/>
                   )
             }
         }.bind(this))
@@ -123,9 +123,9 @@ class CategoryGroup extends React.Component{
 class CategoryGroupList extends React.Component{
 
     render(){
-        var categoryGroups = this.props.categoryGroups.map(function(categorygroup) {
+        let categoryGroups = this.props.categoryGroups.map(function(categorygroup) {
           return (
-            <CategoryGroup title={categorygroup.title} key={categorygroup.id} data={this.props.categories} id={categorygroup.id} onChange={this.props.categoryChanged}/>
+            <CategoryGroup title={categorygroup.title} key={categorygroup.id} id={categorygroup.id} data={this.props.categories} onChange={this.props.categoryChanged}/>
           )
         }.bind(this))
         return (
@@ -145,15 +145,35 @@ class App extends React.Component{
     }
 
 
-    makeQuery(groups){
+    makeQuery(newState){
         let q="/api/events/?"
-        let groupquery=""
-        for(let i =0;i<groups.length;i++){
-            if(groups[i]['value']){
-                groupquery=groupquery+groups[i]['id']+","
+        let filteredGroups=newState.groups.filter(function(group){
+            return group.value
+        })
+        if(filteredGroups.length>0){
+            q=q+"organizators="
+            for(let i=0;i<filteredGroups.length;i++){
+                q=q+filteredGroups[i].id
+                if(i!=filteredGroups.length-1){
+                        q=q+','
+                }
             }
         }
-        q=q+"organizators="+groupquery.substring(0,groupquery.length-1)
+        for(let i=0;i<newState.catgroups.length;i++){
+            let filtered=newState.categories.filter(function(cat){
+                return cat.value && cat.category_group===newState.catgroups[i].id
+            });
+            console.log(filtered)
+            if(filtered.length>0){
+                q=q+"&category_"+newState.catgroups[i].id+"="
+                for(let j=0;j<filtered.length;j++){
+                    q=q+filtered[j].id
+                    if(j!=filtered.length-1){
+                        q=q+','
+                    }
+                }
+            }
+        }
         return q
     }
 
@@ -161,13 +181,18 @@ class App extends React.Component{
         let newState={...this.state}
         let index = newState.groups.map(function(e) { return e.id; }).indexOf(id);
         newState.groups[index]['value']=!newState.groups[index]['value']
-        newState.url=this.makeQuery(newState.groups)
+        newState.url=this.makeQuery(newState)
         this.setState(newState)
     }
 
     categoryChanged(id){
-
-    }
+        let newState={...this.state}
+        let index = newState.categories.map(function(e) { return e.id; }).indexOf(id);
+        newState.categories[index]['value']=!newState.categories[index]['value']
+        newState.url=this.makeQuery(newState)
+        console.log(newState)
+        this.setState(newState)
+    }  
 
     initialLoadGroupsFromServer(){
          $.ajax({
@@ -226,12 +251,12 @@ class App extends React.Component{
     }
 
     render(){
+        console.log(this.state)
         return(
             <div>
-                <h1> Hello </h1>
                 <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
                 <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
-                <Calendar pollInterval={2000} url={this.state.url}/>
+                <Calendar pollInterval={20000} url={this.state.url}/>
             </div>
         );
     }

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from .views import EventViewSet, GroupViewSet, CategoryGroupViewSet, CategoryViewSet
-
+from . import views
 
 urlpatterns = [
     url(r'^events/$', EventViewSet.as_view({'get': 'list', 'post': 'create'})),
@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^categories/(?P<pk>[0-9]+)/$', CategoryViewSet.as_view({'get': 'retrieve'})),
     url(r'^categorygroups/$', CategoryGroupViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^categorygroups/(?P<pk>[0-9]+)/$', CategoryGroupViewSet.as_view({'get': 'retrieve'})),
+    url(r'^ics/(?P<gen>[0-9]+)/$', views.ics, name='ics'),
 ]

@@ -3,6 +3,7 @@ from .models import Event, Group, CategoryGroup, Category
 from .serializers import EventSerializer, GroupSerializer, CategoryGroupSerializer, CategorySerializer
 from rest_framework import filters, generics
 import django_filters
+from django.shortcuts import render
 
 
 class EventViewSet(
@@ -59,3 +60,7 @@ class GroupViewSet(
 ):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+
+
+def ics(request, gen):
+    return render(request, 'ics.html', {'id': gen})
