@@ -30,13 +30,13 @@ class EventViewSet(
 
     serializer_class = EventSerializer
 
-
 class CategoryViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet
 ):
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
