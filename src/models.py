@@ -29,6 +29,17 @@ class Category(models.Model):
         return self.title
 
 
+class IcsCalendar(models.Model):
+    url = models.CharField(max_length=300)
+    title = models.CharField(max_length=300, default="")
+    public = models.BooleanField(default=True)
+    categories = models.ManyToManyField(Category, blank=True)
+    groups = models.ManyToManyField(Group)
+
+    def __str__(self):
+        return self.title
+
+
 class Event(models.Model):
     title = models.CharField(max_length=300)
     start = models.DateTimeField(default=timezone.now)

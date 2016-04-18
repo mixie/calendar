@@ -21,6 +21,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "cookies-js": "^1.2.2",
     "fullcalendar": "^2.7.0-beta",
     "ics": "^0.5.0",

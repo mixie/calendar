@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Event, Group, Category, CategoryGroup
+from .models import Event, Group, Category, CategoryGroup, IcsCalendar
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -25,3 +25,9 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('id', 'title', 'category_group')
+
+class IcsCalendarSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = IcsCalendar
+        fields = ('id', 'title', 'url', 'public', 'categories', 'groups')

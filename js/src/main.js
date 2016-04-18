@@ -4,6 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 require('fullcalendar')
 import {} from 'qtip2'
+import {} from './druhy'
 
 
 class Calendar extends React.Component{
@@ -18,7 +19,14 @@ class Calendar extends React.Component{
                 right: 'month,agendaWeek,agendaDay'
             },
             events: (start, end, timezone, callback) => {
-                $.getJSON({url:this.props.url, success: function(result){
+                let url=this.props.url
+                if((this.props.url).includes("?")){
+                    url=url+"&"
+                }else{
+                    url=url+"?"
+                }
+                url=url+"start="+start+"&end="+end;
+                $.getJSON({url:url, success: function(result){
                     for (let i=0;i<result.length;i++){
                         result[i]['color']='red';
                     }
@@ -136,12 +144,41 @@ class CategoryGroupList extends React.Component{
     }
 }
 
+class IcsExport extends React.Component{
+
+    constructor(props){
+        super(props);
+        this.state = {name:[]};
+        this.handleChange = this.handleChange.bind(this)
+        this.exportCall = this.exportCall.bind(this)
+
+    }
+
+    handleChange(e){
+        this.setState({name: e.target.value});
+    }
+
+    exportCall(){
+        this.props.onClick(this.state.name);
+    }
+
+    render(){
+        return(
+            <div>
+                <label>Calendar name:<input type="text" name="calendarName" onChange={this.handleChange}/></label>
+                <button type="button" onClick={this.exportCall}>Export</button> <br/>
+                Exported url: <input type="text" value={this.props.url} readOnly size="45"/>
+            </div>
+        );
+    }
+}
+
 
 class App extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/"};
+        this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/",exporturl:"exporturl"};
     }
 
 
@@ -163,7 +200,6 @@ class App extends React.Component{
             let filtered=newState.categories.filter(function(cat){
                 return cat.value && cat.category_group===newState.catgroups[i].id
             });
-            console.log(filtered)
             if(filtered.length>0){
                 q=q+"&category_"+newState.catgroups[i].id+"="
                 for(let j=0;j<filtered.length;j++){
@@ -193,6 +229,33 @@ class App extends React.Component{
         console.log(newState)
         this.setState(newState)
     }  
+
+    exportIcs(title){
+        let myState={...this.state}
+        let cats=myState.categories.filter(function(cat) { return cat.value; }).map(function(cat){ return cat.id});
+        let groups = myState.groups.filter(function(group) { return group.value; }).map(function(group){ return group.id});
+        console.log("Title")
+        console.log(title)
+        let exporturl=Math.random().toString(36).substring(7);
+        $.ajax({
+          type: "post",
+          url: "/api/icscalendars/",
+          headers: {
+                "X-CSRFToken":cookie.get('csrftoken'),
+                "Content-Type":"application/json",
+            },
+          data: JSON.stringify({"title": title, 
+                "url": exporturl, 
+                "public": true,
+                "categories": cats,
+                "groups": groups
+            }),
+        }).done(function() {
+            myState.exporturl=document.location+"ics/"+exporturl+".ics";
+            this.setState(myState)
+        }.bind(this));
+        
+    }
 
     initialLoadGroupsFromServer(){
          $.ajax({
@@ -256,6 +319,7 @@ class App extends React.Component{
             <div>
                 <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
                 <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
+                <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
                 <Calendar pollInterval={20000} url={this.state.url}/>
             </div>
         );
