@@ -67,9 +67,10 @@ function mapEvents(events){
 class Group extends React.Component{
 
     render(){
-        var active=(this.props.value ? "active" : "");
+        console.log(this.props.onChange)
+        let active="btn btn-default "+(this.props.value ? "active" : "");
         return (
-             <button type="button" class="btn btn-secondary{active}" onClick={this.props.onChange}>{this.props.title}</button>
+              <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
         );
     }
 
@@ -86,20 +87,19 @@ class GroupList extends React.Component{
           )
         }.bind(this))
         return (
-           <div class="btn-group" role="group" aria-label="...">
-            {groups} 
-          </div>
+        <div> Organizátor: <span className="btn-group pull-right btn-group-xs" role="group" aria-label="...">
+           {groups} 
+          </span>
+        </div>
         );
     }
 }
 
 class Category extends React.Component{
     render(){
-        var checked=(this.props.value ? "checked" : "");
-        return(
-            <span>
-            <label><input type="checkbox" onChange={this.props.onChange} checked={checked} />{this.props.title}</label>
-            </span>
+        let active="btn btn-default "+(this.props.value ? "active" : "");
+        return (
+             <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
         );
     }
 }
@@ -120,7 +120,10 @@ class CategoryGroup extends React.Component{
             }
         }
         return(
-            <li>{this.props.title}: {newCategories} </li>
+            <div> {this.props.title}: <span className="btn-group pull-right btn-group-xs" role="group" aria-label="...">
+               {newCategories}
+              </span>
+            </div>      
         );
     }
 }
@@ -135,9 +138,10 @@ class CategoryGroupList extends React.Component{
           )
         }.bind(this))
         return (
-          <ul className="categoryGroupList">
+            <div>
+            Kategórie: <br/>
             {categoryGroups} 
-          </ul>
+            </div>
         );
     }
 }
@@ -163,9 +167,16 @@ class IcsExport extends React.Component{
     render(){
         return(
             <div>
-                <label>Calendar name:<input type="text" name="calendarName" onChange={this.handleChange}/></label>
-                <button type="button" onClick={this.exportCall}>Export</button> <br/>
-                Exported url: <input type="text" value={this.props.url} readOnly size="45"/>
+            <div className="input-group">
+              <input type="text" className="form-control" placeholder="Calendar name" onChange={this.handleChange} />
+              <span className="input-group-btn">
+                <button className="btn btn-default" type="button" onClick={this.exportCall}>Export</button>
+              </span>
+            </div>
+                <div className="input-group">
+                  <span className="input-group-addon" id="basic-addon1">Exported url:</span>
+                  <input type="text" className="form-control" value={this.props.url} readOnly placeholder="Username" aria-describedby="basic-addon1" size="45"/>
+                </div>
             </div>
         );
     }
@@ -185,14 +196,12 @@ class App extends React.Component{
         let filteredGroups=newState.groups.filter(function(group){
             return group.value
         })
-        if(filteredGroups.length>0){
-            q=q+"organizators="
-            for(let i=0;i<filteredGroups.length;i++){
-                q=q+filteredGroups[i].id
-                if(i!=filteredGroups.length-1){
-                        q=q+','
-                }
-            }
+        q=q+"organizators="
+        for(let i=0;i<filteredGroups.length;i++){
+            q=q+filteredGroups[i].id
+            if(i!=filteredGroups.length-1){
+                    q=q+','
+           }
         }
         for(let i=0;i<newState.catgroups.length;i++){
             let filtered=newState.categories.filter(function(cat){
@@ -224,7 +233,6 @@ class App extends React.Component{
         let index = newState.categories.map(function(e) { return e.id; }).indexOf(id);
         newState.categories[index]['value']=!newState.categories[index]['value']
         newState.url=this.makeQuery(newState)
-        console.log(newState)
         this.setState(newState)
     }  
 
@@ -315,10 +323,26 @@ class App extends React.Component{
         console.log(this.state)
         return(
             <div>
+            <div className="container">
+            <div className="row">
+                <div className="col-md-6">
                 <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
+                </div>
+                <div className="col-md-6">
                 <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
-                <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
+                </div>
+            </div>
+            <div className="row">
+                <div className=".col-md-8 .col-md-offset-2">
                 <Calendar pollInterval={20000} url={this.state.url}/>
+                </div>
+            </div>
+            <div className="row">
+                <div className=".col-md-8 .col-md-offset-2">
+                <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
+                </div>
+            </div>
+            </div>
             </div>
         );
     }

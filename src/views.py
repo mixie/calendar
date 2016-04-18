@@ -23,6 +23,8 @@ class EventViewSet(
         qs = Event.objects.all()
 
         if "organizators" in self.request.GET:
+            if self.request.GET["organizators"].split(',')[0]=='':
+                return []
             qs = qs.filter(groups__pk__in=self.request.GET["organizators"].split(','))
 
         for cg in CategoryGroup.objects.all():
@@ -67,6 +69,7 @@ class GroupViewSet(
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+
 class IcsCalendarViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -75,7 +78,6 @@ class IcsCalendarViewSet(
 ):
     queryset = IcsCalendar.objects.all()
     serializer_class = IcsCalendarSerializer
-
 
 
 def ics(request, gen):
@@ -92,10 +94,10 @@ def ics(request, gen):
     for cg in CategoryGroup.objects.all():
         catsingroup = [c.pk for c in Category.objects.filter(category_group=cg.pk)]
         filteredcats = [c for c in catspk if c in catsingroup]
-        if len(filteredcats)>0:
+        if len(filteredcats) > 0:
             qs = qs.filter(categories__pk__in=filteredcats)
 
     response = HttpResponse(content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename="%s.ics"'% qsfilter[0].title
+    response['Content-Disposition'] = 'attachment; filename="%s.ics"' % qsfilter[0].title
     response.write(convertEventsToCal(qsfilter[0].title, qs))
     return response
