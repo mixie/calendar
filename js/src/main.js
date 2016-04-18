@@ -1,11 +1,11 @@
 import $ from 'jquery'
+import jQuery from 'jquery'
 import cookie from 'cookies-js'
 import React from 'react'
 import ReactDOM from 'react-dom'
 require('fullcalendar')
 import {} from 'qtip2'
 import {} from './druhy'
-
 
 class Calendar extends React.Component{
 
@@ -67,11 +67,9 @@ function mapEvents(events){
 class Group extends React.Component{
 
     render(){
-        var checked=(this.props.value ? "checked" : "");
+        var active=(this.props.value ? "active" : "");
         return (
-          <li className="group">
-             <label><input type="checkbox" name="group" value={this.props.value} onChange={this.props.onChange} checked={checked} />{this.props.title}</label> <br />
-          </li>
+             <button type="button" class="btn btn-secondary{active}" onClick={this.props.onChange}>{this.props.title}</button>
         );
     }
 
@@ -88,9 +86,9 @@ class GroupList extends React.Component{
           )
         }.bind(this))
         return (
-          <ul className="groupList">
+           <div class="btn-group" role="group" aria-label="...">
             {groups} 
-          </ul>
+          </div>
         );
     }
 }
