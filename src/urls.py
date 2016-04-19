@@ -1,10 +1,10 @@
 from django.conf.urls import url
-from .views import EventViewSet, GroupViewSet, CategoryGroupViewSet, CategoryViewSet, IcsCalendarViewSet
+from .views import EventViewSet, GroupViewSet, CategoryGroupViewSet, CategoryViewSet, IcsCalendarViewSet, EventDetailViewSet
 from . import views
 
 urlpatterns = [
     url(r'^events/$', EventViewSet.as_view({'get': 'list', 'post': 'create'})),
-    url(r'^events/(?P<pk>[0-9]+)/$', EventViewSet.as_view({'get': 'retrieve'})),
+    url(r'^events/(?P<pk>[0-9]+)/$', EventDetailViewSet.as_view()),
     url(r'^groups/$', GroupViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^groups/(?P<pk>[0-9]+)/$', GroupViewSet.as_view({'get': 'retrieve'})),
     url(r'^categories/$', CategoryViewSet.as_view({'get': 'list', 'post': 'create'})),

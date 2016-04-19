@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom'
 require('fullcalendar')
 import {} from 'qtip2'
 import {} from './druhy'
+var moment = require('moment')
 
 class Calendar extends React.Component{
 
@@ -13,6 +14,7 @@ class Calendar extends React.Component{
         const {calendar} = this.refs;
         $(calendar).fullCalendar({
             lang: 'sk',
+            editable: true,
             header: {
                 left: 'prev,next',
                 center: 'title',
@@ -32,6 +34,28 @@ class Calendar extends React.Component{
                     }
                     callback(result);
                 }})
+            },
+            eventDrop: function(event, delta, revertFunc) {
+                event.start.add(delta)
+                if(event.end!==null){
+                    event.end.add(delta)
+                }
+                $.ajax({
+                  type: "put",
+                  url: "/api/events/"+event.id+"/",
+                  headers: {
+                        "X-CSRFToken":cookie.get('csrftoken'),
+                        "Content-Type":"application/json",
+                    },
+                  data: JSON.stringify({"title": event.title, 
+                        "start": event.start, 
+                        "end": event.end,
+                        "groups":[1],
+                        "categories":[2],
+
+                    }),
+                }).done(function() {
+                }.bind(this));
             }
         }).qtip({
              content: {

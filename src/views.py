@@ -13,7 +13,8 @@ class EventViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
 ):
     def get_queryset(self):
         """
@@ -36,8 +37,14 @@ class EventViewSet(
         if "start" in self.request.GET:
             qs = qs.filter(end__gt=datetime.fromtimestamp(int(self.request.GET["start"])/1e3))
         return qs
-
+        
     serializer_class = EventSerializer
+
+
+class EventDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
 
 class CategoryViewSet(
     mixins.CreateModelMixin,

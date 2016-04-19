@@ -43,11 +43,11 @@ class IcsCalendar(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=300)
     start = models.DateTimeField(default=timezone.now)
-    end = models.DateTimeField(default=timezone.now)
+    end = models.DateTimeField(default=timezone.now,null=True, blank=True)
     public = models.BooleanField(default=True)
     allDay = models.BooleanField(default=True)
-    categories = models.ManyToManyField(Category)
-    groups = models.ManyToManyField(Group)
+    categories = models.ManyToManyField(Category,null=True, blank=True)
+    groups = models.ManyToManyField(Group,null=True, blank=True)
 
     def __str__(self):
         return self.title
