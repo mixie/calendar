@@ -28,6 +28,9 @@ class EventViewSet(
                 return []
             qs = qs.filter(groups__pk__in=self.request.GET["organizators"].split(','))
 
+        # if "public" in self.request.GET:
+        #     qs = qs.filter(public=self.request.GET["public"])
+
         for cg in CategoryGroup.objects.all():
             name = "category_%s" % str(cg.pk)
             if name in self.request.GET:
