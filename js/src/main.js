@@ -4,7 +4,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 require('fullcalendar')
 import {} from 'qtip2'
-import {} from './druhy'
 var moment = require('moment')
 require('bootstrap')
 var DateTimeField = require('react-bootstrap-datetimepicker');
