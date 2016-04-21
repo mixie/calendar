@@ -54,6 +54,7 @@ class Calendar extends React.Component{
                 let event={title:"",start:date, end:date, categories:[],groups:[]};
                 this.props.openEvent(event,true)
             }.bind(this),
+            eventLimit:true,
         });
         this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 20000);
     }
@@ -82,14 +83,12 @@ function mapEvents(events){
 }
 
 class Group extends React.Component{
-
     render(){
         let active="btn btn-default "+(this.props.value ? "active" : "");
         return (
               <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
         );
     }
-
 }
 
 class GroupList extends React.Component{
@@ -103,7 +102,7 @@ class GroupList extends React.Component{
           )
         }.bind(this))
         return (
-        <div> <h5 className="text-center">Organizátor</h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
+        <div> <h5><strong>Organizátor</strong></h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
            {groups} 
           </span>
         </div>
@@ -161,7 +160,7 @@ class CategoryGroupList extends React.Component{
         }.bind(this))
         return (
             <div>
-            <h5 className="text-center">Kategórie</h5>
+            <h5><strong>Kategórie</strong></h5>
             {categoryGroups} 
             </div>
         );
@@ -263,7 +262,26 @@ class CalEvent extends React.Component{
         this.props.updateEvent(newEvent)
     }  
 
+    allDayChanged(){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(newEvent.end);
+        newEvent.start=moment(newEvent.start);
+        newEvent.allDay=!newEvent.allDay;
+        this.props.updateEvent(newEvent)
+    }  
+
+    publicChanged(){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(newEvent.end);
+        newEvent.start=moment(newEvent.start);
+        newEvent.public=!newEvent.public;
+        this.props.updateEvent(newEvent)
+    }  
+
+
     render(){
+        let publicEvent="btn btn-default "+(this.props.event.public ? "active" : "");
+        let alldayEvent="btn btn-default "+(this.props.event.allDay ? "active" : "");
         return(
         <div id="fullCalModal" className="modal fade">
             <div className="modal-dialog">
@@ -273,12 +291,21 @@ class CalEvent extends React.Component{
                         title: <input type="text" className="form-control" value={this.props.event.title} onChange={this.setTitle.bind(this)} />
                     </div>
                     <div id="modalBody" className="modal-body">
+                    <div className="form-group">
+                    <button type="button" className={publicEvent}  onClick={this.publicChanged.bind(this)}>Public</button>
+                    <button type="button" className={alldayEvent}  onClick={this.allDayChanged.bind(this)}>Allday</button>
+                    </div>
+                    <div className="form-group">
                     from: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD hh:mm" onChange={this.setStartDate.bind(this)}/>
                     to: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD hh:mm" onChange={this.setEndDate.bind(this)}/>
+                    </div>
+                    <div className="form-group">
                     <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)}/>
                     <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
-                    </div> 
+                    </div>
+                    </div>
                     <div className="modal-footer">
+                        <button className="btn btn-danger pull-left"  data-dismiss="modal" onClick={(e)=>this.props.deleteEvent(this.props.event.id)}>Delete</button>
                         <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
                         <button className="btn btn-primary"  data-dismiss="modal" onClick={(e)=>this.props.saveEvent(this.props.event)}>Save</button>
                     </div>
@@ -307,7 +334,6 @@ class App extends React.Component{
     }
 
     updateEventOnScreen(event){
-        console.log(event)
         let newState={...this.state}
         newState.event=event;
         let dateformat='YYYY-MM-DD hh:mm'
@@ -350,6 +376,21 @@ class App extends React.Component{
             $(calendar).fullCalendar('refetchEvents')
         }.bind(this)).fail(revertFunc);
         
+    }
+
+    deleteEvent(eventid){
+        let url="/api/events/"+eventid+"/";
+        $.ajax({
+                  type: "delete",
+                  url: url,
+                  headers: {
+                        "X-CSRFToken":cookie.get('csrftoken'),
+                        "Content-Type":"application/json",
+                    },
+        }).success(function(){
+            const {calendar} = this.refs;
+            $(calendar).fullCalendar('refetchEvents')
+        }.bind(this));
     }
 
     makeQuery(newState){
@@ -505,7 +546,7 @@ class App extends React.Component{
                         <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
                     </div>
                 </div>
-                <CalEvent event={this.state.event} groups={this.state.eventgroups} categories={this.state.eventcategories} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
+                <CalEvent event={this.state.event} groups={this.state.eventgroups} categories={this.state.eventcategories} deleteEvent={this.deleteEvent.bind(this)} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
                 </div>
         );
     }
