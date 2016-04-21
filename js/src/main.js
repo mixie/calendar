@@ -39,35 +39,23 @@ class Calendar extends React.Component{
                 if(event.end!==null){
                     event.end.add(delta)
                 }
-                this.updateEventOnServer(event,revertFunc)
+                this.props.updateEventOnServer(event,revertFunc)
             }.bind(this),
             eventResize: function(event, delta, revertFunc) {
                 if(event.end!==null){
                     event.end.add(delta)
                 }
-                this.updateEventOnServer(event,revertFunc)
+                this.props.updateEventOnServer(event,revertFunc)
             },
             eventClick:  function(event, jsEvent, view) {
-                this.props.createEvent(event)
+                this.props.openEvent(event,false)
             }.bind(this),
-        }).qtip({
-             content: {
-                text:'<a href="link"> asa</a>'
-             }
-         });
+            dayClick:function(date, jsEvent, view) {
+                let event={title:"",start:date, end:date, categories:[],groups:[]};
+                this.props.openEvent(event,true)
+            }.bind(this),
+        });
         this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 20000);
-    }
-
-    updateEventOnServer(event,revertFunc){
-        $.ajax({
-                  type: "put",
-                  url: "/api/events/"+event.id+"/",
-                  headers: {
-                        "X-CSRFToken":cookie.get('csrftoken'),
-                        "Content-Type":"application/json",
-                    },
-                  data: JSON.stringify(event),
-        }).fail(revertFunc);
     }
 
     componentWillUnmount(){
@@ -96,7 +84,6 @@ function mapEvents(events){
 class Group extends React.Component{
 
     render(){
-        console.log(this.props.onChange)
         let active="btn btn-default "+(this.props.value ? "active" : "");
         return (
               <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
@@ -116,7 +103,7 @@ class GroupList extends React.Component{
           )
         }.bind(this))
         return (
-        <div> <h5>Organizátor:</h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
+        <div> <h5 className="text-center">Organizátor</h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
            {groups} 
           </span>
         </div>
@@ -149,9 +136,15 @@ class CategoryGroup extends React.Component{
             }
         }
         return(
-            <div> {this.props.title}: <span className="btn-group btn-group-xs" role="group" aria-label="...">
+            <div className="row">
+            <div className="col-sm-5"> 
+                {this.props.title}:
+            </div>
+            <div className="col-sm-7"> 
+             <span className="btn-group btn-group-xs" role="group" aria-label="...">
                {newCategories}
               </span>
+            </div>
             </div>      
         );
     }
@@ -168,7 +161,7 @@ class CategoryGroupList extends React.Component{
         }.bind(this))
         return (
             <div>
-            <h5>Kategórie:</h5>
+            <h5 className="text-center">Kategórie</h5>
             {categoryGroups} 
             </div>
         );
@@ -212,41 +205,84 @@ class IcsExport extends React.Component{
 }
 
 class CalEvent extends React.Component{
-    render(){
-        let dateformat='DD-MM-YYYY h:mm'
-        var startstring = moment().format(dateformat);
-        var endstring = moment().format(dateformat);
-        var title = "title"
-        if(this.props.event!==null){
-            startstring = this.props.event.start.format(dateformat);
-            endstring = this.props.event.end.format(dateformat);
-            title = this.props.event.title
-            for(let i=0;i<this.props.groups.length;i++){
-                this.props.groups[i].value=false
-            }
-            for(let i=0;i<this.props.event.groups.length;i++){
-                this.props.groups[this.props.event.groups[i]].value=true
-            }
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+          start: this.props.event.start,
+          end: this.props.event.end
+        };
+    }
+
+    setStartDate(date){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.start=moment(date);
+        newEvent.end=moment(newEvent.end);
+        this.props.updateEvent(newEvent)
+    }
+
+    setEndDate(date){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(date);
+        newEvent.start=moment(newEvent.start);
+        this.props.updateEvent(newEvent)
+    }
+
+    setTitle(e){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(newEvent.end);
+        newEvent.start=moment(newEvent.start);
+        newEvent.title=e.target.value;
+        this.props.updateEvent(newEvent)
+    }
+
+
+    groupChanged(id){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(newEvent.end);
+        newEvent.start=moment(newEvent.start);
+        let index=newEvent.groups.indexOf(id)
+        if (index>-1){
+            newEvent.groups.splice(index,1)
+        }else{
+            newEvent.groups.push(id)
         }
+        this.props.updateEvent(newEvent)
+    }
+
+    categoryChanged(id){
+        let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        newEvent.end=moment(newEvent.end);
+        newEvent.start=moment(newEvent.start);
+        let index=newEvent.categories.indexOf(id)
+        if (index>-1){
+            newEvent.categories.splice(index,1)
+        }else{
+            newEvent.categories.push(id)
+        }
+        this.props.updateEvent(newEvent)
+    }  
+
+    render(){
         return(
         <div id="fullCalModal" className="modal fade">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">
                         <button type="button" className="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span className="sr-only">close</span></button>
-                        <h4 id="modalTitle" className="modal-title">{title}</h4>
+                        title: <input type="text" className="form-control" value={this.props.event.title} onChange={this.setTitle.bind(this)} />
                     </div>
                     <div id="modalBody" className="modal-body">
-                    from: <DateTimeField dateTime={startstring} format={dateformat}/>
-                    to: <DateTimeField dateTime={endstring} format={dateformat}/>
-                    <GroupList data={this.props.groups} groupChanged={this.props.groupChanged.bind(this)}/>
-                    <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.props.categoryChanged.bind(this)}/>
+                    from: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD hh:mm" onChange={this.setStartDate.bind(this)}/>
+                    to: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD hh:mm" onChange={this.setEndDate.bind(this)}/>
+                    <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)}/>
+                    <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
                     </div> 
                     <div className="modal-footer">
                         <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-                        <button className="btn btn-primary"><a id="eventUrl" target="_blank">Event Page</a></button>
+                        <button className="btn btn-primary"  data-dismiss="modal" onClick={(e)=>this.props.saveEvent(this.props.event)}>Save</button>
                     </div>
-                </div>
+                </div> 
             </div>
         </div>
         );
@@ -258,15 +294,62 @@ class App extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/",exporturl:"exporturl",event:null};
+        this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/",exporturl:"exporturl",
+        event:{title:"",start:moment(), end:moment(), categories:[],groups:[]}, 
+        eventgroups:[],eventcategories:[],eventstart:"2016-10-02T18:10",eventend:"2016-10-02T18:10"};
     }
 
 
-    createEvent(event){
+    openEvent(event,isNew){
+        this.setState({isNew:isNew})
         $('#fullCalModal').modal();
+        this.updateEventOnScreen(event)
+    }
+
+    updateEventOnScreen(event){
+        console.log(event)
         let newState={...this.state}
-        newState.event=event
+        newState.event=event;
+        let dateformat='YYYY-MM-DD hh:mm'
+        for(let i=0;i<newState.eventgroups.length;i++){
+            newState.eventgroups[i].value=false
+        }
+        for(let i=0;i<event.groups.length;i++){
+            let index = newState.eventgroups.map(function(e) { return e.id; }).indexOf(event.groups[i]);
+            newState.eventgroups[index].value=true
+        }
+        for(let i=0;i<newState.eventcategories.length;i++){
+            newState.eventcategories[i].value=false
+        }
+        for(let i=0;i<event.categories.length;i++){
+            let index = newState.eventcategories.map(function(e) { return e.id; }).indexOf(event.categories[i]);
+            newState.eventcategories[index].value=true
+        }
+        newState.eventstart=event.start.format(dateformat);
+        newState.eventend=event.end.format(dateformat);
         this.setState(newState)
+    }
+
+    updateEventOnServer(event,revertFunc){
+        let url="/api/events/"
+        let method="post"
+        if(!this.state.isNew){
+            url=url+event.id+"/";
+            method="put"
+        }
+        $.ajax({
+                  type: method,
+                  url: url,
+                  headers: {
+                        "X-CSRFToken":cookie.get('csrftoken'),
+                        "Content-Type":"application/json",
+                    },
+                  data: JSON.stringify(event),
+        }).success(function(){
+            const {calendar} = this.refs;
+            $(calendar).fullCalendar('refetchEvents')
+        }.bind(this)).fail(revertFunc);
+        
     }
 
     makeQuery(newState){
@@ -348,7 +431,9 @@ class App extends React.Component{
                 for(let i=0;i<data.length;i++){
                     data[i]['value']=true
                 }
-                this.setState({groups: data,url:this.state.url,categories:this.state.categories,catgroups:this.state.catgroups});
+                this.setState({groups: data});
+                let data2=$.parseJSON(JSON.stringify(data))
+                this.setState({eventgroups: data2});
               }.bind(this),
               error: function(xhr, status, err) {
                 console.error("/api/groups/", status, err.toString());
@@ -366,7 +451,9 @@ class App extends React.Component{
                 for(let i=0;i<data.length;i++){
                     data[i]['value']=false
                 }
-                this.setState({groups: this.state.groups,url:this.state.url,categories:data,catgroups:this.state.catgroups});
+                this.setState({categories:data});
+                let data2=$.parseJSON(JSON.stringify(data))
+                this.setState({eventcategories: data2});
               }.bind(this),
               error: function(xhr, status, err) {
                 console.error("/api/categories/", status, err.toString());
@@ -381,7 +468,7 @@ class App extends React.Component{
               dataType: 'json',
               cache: false,
               success: function(data) {
-                this.setState({groups: this.state.groups,url:this.state.url,categories:this.state.categories,catgroups:data});
+                this.setState({catgroups:data});
               }.bind(this),
               error: function(xhr, status, err) {
                 console.error("/api/categorygroups/", status, err.toString());
@@ -397,29 +484,29 @@ class App extends React.Component{
 
     render(){
         return(
-            <div>
-            <div className="container">
-            <div className="row">
-                <div className="col-sm-6">
-                <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
+                <div className="container">
+                <div className="row">
+                    <div className="col-md-4 col-sm-6 col-md-offset-2">
+                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
+                    </div>
+                    <div className="col-md-4 col-sm-6">
+                    <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
+                    </div>
                 </div>
-                <div className="col-sm-6">
-                <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
+                <hr/>
+                <div className="row">
+                    <div className="col-md-8 col-md-offset-2">
+                    <Calendar pollInterval={20000} url={this.state.url} openEvent={this.openEvent.bind(this)} updateEventOnServer={this.updateEventOnServer.bind(this)}/>
+                    </div>
+                </div> 
+                <hr/>
+                <div className="row">
+                    <div className="col-md-10 col-md-offset-1">
+                        <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
+                    </div>
                 </div>
-            </div>
-            <div className="row">
-                <div className=".col-md-8 .col-md-offset-2">
-                <Calendar pollInterval={20000} url={this.state.url} createEvent={this.createEvent.bind(this)}/>
+                <CalEvent event={this.state.event} groups={this.state.eventgroups} categories={this.state.eventcategories} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
                 </div>
-            </div>
-            <div className="row">
-                <div className=".col-md-8 .col-md-offset-2">
-                <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
-                </div>
-            </div>
-            <CalEvent event={this.state.event} groups={this.state.groups} groupChanged={this.groupChanged.bind(this)} categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)}/>
-            </div>
-            </div>
         );
     }
 }
