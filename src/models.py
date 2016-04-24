@@ -6,6 +6,8 @@ from datetime import datetime
 
 from django.utils import timezone
 
+from django.contrib.auth.models import User, Group
+
 
 class Group(models.Model):
     title = models.CharField(max_length=300,  default="")

@@ -7,6 +7,7 @@ import {} from 'qtip2'
 var moment = require('moment')
 require('bootstrap')
 var DateTimeField = require('react-bootstrap-datetimepicker');
+import {} from 'parsleyjs'
 
 
 class Calendar extends React.Component{
@@ -352,7 +353,11 @@ class App extends React.Component{
             newState.eventcategories[index].value=true
         }
         newState.eventstart=event.start.format(dateformat);
-        newState.eventend=event.end.format(dateformat);
+        if(event.end!==null){
+            newState.eventend=event.end.format(dateformat);
+        }else{
+            newState.eventend=newState.eventstart;
+        }
         this.setState(newState)
     }
 
