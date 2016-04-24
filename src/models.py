@@ -9,12 +9,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User, Group
 
 
-class Group(models.Model):
-    title = models.CharField(max_length=300,  default="")
-    def __str__(self):
-        return self.title
-
-
 class CategoryGroup(models.Model):
     title = models.CharField(max_length=300,  default="")
 

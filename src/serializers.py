@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Event, Group, Category, CategoryGroup, IcsCalendar
+from .models import Event, Category, CategoryGroup, IcsCalendar
+from django.contrib.auth.models import User, Group
+
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -11,7 +13,7 @@ class EventSerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ('id', 'title')
+        fields = ('id', 'name')
 
 
 class CategoryGroupSerializer(serializers.ModelSerializer):

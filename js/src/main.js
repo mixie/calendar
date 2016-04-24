@@ -87,7 +87,7 @@ class Group extends React.Component{
     render(){
         let active="btn btn-default "+(this.props.value ? "active" : "");
         return (
-              <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
+              <button type="button" className={active} onClick={this.props.onChange}>{this.props.name}</button>
         );
     }
 }
@@ -97,7 +97,7 @@ class GroupList extends React.Component{
     render(){
         var groups = this.props.data.map(function(group) {
           return (
-            <Group title={group.title} key={group.id} 
+            <Group name={group.name} key={group.id} 
             value={group.value} 
             onChange={(e)=>this.props.groupChanged(group.id)}/>
           )

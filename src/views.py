@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins
-from .models import Event, Group, CategoryGroup, Category, IcsCalendar
+from .models import Event, CategoryGroup, Category, IcsCalendar
+from django.contrib.auth.models import User, Group
 from .serializers import EventSerializer, GroupSerializer, CategoryGroupSerializer, CategorySerializer, IcsCalendarSerializer
 from rest_framework import filters, generics
 import django_filters
