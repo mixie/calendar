@@ -52,7 +52,7 @@ class Calendar extends React.Component{
                 this.props.openEvent(event,false)
             }.bind(this),
             dayClick:function(date, jsEvent, view) {
-                let event={title:"",start:date, end:date, categories:[],groups:[]};
+                let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
                 this.props.openEvent(event,true)
             }.bind(this),
             eventLimit:true,
@@ -324,7 +324,7 @@ class App extends React.Component{
         super(props);
         this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/",exporturl:"exporturl",
         event:{title:"",start:moment(), end:moment(), categories:[],groups:[]}, 
-        eventgroups:[],eventcategories:[],eventstart:"2016-10-02T18:10",eventend:"2016-10-02T18:10"};
+        eventgroups:[],eventcategories:[],eventstart:"2016-10-02T18:10",eventend:"2016-10-02T18:10",public:false,allDay:false};
     }
 
 
@@ -363,7 +363,11 @@ class App extends React.Component{
 
     updateEventOnServer(event,revertFunc){
         let url="/api/events/"
+        let start = event.start.format('YYYY-MM-DDThh:mm').replace("A","T").replace("P","T")
+        let end = event.end.format('YYYY-MM-DDThh:mm').replace("A","T").replace("P","T")
         let method="post"
+        console.log(start)
+        console.log(end)
         if(!this.state.isNew){
             url=url+event.id+"/";
             method="put"
@@ -375,7 +379,16 @@ class App extends React.Component{
                         "X-CSRFToken":cookie.get('csrftoken'),
                         "Content-Type":"application/json",
                     },
-                  data: JSON.stringify(event),
+                  data: JSON.stringify({
+                        "id": event.id,
+                        "title": event.title,
+                        "start": start,
+                        "end": end,
+                        "public": event.public,
+                        "allDay": event.allDay,
+                        "categories":event.categories,
+                        "groups":event.groups
+                    }),
         }).success(function(){
             const {calendar} = this.refs;
             $(calendar).fullCalendar('refetchEvents')
