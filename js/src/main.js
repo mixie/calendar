@@ -57,7 +57,7 @@ class Calendar extends React.Component{
             }.bind(this),
             eventLimit:true,
         });
-        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 20000);
+        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 30000);
     }
 
     componentWillUnmount(){
@@ -297,8 +297,8 @@ class CalEvent extends React.Component{
                     <button type="button" className={alldayEvent}  onClick={this.allDayChanged.bind(this)}>Allday</button>
                     </div>
                     <div className="form-group">
-                    from: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD hh:mm" onChange={this.setStartDate.bind(this)}/>
-                    to: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD hh:mm" onChange={this.setEndDate.bind(this)}/>
+                    from: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setStartDate.bind(this)}/>
+                    to: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setEndDate.bind(this)}/>
                     </div>
                     <div className="form-group">
                     <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)}/>
@@ -337,7 +337,7 @@ class App extends React.Component{
     updateEventOnScreen(event){
         let newState={...this.state}
         newState.event=event;
-        let dateformat='YYYY-MM-DD hh:mm'
+        let dateformat='YYYY-MM-DD HH:mm'
         for(let i=0;i<newState.eventgroups.length;i++){
             newState.eventgroups[i].value=false
         }
@@ -363,8 +363,10 @@ class App extends React.Component{
 
     updateEventOnServer(event,revertFunc){
         let url="/api/events/"
-        let start = event.start.format('YYYY-MM-DDThh:mm').replace("A","T").replace("P","T")
-        let end = event.end.format('YYYY-MM-DDThh:mm').replace("A","T").replace("P","T")
+        let start = event.start.format('YYYY-MM-DDTHH:mm')
+        let end = event.end.format('YYYY-MM-DDTHH:mm')
+        console.log(start)
+        console.log(end)
         let method="post"
         console.log(start)
         console.log(end)

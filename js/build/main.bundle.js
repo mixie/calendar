@@ -136,14 +136,14 @@
 	                    this.props.openEvent(event, false);
 	                }.bind(this),
 	                dayClick: function (date, jsEvent, view) {
-	                    var event = { title: "", start: date, end: date, categories: [], groups: [] };
+	                    var event = { title: "", start: date, end: date, categories: [], groups: [], public: false, allDay: false };
 	                    this.props.openEvent(event, true);
 	                }.bind(this),
 	                eventLimit: true
 	            });
 	            this.intervalId = setInterval(function () {
 	                $(calendar).fullCalendar('refetchEvents');
-	            }, 20000);
+	            }, 30000);
 	        }
 	    }, {
 	        key: 'componentWillUnmount',
@@ -562,9 +562,9 @@
 	                                'div',
 	                                { className: 'form-group' },
 	                                'from: ',
-	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventstart, format: 'YYYY-MM-DD hh:mm', onChange: this.setStartDate.bind(this) }),
+	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventstart, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setStartDate.bind(this) }),
 	                                'to: ',
-	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventend, format: 'YYYY-MM-DD hh:mm', onChange: this.setEndDate.bind(this) })
+	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventend, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setEndDate.bind(this) })
 	                            ),
 	                            _react2.default.createElement(
 	                                'div',
@@ -615,7 +615,7 @@
 
 	        _this13.state = { groups: [], categories: [], catgroups: [], url: "/api/events/", exporturl: "exporturl",
 	            event: { title: "", start: moment(), end: moment(), categories: [], groups: [] },
-	            eventgroups: [], eventcategories: [], eventstart: "2016-10-02T18:10", eventend: "2016-10-02T18:10" };
+	            eventgroups: [], eventcategories: [], eventstart: "2016-10-02T18:10", eventend: "2016-10-02T18:10", public: false, allDay: false };
 	        return _this13;
 	    }
 
@@ -631,7 +631,7 @@
 	        value: function updateEventOnScreen(event) {
 	            var newState = _extends({}, this.state);
 	            newState.event = event;
-	            var dateformat = 'YYYY-MM-DD hh:mm';
+	            var dateformat = 'YYYY-MM-DD HH:mm';
 	            for (var i = 0; i < newState.eventgroups.length; i++) {
 	                newState.eventgroups[i].value = false;
 	            }
@@ -662,7 +662,13 @@
 	        key: 'updateEventOnServer',
 	        value: function updateEventOnServer(event, revertFunc) {
 	            var url = "/api/events/";
+	            var start = event.start.format('YYYY-MM-DDTHH:mm');
+	            var end = event.end.format('YYYY-MM-DDTHH:mm');
+	            console.log(start);
+	            console.log(end);
 	            var method = "post";
+	            console.log(start);
+	            console.log(end);
 	            if (!this.state.isNew) {
 	                url = url + event.id + "/";
 	                method = "put";
@@ -674,7 +680,16 @@
 	                    "X-CSRFToken": _cookiesJs2.default.get('csrftoken'),
 	                    "Content-Type": "application/json"
 	                },
-	                data: JSON.stringify(event)
+	                data: JSON.stringify({
+	                    "id": event.id,
+	                    "title": event.title,
+	                    "start": start,
+	                    "end": end,
+	                    "public": event.public,
+	                    "allDay": event.allDay,
+	                    "categories": event.categories,
+	                    "groups": event.groups
+	                })
 	            }).success(function () {
 	                var calendar = this.refs.calendar;
 
