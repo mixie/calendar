@@ -662,8 +662,8 @@
 	        key: 'updateEventOnServer',
 	        value: function updateEventOnServer(event, revertFunc) {
 	            var url = "/api/events/";
-	            var start = event.start.format('YYYY-MM-DDTHH:mm');
-	            var end = event.end.format('YYYY-MM-DDTHH:mm');
+	            var start = event.start.format('YYYY-MM-DDTHH:mm').replace("P", "T").replace("A", "T");
+	            var end = event.end.format('YYYY-MM-DDTHH:mm').replace("P", "T").replace("A", "T");
 	            console.log(start);
 	            console.log(end);
 	            var method = "post";
