@@ -265,8 +265,10 @@ class CalEvent extends React.Component{
 
     allDayChanged(){
         let newEvent=$.parseJSON(JSON.stringify(this.props.event));
+        console.log(newEvent.start)
         newEvent.end=moment(newEvent.end);
         newEvent.start=moment(newEvent.start);
+        console.log(newEvent.start)
         newEvent.allDay=!newEvent.allDay;
         this.props.updateEvent(newEvent)
     }  
@@ -290,6 +292,45 @@ class CalEvent extends React.Component{
                     <div className="modal-header">
                         <button type="button" className="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span className="sr-only">close</span></button>
                         title: <input type="text" className="form-control" value={this.props.event.title} onChange={this.setTitle.bind(this)} />
+                    </div>
+                    <div id="modalBody" className="modal-body">
+                    <div className="form-group">
+                    <button type="button" className={publicEvent}  onClick={this.publicChanged.bind(this)}>Public</button>
+                    <button type="button" className={alldayEvent}  onClick={this.allDayChanged.bind(this)}>Allday</button>
+                    </div>
+                    <div className="form-group">
+                    from: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setStartDate.bind(this)}/>
+                    to: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setEndDate.bind(this)}/>
+                    </div>
+                    <div className="form-group">
+                    <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)}/>
+                    <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
+                    </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button className="btn btn-danger pull-left"  data-dismiss="modal" onClick={(e)=>this.props.deleteEvent(this.props.event.id)}>Delete</button>
+                        <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+                        <button className="btn btn-primary"  data-dismiss="modal" onClick={(e)=>this.props.saveEvent(this.props.event)}>Save</button>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        );
+    }
+}
+
+class CalViewOnlyEvent extends React.Component{
+
+    render(){
+        let publicEvent="btn btn-default "+(this.props.event.public ? "active" : "");
+        let alldayEvent="btn btn-default "+(this.props.event.allDay ? "active" : "");
+        return(
+        <div id="fullCalModal" className="modal fade">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <button type="button" className="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span className="sr-only">close</span></button>
+                        title: this.props.event.title
                     </div>
                     <div id="modalBody" className="modal-body">
                     <div className="form-group">
@@ -365,11 +406,7 @@ class App extends React.Component{
         let url="/api/events/"
         let start = event.start.format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
         let end = event.end.format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
-        console.log(start)
-        console.log(end)
         let method="post"
-        console.log(start)
-        console.log(end)
         if(!this.state.isNew){
             url=url+event.id+"/";
             method="put"
@@ -462,7 +499,6 @@ class App extends React.Component{
         let myState={...this.state}
         let cats=myState.categories.filter(function(cat) { return cat.value; }).map(function(cat){ return cat.id});
         let groups = myState.groups.filter(function(group) { return group.value; }).map(function(group){ return group.id});
-        let exporturl=Math.random().toString(36).substring(7);
         $.ajax({
           type: "post",
           url: "/api/icscalendars/",
@@ -471,13 +507,13 @@ class App extends React.Component{
                 "Content-Type":"application/json",
             },
           data: JSON.stringify({"title": title, 
-                "url": exporturl, 
                 "public": true,
                 "categories": cats,
-                "groups": groups
+                "groups": groups,
+                "url": "a",
             }),
-        }).done(function() {
-            myState.exporturl=document.location+"ics/"+exporturl+".ics";
+        }).done(function(data) {
+            myState.exporturl=document.location+"ics/"+data.url+".ics";
             this.setState(myState)
         }.bind(this));
         

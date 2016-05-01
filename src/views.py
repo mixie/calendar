@@ -8,6 +8,7 @@ from django.shortcuts import render
 from datetime import datetime
 from icsconvert import *
 from django.http import HttpResponse
+from django.utils.crypto import get_random_string
 
 
 class EventViewSet(
@@ -87,6 +88,10 @@ class IcsCalendarViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet
 ):
+    def perform_create(self, serializer):
+        url = get_random_string(length=20)
+        serializer.save(url=url)
+
     queryset = IcsCalendar.objects.all()
     serializer_class = IcsCalendarSerializer
 
