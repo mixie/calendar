@@ -88,7 +88,7 @@ export class CalEvent extends React.Component{
         let publicEvent="btn btn-default "+(this.props.event.public ? "active" : "");
         let alldayEvent="btn btn-default "+(this.props.event.allDay ? "active" : "");
         return(
-        <div id="fullCalModal" className="modal fade">
+        <div id="fullCalModalEdit" className="modal fade">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <div className="modal-header">

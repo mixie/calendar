@@ -11,6 +11,7 @@ import {GroupList} from './groups.js'
 import {CategoryGroupList} from './categories.js'
 import {IcsExport} from './icsexport.js'
 import {CalEvent} from './calevent.js'
+import {CalEventView} from './eventview.js'
 
 class App extends React.Component{
 
@@ -24,7 +25,13 @@ class App extends React.Component{
 
     openEvent(event,isNew){
         this.setState({isNew:isNew})
-        $('#fullCalModal').modal();
+        $('#fullCalModalView').modal("show");
+        this.updateEventOnScreen(event)
+    }
+
+    editEvent(event,isNew){
+        this.setState({isNew:isNew})
+        $('#fullCalModalEdit').modal("show");
         this.updateEventOnScreen(event)
     }
 
@@ -91,6 +98,11 @@ class App extends React.Component{
             this.setState({url:this.state.url}) //hack, aby sa refreshol calendar
         }.bind(this)).fail(revertFunc);
         
+    }
+
+    saveEvent(event){
+        this.updateEventOnServer(event)
+        $('#fullCalModalView').modal("show");
     }
 
     deleteEvent(eventid){
@@ -259,7 +271,7 @@ class App extends React.Component{
                 <div className="container">
                 <div className="row">
                     <div className="col-md-4 col-sm-6 col-md-offset-2">
-                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Groups"}/>
+                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>
                     </div>
                     <div className="col-md-4 col-sm-6">
                     <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
@@ -277,7 +289,8 @@ class App extends React.Component{
                         <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
                     </div>
                 </div>
-                <CalEvent event={this.state.event} groups={this.state.eventgroups} otherGroups={this.state.groupsother} categories={this.state.eventcategories} deleteEvent={this.deleteEvent.bind(this)} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
+                <CalEvent event={this.state.event} groups={this.state.eventgroups} otherGroups={this.state.groupsother} categories={this.state.eventcategories} deleteEvent={this.deleteEvent.bind(this)} saveEvent={this.saveEvent.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
+                <CalEventView event={this.state.event} groups={this.state.eventgroups} otherGroups={this.state.groupsother} categories={this.state.eventcategories} categoryGroups={this.state.catgroups} eventstart={this.state.eventstart} editEvent={this.editEvent.bind(this)} eventend={this.state.eventend}/>
                 </div>
         );
     }
