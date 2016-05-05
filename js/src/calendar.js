@@ -1,9 +1,8 @@
 window.$ = window.jQuery = require('jquery');
 import React from 'react'
-import ReactDOM from 'react-dom'
 require('fullcalendar')
 
-class Calendar extends React.Component{
+export class Calendar extends React.Component{
 
     componentDidMount(){
         const {calendar} = this.refs;
@@ -33,35 +32,24 @@ class Calendar extends React.Component{
                 if(event.end!==null){
                     event.end.add(delta)
                 }
-                this.updateEventOnServer(event,revertFunc)
+                this.props.updateEventOnServer(event,revertFunc)
             }.bind(this),
             eventResize: function(event, delta, revertFunc) {
                 if(event.end!==null){
                     event.end.add(delta)
                 }
-                this.updateEventOnServer(event,revertFunc)
+                this.props.updateEventOnServer(event,revertFunc)
             },
             eventClick:  function(event, jsEvent, view) {
-                this.props.createEvent(event)
+                this.props.openEvent(event,false)
             }.bind(this),
-        }).qtip({
-             content: {
-                text:'<a href="link"> asa</a>'
-             }
-         });
-        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 20000);
-    }
-
-    updateEventOnServer(event,revertFunc){
-        $.ajax({
-                  type: "put",
-                  url: "/api/events/"+event.id+"/",
-                  headers: {
-                        "X-CSRFToken":cookie.get('csrftoken'),
-                        "Content-Type":"application/json",
-                    },
-                  data: JSON.stringify(event),
-        }).fail(revertFunc);
+            dayClick:function(date, jsEvent, view) {
+                let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
+                this.props.openEvent(event,true)
+            }.bind(this),
+            eventLimit:true,
+        });
+        this.intervalId=setInterval(function(){$(calendar).fullCalendar('refetchEvents')}, 30000);
     }
 
     componentWillUnmount(){
@@ -79,10 +67,3 @@ class Calendar extends React.Component{
     }
 }
 
-function mapEvents(events){
-        let resEvents=[]
-        for(let i=0;i<events.length;i++){
-            resEvents.push({title:events[i].title,start:Date.now(),end:Date.now()})
-        }
-        return resEvents
-}

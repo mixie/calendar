@@ -9,6 +9,7 @@ from datetime import datetime
 from icsconvert import *
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
+from django.http import JsonResponse
 
 
 class EventViewSet(
@@ -30,8 +31,11 @@ class EventViewSet(
                 return []
             qs = qs.filter(groups__pk__in=self.request.GET["organizators"].split(','))
 
-        # if "public" in self.request.GET:
-        #     qs = qs.filter(public=self.request.GET["public"])
+        if self.request.user.is_authenticated(): 
+            qs=qs.filter(groups__pk__in=self.request.user.groups.all())
+
+        if(not self.request.user.groups.filter(name="veduci").exists()):
+            qs= qs.filter(public=True)
 
         for cg in CategoryGroup.objects.all():
             name = "category_%s" % str(cg.pk)
@@ -42,11 +46,23 @@ class EventViewSet(
         if "start" in self.request.GET:
             qs = qs.filter(end__gt=datetime.fromtimestamp(int(self.request.GET["start"])/1e3))
         return qs
+
+    def perform_create(self, serializer):
+        if(self.request.user.groups.filter(name="veduci").exists()):
+            serializer.save()
         
     serializer_class = EventSerializer
 
 
 class EventDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
+    def perform_update(self, serializer):
+        if(self.request.user.groups.filter(name="veduci").exists()):
+            serializer.save()
+
+    def perform_delete(self, serializer):
+        if(self.request.user.groups.filter(name="veduci").exists()):
+            serializer.save()
+
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
@@ -78,7 +94,10 @@ class GroupViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = Group.objects.all()
+
+    def get_queryset(self):
+        return self.request.user.groups.all()
+
     serializer_class = GroupSerializer
 
 
@@ -94,6 +113,9 @@ class IcsCalendarViewSet(
 
     queryset = IcsCalendar.objects.all()
     serializer_class = IcsCalendarSerializer
+
+def onlyPublic(request):
+    return JsonResponse({'onlyPublic':request.user.groups.filter(name="veduci").exists()})
 
 
 def ics(request, gen):
