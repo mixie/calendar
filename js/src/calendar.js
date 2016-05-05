@@ -16,6 +16,7 @@ export class Calendar extends React.Component{
             },
             events: (start, end, timezone, callback) => {
                 let url=this.props.url
+                console.log(url)
                 if((this.props.url).includes("?")){
                     url=url+"&"
                 }else{

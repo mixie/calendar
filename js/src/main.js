@@ -84,8 +84,7 @@ class App extends React.Component{
                         "groups":event.groups
                     }),
         }).success(function(){
-            const {calendar} = this.refs;
-            $(calendar).fullCalendar('refetchEvents')
+            this.setState({url:this.state.url}) //hack, aby sa refreshol calendar
         }.bind(this)).fail(revertFunc);
         
     }
@@ -100,8 +99,7 @@ class App extends React.Component{
                         "Content-Type":"application/json",
                     },
         }).success(function(){
-            const {calendar} = this.refs;
-            $(calendar).fullCalendar('refetchEvents')
+            this.setState({url:this.state.url}) //hack, aby sa refreshol calendar
         }.bind(this));
     }
 
