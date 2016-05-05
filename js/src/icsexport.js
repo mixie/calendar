@@ -28,7 +28,7 @@ export class IcsExport extends React.Component{
               </span>
             </div>
                 <div className="input-group">
-                  <span className="input-group-addon" id="basic-addon1">Exported url:</span>
+                  <span className="input-group-addon" id="basic-addon1">ICS url:</span>
                   <input type="text" className="form-control" value={this.props.url} readOnly placeholder="Username" aria-describedby="basic-addon1" size="45"/>
                 </div>
             </div>

@@ -20,7 +20,7 @@ export class GroupList extends React.Component{
           )
         }.bind(this))
         return (
-        <div> <h5><strong>Organizátor</strong></h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
+        <div> <h5><strong>{this.props.groupListName}</strong></h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
            {groups} 
           </span>
         </div>

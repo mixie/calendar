@@ -10,16 +10,14 @@ import {Calendar} from './calendar.js'
 import {GroupList} from './groups.js'
 import {CategoryGroupList} from './categories.js'
 import {IcsExport} from './icsexport.js'
-import {CalEvent, CalViewOnlyEvent} from './calevent.js'
-
-
+import {CalEvent} from './calevent.js'
 
 class App extends React.Component{
 
     constructor(props){
         super(props);
         this.state = {groups:[],categories:[],catgroups:[],url:"/api/events/",exporturl:"exporturl",
-        event:{title:"",start:moment(), end:moment(), categories:[],groups:[]}, 
+        event:{title:"",start:moment(), end:moment(), categories:[],groups:[]},groupsother:[], 
         eventgroups:[],eventcategories:[],eventstart:"2016-10-02T18:10",eventend:"2016-10-02T18:10",public:false,allDay:false};
     }
 
@@ -39,7 +37,13 @@ class App extends React.Component{
         }
         for(let i=0;i<event.groups.length;i++){
             let index = newState.eventgroups.map(function(e) { return e.id; }).indexOf(event.groups[i]);
-            newState.eventgroups[index].value=true
+            if (index!=-1){
+                newState.eventgroups[index].value=true
+            }else{
+                let index = newState.groupsother.map(function(e) { return e.id; }).indexOf(event.groups[i]);
+                newState.groupsother[index].value=true
+            }
+            
         }
         for(let i=0;i<newState.eventcategories.length;i++){
             newState.eventcategories[i].value=false
@@ -108,7 +112,7 @@ class App extends React.Component{
         let filteredGroups=newState.groups.filter(function(group){
             return group.value
         })
-        q=q+"organizators="
+        q=q+"groups="
         for(let i=0;i<filteredGroups.length;i++){
             q=q+filteredGroups[i].id
             if(i!=filteredGroups.length-1){
@@ -191,6 +195,23 @@ class App extends React.Component{
         });
     }   
 
+    initialLoadGroupsOtherFromServer(){
+         $.ajax({
+              url: "/api/groups/?other=true",
+              dataType: 'json',
+              cache: false,
+              success: function(data) {
+                for(let i=0;i<data.length;i++){
+                    data[i]['value']=false
+                }
+                let data2=$.parseJSON(JSON.stringify(data))
+                this.setState({groupsother: data2});
+              }.bind(this),
+              error: function(xhr, status, err) {
+                console.error("/api/groups/?other=true", status, err.toString());
+              }.bind(this)
+        });
+    }   
 
     initialLoadCategoriesFromServer(){
          $.ajax({
@@ -228,6 +249,7 @@ class App extends React.Component{
 
     componentDidMount(){
         this.initialLoadGroupsFromServer();
+        this.initialLoadGroupsOtherFromServer();
         this.initialLoadCategoriesFromServer();
         this.initialLoadCategoryGroupsFromServer();
     }
@@ -237,7 +259,7 @@ class App extends React.Component{
                 <div className="container">
                 <div className="row">
                     <div className="col-md-4 col-sm-6 col-md-offset-2">
-                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} />
+                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Groups"}/>
                     </div>
                     <div className="col-md-4 col-sm-6">
                     <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
@@ -255,7 +277,7 @@ class App extends React.Component{
                         <IcsExport url={this.state.exporturl} onClick={this.exportIcs.bind(this)}/>
                     </div>
                 </div>
-                <CalEvent event={this.state.event} groups={this.state.eventgroups} categories={this.state.eventcategories} deleteEvent={this.deleteEvent.bind(this)} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
+                <CalEvent event={this.state.event} groups={this.state.eventgroups} otherGroups={this.state.groupsother} categories={this.state.eventcategories} deleteEvent={this.deleteEvent.bind(this)} saveEvent={this.updateEventOnServer.bind(this)} categoryGroups={this.state.catgroups} updateEvent={this.updateEventOnScreen.bind(this)} eventstart={this.state.eventstart} eventend={this.state.eventend}/>
                 </div>
         );
     }

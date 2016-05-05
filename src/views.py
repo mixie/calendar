@@ -26,16 +26,19 @@ class EventViewSet(
         """
         qs = Event.objects.all()
 
-        if "organizators" in self.request.GET:
-            if self.request.GET["organizators"].split(',')[0]=='':
+        if "groups" in self.request.GET:
+            if self.request.GET["groups"].split(',')[0]=='':
                 return []
-            qs = qs.filter(groups__pk__in=self.request.GET["organizators"].split(','))
+            qs = qs.filter(groups__pk__in=self.request.GET["groups"].split(','))
 
-        if self.request.user.is_authenticated(): 
-            qs=qs.filter(groups__pk__in=self.request.user.groups.all())
-
-        if(not self.request.user.groups.filter(name="veduci").exists()):
-            qs= qs.filter(public=True)
+        # if self.request.user.is_authenticated(): 
+        #     usergroups=self.request.user.groups.all()
+        #     if len(usergroups)>0:
+        #         qs=qs.filter(groups__pk__in=self.request.user.groups.all())
+        #     else:
+        #         qs = qs.filter(public=True)
+        # else:
+        #    qs = qs.filter(public=True)
 
         for cg in CategoryGroup.objects.all():
             name = "category_%s" % str(cg.pk)
@@ -48,20 +51,35 @@ class EventViewSet(
         return qs
 
     def perform_create(self, serializer):
-        if(self.request.user.groups.filter(name="veduci").exists()):
-            serializer.save()
-        
+        if self.request.user.is_authenticated(): 
+            usergroups = [g.id for g in self.request.user.groups.all()]
+            requestgroups = self.request.data.get("groups","")
+            for ug in usergroups:
+                if ug in requestgroups:
+                    serializer.save()
+                    break    
+
     serializer_class = EventSerializer
 
 
 class EventDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
-        if(self.request.user.groups.filter(name="veduci").exists()):
-            serializer.save()
+        if self.request.user.is_authenticated(): 
+            usergroups = [g.id for g in self.request.user.groups.all()]
+            requestgroups = self.request.data.get("groups","")
+            for ug in usergroups:
+                if ug in requestgroups:
+                    serializer.save()
+                    break      
 
     def perform_delete(self, serializer):
-        if(self.request.user.groups.filter(name="veduci").exists()):
-            serializer.save()
+        if self.request.user.is_authenticated(): 
+            usergroups = [g.id for g in self.request.user.groups.all()]
+            requestgroups = self.request.data.get("groups","")
+            for ug in usergroups:
+                if ug in requestgroups:
+                    serializer.save()
+                    break      
 
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -96,6 +114,11 @@ class GroupViewSet(
 ):
 
     def get_queryset(self):
+        if "other" in self.request.GET:
+            if self.request.GET["other"]=="true":
+                return [g for g in Group.objects.all() if g not in self.request.user.groups.all()]
+            else:
+                return self.request.user.groups.all()
         return self.request.user.groups.all()
 
     serializer_class = GroupSerializer
@@ -113,10 +136,6 @@ class IcsCalendarViewSet(
 
     queryset = IcsCalendar.objects.all()
     serializer_class = IcsCalendarSerializer
-
-def onlyPublic(request):
-    return JsonResponse({'onlyPublic':request.user.groups.filter(name="veduci").exists()})
-
 
 def ics(request, gen):
     qsfilter = IcsCalendar.objects.filter(url=gen)

@@ -14,6 +14,4 @@ urlpatterns = [
     url(r'^icscalendars/$', IcsCalendarViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^icscalendars/(?P<pk>[0-9]+)/$', IcsCalendarViewSet.as_view({'get': 'retrieve'})),
     url(r'^ics/(?P<gen>[a-zA-Z0-9]+).ics/$', views.ics, name='ics'),
-    url(r'^onlyPublic/$', views.onlyPublic, name='onlyPublic'),
-
 ]
