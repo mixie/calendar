@@ -43,7 +43,7 @@ class CategoryGroupView extends React.Component{
 }
 
 
-class CategoryGroupViewList extends React.Component{
+class CategoryGroupListView extends React.Component{
 
     render(){
         let categoryGroups = this.props.categoryGroups.map(function(categorygroup) {
@@ -56,6 +56,34 @@ class CategoryGroupViewList extends React.Component{
             <h5><strong>Kategórie</strong></h5>
             {categoryGroups} 
             </div>
+        );
+    }
+}
+
+class GroupView extends React.Component{
+    render(){
+        let active="btn disabled "+(this.props.value ? "btn-primary" : "btn-default");
+        return (
+              <button type="button" className={active} onClick={this.props.onChange}>{this.props.name}</button>
+        );
+    }
+}
+
+class GroupListView extends React.Component{
+
+    render(){
+        var groups = this.props.data.map(function(group) {
+          return (
+            <GroupView name={group.name} key={group.id} 
+            value={group.value} 
+            onChange={(e)=>this.props.groupChanged(group.id)}/>
+          )
+        }.bind(this))
+        return (
+        <div> <h5><strong>{this.props.groupListName}</strong></h5> <span className="btn-group btn-group-xs" role="group" aria-label="...">
+           {groups} 
+          </span>
+        </div>
         );
     }
 }
@@ -84,11 +112,13 @@ export class CalEventView extends React.Component{
                     do: {this.props.eventend}
                     </div>
                     <div className="form-group">
-                    <CategoryGroupViewList categories={this.props.categories} categoryGroups={this.props.categoryGroups}/>
+                     {(this.props.groups.length>0) && <GroupListView data={this.props.groups} groupListName={"Skupiny"}/>}
+                     {(this.props.groups.length>0) && <GroupListView data={this.props.otherGroups} groupListName={"Ostatné skupiny"}/>}
+                    <CategoryGroupListView categories={this.props.categories} categoryGroups={this.props.categoryGroups}/>
                     </div>
                     </div>
                     <div className="modal-footer">
-                        <button className="btn btn-warning pull-left"  data-dismiss="modal" onClick={(e)=>this.props.editEvent(this.props.event.id)}>Upraviť</button>
+                        {(this.props.groups.length>0) && <button className="btn btn-warning pull-left"  data-dismiss="modal" onClick={(e)=>this.props.editEvent(this.props.event.id)}>Upraviť</button>}
                         <button type="button" className="btn btn-default" data-dismiss="modal">Zavrieť</button>
                     </div>
                 </div> 

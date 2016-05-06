@@ -2,7 +2,7 @@ import React from 'react'
 
 class Group extends React.Component{
     render(){
-        let active="btn btn-default "+(this.props.value ? "active" : "");
+        let active="btn "+(this.props.value ? " btn-primary active" : "btn-default");
         return (
               <button type="button" className={active} onClick={this.props.onChange}>{this.props.name}</button>
         );

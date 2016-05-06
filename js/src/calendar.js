@@ -45,8 +45,10 @@ export class Calendar extends React.Component{
                 this.props.openEvent(event,false)
             }.bind(this),
             dayClick:function(date, jsEvent, view) {
-                let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
-                this.props.openEvent(event,true)
+                if(!this.props.viewOnly()){
+                    let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
+                    this.props.editEvent(event,true)
+                }
             }.bind(this),
             eventLimit:true,
         });

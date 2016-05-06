@@ -266,21 +266,25 @@ class App extends React.Component{
         this.initialLoadCategoryGroupsFromServer();
     }
 
+    viewOnly(){
+        return this.state.groups.length == 0
+    }
+
     render(){
         return(
                 <div className="container">
                 <div className="row">
                     <div className="col-md-4 col-sm-6 col-md-offset-2">
-                    <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>
+                    <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
                     </div>
                     <div className="col-md-4 col-sm-6">
-                    <CategoryGroupList categories={this.state.categories} categoryGroups={this.state.catgroups} categoryChanged={this.categoryChanged.bind(this)} />
+                    {(this.state.groups.length > 0) && <GroupList data={this.state.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>}
                     </div>
                 </div>
                 <hr/>
                 <div className="row">
                     <div className="col-md-8 col-md-offset-2">
-                    <Calendar pollInterval={20000} url={this.state.url} openEvent={this.openEvent.bind(this)} updateEventOnServer={this.updateEventOnServer.bind(this)}/>
+                    <Calendar viewOnly={this.viewOnly.bind(this)} pollInterval={20000} url={this.state.url} openEvent={this.openEvent.bind(this)} editEvent={this.editEvent.bind(this)} updateEventOnServer={this.updateEventOnServer.bind(this)}/>
                     </div>
                 </div> 
                 <hr/>

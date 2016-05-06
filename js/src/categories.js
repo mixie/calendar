@@ -2,7 +2,7 @@ import React from 'react'
 
 class Category extends React.Component{
     render(){
-        let active="btn btn-default "+(this.props.value ? "active" : "");
+        let active="btn "+(this.props.value ? " btn-primary active" : "btn-default");
         return (
              <button type="button" className={active} onClick={this.props.onChange}>{this.props.title}</button>
         );
@@ -48,6 +48,8 @@ export class CategoryGroupList extends React.Component{
             <CategoryGroup title={categorygroup.title} key={categorygroup.id} id={categorygroup.id} data={this.props.categories} onChange={this.props.categoryChanged}/>
           )
         }.bind(this))
+        console.log("categoryGroups")
+        console.log(categoryGroups)
         return (
             <div>
             <h5><strong>Kategórie</strong></h5>

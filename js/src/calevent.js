@@ -106,7 +106,7 @@ export class CalEvent extends React.Component{
                     </div>
                     <div className="form-group">
                     <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>
-                    <GroupList data={this.props.otherGroups} groupChanged={this.groupChanged.bind(this)} groupListName={"Ostatné groups"}/>
+                    <GroupList data={this.props.otherGroups} groupChanged={this.groupChanged.bind(this)} groupListName={"Ostatné skupiny"}/>
                     <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
                     </div>
                     </div>
