@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Login</title> 
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css"> 
+</head>
+
+<body>
+<style>
+</style>
+ <ul class="nav nav-pills">
+  <li role="navigation"><a href="/">Home</a></li>
+  <li role="navigation" class="active"><a href="/login">Login</a></li>
+  <li role="navigation"><a href="/register">Register</a></li>
+</ul>
+
+    <form id="login_form" method="post" action="/login/">
+    	{% csrf_token %}
+        Username: <input type="text" name="username" value="" size="50" />
+        <br />
+        Password: <input type="password" name="password" value="" size="50" />
+        <br />
+        <input type="submit" value="submit" />
+    </form>
+
+ 
+  <script src="http://localhost:8080/main.bundle.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.css">
+  <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css">
+
+</body>
+</html>

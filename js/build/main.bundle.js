@@ -64,7 +64,17 @@
 
 	__webpack_require__(167);
 
-	__webpack_require__(169);
+	var _calendar = __webpack_require__(169);
+
+	var _groups = __webpack_require__(271);
+
+	var _categories = __webpack_require__(272);
+
+	var _icsexport = __webpack_require__(273);
+
+	var _calevent = __webpack_require__(274);
+
+	var _eventview = __webpack_require__(325);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -77,553 +87,35 @@
 	window.$ = window.jQuery = __webpack_require__(168);
 
 	__webpack_require__(170);
-
 	var moment = __webpack_require__(171);
-	__webpack_require__(271);
-	var DateTimeField = __webpack_require__(284);
+	__webpack_require__(326);
 
-	var Calendar = function (_React$Component) {
-	    _inherits(Calendar, _React$Component);
-
-	    function Calendar() {
-	        _classCallCheck(this, Calendar);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Calendar).apply(this, arguments));
-	    }
-
-	    _createClass(Calendar, [{
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            var _this2 = this;
-
-	            var calendar = this.refs.calendar;
-
-	            $(calendar).fullCalendar({
-	                lang: 'sk',
-	                editable: true,
-	                header: {
-	                    left: 'prev,next',
-	                    center: 'title',
-	                    right: 'month,agendaWeek,agendaDay'
-	                },
-	                events: function events(start, end, timezone, callback) {
-	                    var url = _this2.props.url;
-	                    if (_this2.props.url.includes("?")) {
-	                        url = url + "&";
-	                    } else {
-	                        url = url + "?";
-	                    }
-	                    url = url + "start=" + start + "&end=" + end;
-	                    $.getJSON({ url: url, success: function success(result) {
-	                            callback(result);
-	                        } });
-	                },
-	                timeFormat: 'H:mm',
-	                eventDrop: function (event, delta, revertFunc) {
-	                    event.start.add(delta);
-	                    if (event.end !== null) {
-	                        event.end.add(delta);
-	                    }
-	                    this.props.updateEventOnServer(event, revertFunc);
-	                }.bind(this),
-	                eventResize: function eventResize(event, delta, revertFunc) {
-	                    if (event.end !== null) {
-	                        event.end.add(delta);
-	                    }
-	                    this.props.updateEventOnServer(event, revertFunc);
-	                },
-	                eventClick: function (event, jsEvent, view) {
-	                    this.props.openEvent(event, false);
-	                }.bind(this),
-	                dayClick: function (date, jsEvent, view) {
-	                    var event = { title: "", start: date, end: date, categories: [], groups: [], public: false, allDay: false };
-	                    this.props.openEvent(event, true);
-	                }.bind(this),
-	                eventLimit: true
-	            });
-	            this.intervalId = setInterval(function () {
-	                $(calendar).fullCalendar('refetchEvents');
-	            }, 30000);
-	        }
-	    }, {
-	        key: 'componentWillUnmount',
-	        value: function componentWillUnmount() {
-	            var calendar = this.refs.calendar;
-
-	            clearInterval(this.intervalId);
-	            $(calendar).fullCalendar('destroy');
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var calendar = this.refs.calendar;
-
-	            $(calendar).fullCalendar('refetchEvents');
-	            return _react2.default.createElement('div', { ref: 'calendar' });
-	        }
-	    }]);
-
-	    return Calendar;
-	}(_react2.default.Component);
-
-	function mapEvents(events) {
-	    var resEvents = [];
-	    for (var i = 0; i < events.length; i++) {
-	        resEvents.push({ title: events[i].title, start: Date.now(), end: Date.now() });
-	    }
-	    return resEvents;
-	}
-
-	var Group = function (_React$Component2) {
-	    _inherits(Group, _React$Component2);
-
-	    function Group() {
-	        _classCallCheck(this, Group);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Group).apply(this, arguments));
-	    }
-
-	    _createClass(Group, [{
-	        key: 'render',
-	        value: function render() {
-	            var active = "btn btn-default " + (this.props.value ? "active" : "");
-	            return _react2.default.createElement(
-	                'button',
-	                { type: 'button', className: active, onClick: this.props.onChange },
-	                this.props.name
-	            );
-	        }
-	    }]);
-
-	    return Group;
-	}(_react2.default.Component);
-
-	var GroupList = function (_React$Component3) {
-	    _inherits(GroupList, _React$Component3);
-
-	    function GroupList() {
-	        _classCallCheck(this, GroupList);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(GroupList).apply(this, arguments));
-	    }
-
-	    _createClass(GroupList, [{
-	        key: 'render',
-	        value: function render() {
-	            var groups = this.props.data.map(function (group) {
-	                var _this5 = this;
-
-	                return _react2.default.createElement(Group, { name: group.name, key: group.id,
-	                    value: group.value,
-	                    onChange: function onChange(e) {
-	                        return _this5.props.groupChanged(group.id);
-	                    } });
-	            }.bind(this));
-	            return _react2.default.createElement(
-	                'div',
-	                null,
-	                ' ',
-	                _react2.default.createElement(
-	                    'h5',
-	                    null,
-	                    _react2.default.createElement(
-	                        'strong',
-	                        null,
-	                        'Organizátor'
-	                    )
-	                ),
-	                ' ',
-	                _react2.default.createElement(
-	                    'span',
-	                    { className: 'btn-group btn-group-xs', role: 'group', 'aria-label': '...' },
-	                    groups
-	                )
-	            );
-	        }
-	    }]);
-
-	    return GroupList;
-	}(_react2.default.Component);
-
-	var Category = function (_React$Component4) {
-	    _inherits(Category, _React$Component4);
-
-	    function Category() {
-	        _classCallCheck(this, Category);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Category).apply(this, arguments));
-	    }
-
-	    _createClass(Category, [{
-	        key: 'render',
-	        value: function render() {
-	            var active = "btn btn-default " + (this.props.value ? "active" : "");
-	            return _react2.default.createElement(
-	                'button',
-	                { type: 'button', className: active, onClick: this.props.onChange },
-	                this.props.title
-	            );
-	        }
-	    }]);
-
-	    return Category;
-	}(_react2.default.Component);
-
-	var CategoryGroup = function (_React$Component5) {
-	    _inherits(CategoryGroup, _React$Component5);
-
-	    function CategoryGroup() {
-	        _classCallCheck(this, CategoryGroup);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroup).apply(this, arguments));
-	    }
-
-	    _createClass(CategoryGroup, [{
-	        key: 'render',
-	        value: function render() {
-	            var categories = this.props.data.map(function (category) {
-	                var _this8 = this;
-
-	                if (category.category_group === this.props.id) {
-	                    return _react2.default.createElement(Category, { title: category.title, value: category.value, key: category.id, onChange: function onChange(e) {
-	                            return _this8.props.onChange(category.id);
-	                        } });
-	                }
-	            }.bind(this));
-	            var newCategories = [];
-	            for (var i = 0; i < categories.length; i++) {
-	                if (categories[i] !== undefined) {
-	                    newCategories.push(categories[i]);
-	                }
-	            }
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'row' },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'col-sm-5' },
-	                    this.props.title,
-	                    ':'
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'col-sm-7' },
-	                    _react2.default.createElement(
-	                        'span',
-	                        { className: 'btn-group btn-group-xs', role: 'group', 'aria-label': '...' },
-	                        newCategories
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-
-	    return CategoryGroup;
-	}(_react2.default.Component);
-
-	var CategoryGroupList = function (_React$Component6) {
-	    _inherits(CategoryGroupList, _React$Component6);
-
-	    function CategoryGroupList() {
-	        _classCallCheck(this, CategoryGroupList);
-
-	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroupList).apply(this, arguments));
-	    }
-
-	    _createClass(CategoryGroupList, [{
-	        key: 'render',
-	        value: function render() {
-	            var categoryGroups = this.props.categoryGroups.map(function (categorygroup) {
-	                return _react2.default.createElement(CategoryGroup, { title: categorygroup.title, key: categorygroup.id, id: categorygroup.id, data: this.props.categories, onChange: this.props.categoryChanged });
-	            }.bind(this));
-	            return _react2.default.createElement(
-	                'div',
-	                null,
-	                _react2.default.createElement(
-	                    'h5',
-	                    null,
-	                    _react2.default.createElement(
-	                        'strong',
-	                        null,
-	                        'Kategórie'
-	                    )
-	                ),
-	                categoryGroups
-	            );
-	        }
-	    }]);
-
-	    return CategoryGroupList;
-	}(_react2.default.Component);
-
-	var IcsExport = function (_React$Component7) {
-	    _inherits(IcsExport, _React$Component7);
-
-	    function IcsExport(props) {
-	        _classCallCheck(this, IcsExport);
-
-	        var _this10 = _possibleConstructorReturn(this, Object.getPrototypeOf(IcsExport).call(this, props));
-
-	        _this10.state = { name: [] };
-	        _this10.handleChange = _this10.handleChange.bind(_this10);
-	        _this10.exportCall = _this10.exportCall.bind(_this10);
-
-	        return _this10;
-	    }
-
-	    _createClass(IcsExport, [{
-	        key: 'handleChange',
-	        value: function handleChange(e) {
-	            this.setState({ name: e.target.value });
-	        }
-	    }, {
-	        key: 'exportCall',
-	        value: function exportCall() {
-	            this.props.onClick(this.state.name);
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            return _react2.default.createElement(
-	                'div',
-	                null,
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'input-group' },
-	                    _react2.default.createElement('input', { type: 'text', className: 'form-control', placeholder: 'Calendar name', onChange: this.handleChange }),
-	                    _react2.default.createElement(
-	                        'span',
-	                        { className: 'input-group-btn' },
-	                        _react2.default.createElement(
-	                            'button',
-	                            { className: 'btn btn-default', type: 'button', onClick: this.exportCall },
-	                            'Export'
-	                        )
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'input-group' },
-	                    _react2.default.createElement(
-	                        'span',
-	                        { className: 'input-group-addon', id: 'basic-addon1' },
-	                        'Exported url:'
-	                    ),
-	                    _react2.default.createElement('input', { type: 'text', className: 'form-control', value: this.props.url, readOnly: true, placeholder: 'Username', 'aria-describedby': 'basic-addon1', size: '45' })
-	                )
-	            );
-	        }
-	    }]);
-
-	    return IcsExport;
-	}(_react2.default.Component);
-
-	var CalEvent = function (_React$Component8) {
-	    _inherits(CalEvent, _React$Component8);
-
-	    function CalEvent(props) {
-	        _classCallCheck(this, CalEvent);
-
-	        var _this11 = _possibleConstructorReturn(this, Object.getPrototypeOf(CalEvent).call(this, props));
-
-	        _this11.state = {
-	            start: _this11.props.event.start,
-	            end: _this11.props.event.end
-	        };
-	        return _this11;
-	    }
-
-	    _createClass(CalEvent, [{
-	        key: 'setStartDate',
-	        value: function setStartDate(date) {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.start = moment(date);
-	            newEvent.end = moment(newEvent.end);
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'setEndDate',
-	        value: function setEndDate(date) {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(date);
-	            newEvent.start = moment(newEvent.start);
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'setTitle',
-	        value: function setTitle(e) {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(newEvent.end);
-	            newEvent.start = moment(newEvent.start);
-	            newEvent.title = e.target.value;
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'groupChanged',
-	        value: function groupChanged(id) {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(newEvent.end);
-	            newEvent.start = moment(newEvent.start);
-	            var index = newEvent.groups.indexOf(id);
-	            if (index > -1) {
-	                newEvent.groups.splice(index, 1);
-	            } else {
-	                newEvent.groups.push(id);
-	            }
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'categoryChanged',
-	        value: function categoryChanged(id) {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(newEvent.end);
-	            newEvent.start = moment(newEvent.start);
-	            var index = newEvent.categories.indexOf(id);
-	            if (index > -1) {
-	                newEvent.categories.splice(index, 1);
-	            } else {
-	                newEvent.categories.push(id);
-	            }
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'allDayChanged',
-	        value: function allDayChanged() {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(newEvent.end);
-	            newEvent.start = moment(newEvent.start);
-	            newEvent.allDay = !newEvent.allDay;
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'publicChanged',
-	        value: function publicChanged() {
-	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
-	            newEvent.end = moment(newEvent.end);
-	            newEvent.start = moment(newEvent.start);
-	            newEvent.public = !newEvent.public;
-	            this.props.updateEvent(newEvent);
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var _this12 = this;
-
-	            var publicEvent = "btn btn-default " + (this.props.event.public ? "active" : "");
-	            var alldayEvent = "btn btn-default " + (this.props.event.allDay ? "active" : "");
-	            return _react2.default.createElement(
-	                'div',
-	                { id: 'fullCalModal', className: 'modal fade' },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'modal-dialog' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'modal-content' },
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'modal-header' },
-	                            _react2.default.createElement(
-	                                'button',
-	                                { type: 'button', className: 'close', 'data-dismiss': 'modal' },
-	                                _react2.default.createElement(
-	                                    'span',
-	                                    { 'aria-hidden': 'true' },
-	                                    '×'
-	                                ),
-	                                ' ',
-	                                _react2.default.createElement(
-	                                    'span',
-	                                    { className: 'sr-only' },
-	                                    'close'
-	                                )
-	                            ),
-	                            'title: ',
-	                            _react2.default.createElement('input', { type: 'text', className: 'form-control', value: this.props.event.title, onChange: this.setTitle.bind(this) })
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { id: 'modalBody', className: 'modal-body' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'form-group' },
-	                                _react2.default.createElement(
-	                                    'button',
-	                                    { type: 'button', className: publicEvent, onClick: this.publicChanged.bind(this) },
-	                                    'Public'
-	                                ),
-	                                _react2.default.createElement(
-	                                    'button',
-	                                    { type: 'button', className: alldayEvent, onClick: this.allDayChanged.bind(this) },
-	                                    'Allday'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'form-group' },
-	                                'from: ',
-	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventstart, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setStartDate.bind(this) }),
-	                                'to: ',
-	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventend, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setEndDate.bind(this) })
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'form-group' },
-	                                _react2.default.createElement(GroupList, { data: this.props.groups, groupChanged: this.groupChanged.bind(this) }),
-	                                _react2.default.createElement(CategoryGroupList, { categories: this.props.categories, categoryGroups: this.props.categoryGroups, categoryChanged: this.categoryChanged.bind(this) })
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'modal-footer' },
-	                            _react2.default.createElement(
-	                                'button',
-	                                { className: 'btn btn-danger pull-left', 'data-dismiss': 'modal', onClick: function onClick(e) {
-	                                        return _this12.props.deleteEvent(_this12.props.event.id);
-	                                    } },
-	                                'Delete'
-	                            ),
-	                            _react2.default.createElement(
-	                                'button',
-	                                { type: 'button', className: 'btn btn-default', 'data-dismiss': 'modal' },
-	                                'Close'
-	                            ),
-	                            _react2.default.createElement(
-	                                'button',
-	                                { className: 'btn btn-primary', 'data-dismiss': 'modal', onClick: function onClick(e) {
-	                                        return _this12.props.saveEvent(_this12.props.event);
-	                                    } },
-	                                'Save'
-	                            )
-	                        )
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-
-	    return CalEvent;
-	}(_react2.default.Component);
-
-	var App = function (_React$Component9) {
-	    _inherits(App, _React$Component9);
+	var App = function (_React$Component) {
+	    _inherits(App, _React$Component);
 
 	    function App(props) {
 	        _classCallCheck(this, App);
 
-	        var _this13 = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
 
-	        _this13.state = { groups: [], categories: [], catgroups: [], url: "/api/events/", exporturl: "exporturl",
-	            event: { title: "", start: moment(), end: moment(), categories: [], groups: [] },
+	        _this.state = { groups: [], categories: [], catgroups: [], url: "/api/events/", exporturl: "exporturl",
+	            event: { title: "", start: moment(), end: moment(), categories: [], groups: [] }, groupsother: [],
 	            eventgroups: [], eventcategories: [], eventstart: "2016-10-02T18:10", eventend: "2016-10-02T18:10", public: false, allDay: false };
-	        return _this13;
+	        return _this;
 	    }
 
 	    _createClass(App, [{
 	        key: 'openEvent',
 	        value: function openEvent(event, isNew) {
 	            this.setState({ isNew: isNew });
-	            $('#fullCalModal').modal();
+	            $('#fullCalModalView').modal("show");
+	            this.updateEventOnScreen(event);
+	        }
+	    }, {
+	        key: 'editEvent',
+	        value: function editEvent(event, isNew) {
+	            this.setState({ isNew: isNew });
+	            $('#fullCalModalEdit').modal("show");
 	            this.updateEventOnScreen(event);
 	        }
 	    }, {
@@ -639,16 +131,23 @@
 	                var index = newState.eventgroups.map(function (e) {
 	                    return e.id;
 	                }).indexOf(event.groups[_i]);
-	                newState.eventgroups[index].value = true;
+	                if (index != -1) {
+	                    newState.eventgroups[index].value = true;
+	                } else {
+	                    var _index = newState.groupsother.map(function (e) {
+	                        return e.id;
+	                    }).indexOf(event.groups[_i]);
+	                    newState.groupsother[_index].value = true;
+	                }
 	            }
 	            for (var _i2 = 0; _i2 < newState.eventcategories.length; _i2++) {
 	                newState.eventcategories[_i2].value = false;
 	            }
 	            for (var _i3 = 0; _i3 < event.categories.length; _i3++) {
-	                var _index = newState.eventcategories.map(function (e) {
+	                var _index2 = newState.eventcategories.map(function (e) {
 	                    return e.id;
 	                }).indexOf(event.categories[_i3]);
-	                newState.eventcategories[_index].value = true;
+	                newState.eventcategories[_index2].value = true;
 	            }
 	            newState.eventstart = event.start.format(dateformat);
 	            if (event.end !== null) {
@@ -664,11 +163,7 @@
 	            var url = "/api/events/";
 	            var start = event.start.format('YYYY-MM-DDTHH:mm').replace("P", "T").replace("A", "T");
 	            var end = event.end.format('YYYY-MM-DDTHH:mm').replace("P", "T").replace("A", "T");
-	            console.log(start);
-	            console.log(end);
 	            var method = "post";
-	            console.log(start);
-	            console.log(end);
 	            if (!this.state.isNew) {
 	                url = url + event.id + "/";
 	                method = "put";
@@ -691,10 +186,14 @@
 	                    "groups": event.groups
 	                })
 	            }).success(function () {
-	                var calendar = this.refs.calendar;
-
-	                $(calendar).fullCalendar('refetchEvents');
+	                this.setState({ url: this.state.url }); //hack, aby sa refreshol calendar
 	            }.bind(this)).fail(revertFunc);
+	        }
+	    }, {
+	        key: 'saveEvent',
+	        value: function saveEvent(event) {
+	            this.updateEventOnServer(event);
+	            $('#fullCalModalView').modal("show");
 	        }
 	    }, {
 	        key: 'deleteEvent',
@@ -708,9 +207,7 @@
 	                    "Content-Type": "application/json"
 	                }
 	            }).success(function () {
-	                var calendar = this.refs.calendar;
-
-	                $(calendar).fullCalendar('refetchEvents');
+	                this.setState({ url: this.state.url }); //hack, aby sa refreshol calendar
 	            }.bind(this));
 	        }
 	    }, {
@@ -720,7 +217,7 @@
 	            var filteredGroups = newState.groups.filter(function (group) {
 	                return group.value;
 	            });
-	            q = q + "organizators=";
+	            q = q + "groups=";
 	            for (var i = 0; i < filteredGroups.length; i++) {
 	                q = q + filteredGroups[i].id;
 	                if (i != filteredGroups.length - 1) {
@@ -784,7 +281,6 @@
 	            }).map(function (group) {
 	                return group.id;
 	            });
-	            var exporturl = Math.random().toString(36).substring(7);
 	            $.ajax({
 	                type: "post",
 	                url: "/api/icscalendars/",
@@ -793,13 +289,13 @@
 	                    "Content-Type": "application/json"
 	                },
 	                data: JSON.stringify({ "title": title,
-	                    "url": exporturl,
 	                    "public": true,
 	                    "categories": cats,
-	                    "groups": groups
+	                    "groups": groups,
+	                    "url": "a"
 	                })
-	            }).done(function () {
-	                myState.exporturl = document.location + "ics/" + exporturl + ".ics";
+	            }).done(function (data) {
+	                myState.exporturl = document.location + "ics/" + data.url + ".ics";
 	                this.setState(myState);
 	            }.bind(this));
 	        }
@@ -820,6 +316,25 @@
 	                }.bind(this),
 	                error: function (xhr, status, err) {
 	                    console.error("/api/groups/", status, err.toString());
+	                }.bind(this)
+	            });
+	        }
+	    }, {
+	        key: 'initialLoadGroupsOtherFromServer',
+	        value: function initialLoadGroupsOtherFromServer() {
+	            $.ajax({
+	                url: "/api/groups/?other=true",
+	                dataType: 'json',
+	                cache: false,
+	                success: function (data) {
+	                    for (var i = 0; i < data.length; i++) {
+	                        data[i]['value'] = false;
+	                    }
+	                    var data2 = $.parseJSON(JSON.stringify(data));
+	                    this.setState({ groupsother: data2 });
+	                }.bind(this),
+	                error: function (xhr, status, err) {
+	                    console.error("/api/groups/?other=true", status, err.toString());
 	                }.bind(this)
 	            });
 	        }
@@ -862,8 +377,14 @@
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
 	            this.initialLoadGroupsFromServer();
+	            this.initialLoadGroupsOtherFromServer();
 	            this.initialLoadCategoriesFromServer();
 	            this.initialLoadCategoryGroupsFromServer();
+	        }
+	    }, {
+	        key: 'viewOnly',
+	        value: function viewOnly() {
+	            return this.state.groups.length == 0;
 	        }
 	    }, {
 	        key: 'render',
@@ -877,12 +398,12 @@
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'col-md-4 col-sm-6 col-md-offset-2' },
-	                        _react2.default.createElement(GroupList, { data: this.state.groups, groupChanged: this.groupChanged.bind(this) })
+	                        _react2.default.createElement(_categories.CategoryGroupList, { categories: this.state.categories, categoryGroups: this.state.catgroups, categoryChanged: this.categoryChanged.bind(this) })
 	                    ),
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'col-md-4 col-sm-6' },
-	                        _react2.default.createElement(CategoryGroupList, { categories: this.state.categories, categoryGroups: this.state.catgroups, categoryChanged: this.categoryChanged.bind(this) })
+	                        this.state.groups.length > 0 && _react2.default.createElement(_groups.GroupList, { data: this.state.groups, groupChanged: this.groupChanged.bind(this), groupListName: "Skupiny" })
 	                    )
 	                ),
 	                _react2.default.createElement('hr', null),
@@ -892,7 +413,7 @@
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'col-md-8 col-md-offset-2' },
-	                        _react2.default.createElement(Calendar, { pollInterval: 20000, url: this.state.url, openEvent: this.openEvent.bind(this), updateEventOnServer: this.updateEventOnServer.bind(this) })
+	                        _react2.default.createElement(_calendar.Calendar, { viewOnly: this.viewOnly.bind(this), pollInterval: 20000, url: this.state.url, openEvent: this.openEvent.bind(this), editEvent: this.editEvent.bind(this), updateEventOnServer: this.updateEventOnServer.bind(this) })
 	                    )
 	                ),
 	                _react2.default.createElement('hr', null),
@@ -902,10 +423,11 @@
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'col-md-10 col-md-offset-1' },
-	                        _react2.default.createElement(IcsExport, { url: this.state.exporturl, onClick: this.exportIcs.bind(this) })
+	                        _react2.default.createElement(_icsexport.IcsExport, { url: this.state.exporturl, onClick: this.exportIcs.bind(this) })
 	                    )
 	                ),
-	                _react2.default.createElement(CalEvent, { event: this.state.event, groups: this.state.eventgroups, categories: this.state.eventcategories, deleteEvent: this.deleteEvent.bind(this), saveEvent: this.updateEventOnServer.bind(this), categoryGroups: this.state.catgroups, updateEvent: this.updateEventOnScreen.bind(this), eventstart: this.state.eventstart, eventend: this.state.eventend })
+	                _react2.default.createElement(_calevent.CalEvent, { event: this.state.event, groups: this.state.eventgroups, otherGroups: this.state.groupsother, categories: this.state.eventcategories, deleteEvent: this.deleteEvent.bind(this), saveEvent: this.saveEvent.bind(this), categoryGroups: this.state.catgroups, updateEvent: this.updateEventOnScreen.bind(this), eventstart: this.state.eventstart, eventend: this.state.eventend }),
+	                _react2.default.createElement(_eventview.CalEventView, { event: this.state.event, groups: this.state.eventgroups, otherGroups: this.state.groupsother, categories: this.state.eventcategories, categoryGroups: this.state.catgroups, eventstart: this.state.eventstart, editEvent: this.editEvent.bind(this), eventend: this.state.eventend })
 	            );
 	        }
 	    }]);
@@ -21052,3491 +20574,2366 @@
 /* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
-	 * qTip2 - Pretty powerful tooltips - v3.0.2
-	 * http://qtip2.com
-	 *
-	 * Copyright (c) 2015 
-	 * Released under the MIT licenses
-	 * http://jquery.org/license
-	 *
-	 * Date: Tue Dec 8 2015 07:16 GMT+0000
-	 * Plugins: tips modal viewport svg imagemap ie6
-	 * Styles: core basic css3
-	 */
-	/*global window: false, jQuery: false, console: false, define: false */
-
-	/* Cache window, document, undefined */
-	(function( window, document, undefined ) {
-
-	// Uses AMD or browser globals to create a jQuery plugin.
-	(function( factory ) {
-		"use strict";
-		if(true) {
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(168)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		}
-		else if(jQuery && !jQuery.fn.qtip) {
-			factory(jQuery);
-		}
-	}
-	(function($) {
-		"use strict"; // Enable ECMAScript "strict" operation for this function. See more: http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
-	;// Munge the primitives - Paul Irish tip
-	var TRUE = true,
-	FALSE = false,
-	NULL = null,
-
-	// Common variables
-	X = 'x', Y = 'y',
-	WIDTH = 'width',
-	HEIGHT = 'height',
-
-	// Positioning sides
-	TOP = 'top',
-	LEFT = 'left',
-	BOTTOM = 'bottom',
-	RIGHT = 'right',
-	CENTER = 'center',
-
-	// Position adjustment types
-	FLIP = 'flip',
-	FLIPINVERT = 'flipinvert',
-	SHIFT = 'shift',
-
-	// Shortcut vars
-	QTIP, PROTOTYPE, CORNER, CHECKS,
-	PLUGINS = {},
-	NAMESPACE = 'qtip',
-	ATTR_HAS = 'data-hasqtip',
-	ATTR_ID = 'data-qtip-id',
-	WIDGET = ['ui-widget', 'ui-tooltip'],
-	SELECTOR = '.'+NAMESPACE,
-	INACTIVE_EVENTS = 'click dblclick mousedown mouseup mousemove mouseleave mouseenter'.split(' '),
-
-	CLASS_FIXED = NAMESPACE+'-fixed',
-	CLASS_DEFAULT = NAMESPACE + '-default',
-	CLASS_FOCUS = NAMESPACE + '-focus',
-	CLASS_HOVER = NAMESPACE + '-hover',
-	CLASS_DISABLED = NAMESPACE+'-disabled',
-
-	replaceSuffix = '_replacedByqTip',
-	oldtitle = 'oldtitle',
-	trackingBound,
-
-	// Browser detection
-	BROWSER = {
-		/*
-		 * IE version detection
-		 *
-		 * Adapted from: http://ajaxian.com/archives/attack-of-the-ie-conditional-comment
-		 * Credit to James Padolsey for the original implemntation!
-		 */
-		ie: (function() {
-			/* eslint-disable no-empty */
-			var v, i;
-			for (
-				v = 4, i = document.createElement('div');
-				(i.innerHTML = '<!--[if gt IE ' + v + ']><i></i><![endif]-->') && i.getElementsByTagName('i')[0];
-				v+=1
-			) {}
-			return v > 4 ? v : NaN;
-			/* eslint-enable no-empty */
-		})(),
-
-		/*
-		 * iOS version detection
-		 */
-		iOS: parseFloat(
-			('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0,''])[1])
-			.replace('undefined', '3_2').replace('_', '.').replace('_', '')
-		) || FALSE
-	};
-	;function QTip(target, options, id, attr) {
-		// Elements and ID
-		this.id = id;
-		this.target = target;
-		this.tooltip = NULL;
-		this.elements = { target: target };
-
-		// Internal constructs
-		this._id = NAMESPACE + '-' + id;
-		this.timers = { img: {} };
-		this.options = options;
-		this.plugins = {};
-
-		// Cache object
-		this.cache = {
-			event: {},
-			target: $(),
-			disabled: FALSE,
-			attr: attr,
-			onTooltip: FALSE,
-			lastClass: ''
-		};
-
-		// Set the initial flags
-		this.rendered = this.destroyed = this.disabled = this.waiting =
-			this.hiddenDuringWait = this.positioning = this.triggering = FALSE;
-	}
-	PROTOTYPE = QTip.prototype;
-
-	PROTOTYPE._when = function(deferreds) {
-		return $.when.apply($, deferreds);
-	};
-
-	PROTOTYPE.render = function(show) {
-		if(this.rendered || this.destroyed) { return this; } // If tooltip has already been rendered, exit
-
-		var self = this,
-			options = this.options,
-			cache = this.cache,
-			elements = this.elements,
-			text = options.content.text,
-			title = options.content.title,
-			button = options.content.button,
-			posOptions = options.position,
-			deferreds = [];
-
-		// Add ARIA attributes to target
-		$.attr(this.target[0], 'aria-describedby', this._id);
-
-		// Create public position object that tracks current position corners
-		cache.posClass = this._createPosClass(
-			(this.position = { my: posOptions.my, at: posOptions.at }).my
-		);
-
-		// Create tooltip element
-		this.tooltip = elements.tooltip = $('<div/>', {
-			'id': this._id,
-			'class': [ NAMESPACE, CLASS_DEFAULT, options.style.classes, cache.posClass ].join(' '),
-			'width': options.style.width || '',
-			'height': options.style.height || '',
-			'tracking': posOptions.target === 'mouse' && posOptions.adjust.mouse,
-
-			/* ARIA specific attributes */
-			'role': 'alert',
-			'aria-live': 'polite',
-			'aria-atomic': FALSE,
-			'aria-describedby': this._id + '-content',
-			'aria-hidden': TRUE
-		})
-		.toggleClass(CLASS_DISABLED, this.disabled)
-		.attr(ATTR_ID, this.id)
-		.data(NAMESPACE, this)
-		.appendTo(posOptions.container)
-		.append(
-			// Create content element
-			elements.content = $('<div />', {
-				'class': NAMESPACE + '-content',
-				'id': this._id + '-content',
-				'aria-atomic': TRUE
-			})
-		);
-
-		// Set rendered flag and prevent redundant reposition calls for now
-		this.rendered = -1;
-		this.positioning = TRUE;
-
-		// Create title...
-		if(title) {
-			this._createTitle();
-
-			// Update title only if its not a callback (called in toggle if so)
-			if(!$.isFunction(title)) {
-				deferreds.push( this._updateTitle(title, FALSE) );
-			}
-		}
-
-		// Create button
-		if(button) { this._createButton(); }
-
-		// Set proper rendered flag and update content if not a callback function (called in toggle)
-		if(!$.isFunction(text)) {
-			deferreds.push( this._updateContent(text, FALSE) );
-		}
-		this.rendered = TRUE;
-
-		// Setup widget classes
-		this._setWidget();
-
-		// Initialize 'render' plugins
-		$.each(PLUGINS, function(name) {
-			var instance;
-			if(this.initialize === 'render' && (instance = this(self))) {
-				self.plugins[name] = instance;
-			}
-		});
-
-		// Unassign initial events and assign proper events
-		this._unassignEvents();
-		this._assignEvents();
-
-		// When deferreds have completed
-		this._when(deferreds).then(function() {
-			// tooltiprender event
-			self._trigger('render');
-
-			// Reset flags
-			self.positioning = FALSE;
-
-			// Show tooltip if not hidden during wait period
-			if(!self.hiddenDuringWait && (options.show.ready || show)) {
-				self.toggle(TRUE, cache.event, FALSE);
-			}
-			self.hiddenDuringWait = FALSE;
-		});
-
-		// Expose API
-		QTIP.api[this.id] = this;
-
-		return this;
-	};
-
-	PROTOTYPE.destroy = function(immediate) {
-		// Set flag the signify destroy is taking place to plugins
-		// and ensure it only gets destroyed once!
-		if(this.destroyed) { return this.target; }
-
-		function process() {
-			if(this.destroyed) { return; }
-			this.destroyed = TRUE;
-
-			var target = this.target,
-				title = target.attr(oldtitle),
-				timer;
-
-			// Destroy tooltip if rendered
-			if(this.rendered) {
-				this.tooltip.stop(1,0).find('*').remove().end().remove();
-			}
-
-			// Destroy all plugins
-			$.each(this.plugins, function() {
-				this.destroy && this.destroy();
-			});
-
-			// Clear timers
-			for (timer in this.timers) {
-				if (this.timers.hasOwnProperty(timer)) {
-					clearTimeout(this.timers[timer]);
-				}
-			}
-
-			// Remove api object and ARIA attributes
-			target.removeData(NAMESPACE)
-				.removeAttr(ATTR_ID)
-				.removeAttr(ATTR_HAS)
-				.removeAttr('aria-describedby');
-
-			// Reset old title attribute if removed
-			if(this.options.suppress && title) {
-				target.attr('title', title).removeAttr(oldtitle);
-			}
-
-			// Remove qTip events associated with this API
-			this._unassignEvents();
-
-			// Remove ID from used id objects, and delete object references
-			// for better garbage collection and leak protection
-			this.options = this.elements = this.cache = this.timers =
-				this.plugins = this.mouse = NULL;
-
-			// Delete epoxsed API object
-			delete QTIP.api[this.id];
-		}
-
-		// If an immediate destroy is needed
-		if((immediate !== TRUE || this.triggering === 'hide') && this.rendered) {
-			this.tooltip.one('tooltiphidden', $.proxy(process, this));
-			!this.triggering && this.hide();
-		}
-
-		// If we're not in the process of hiding... process
-		else { process.call(this); }
-
-		return this.target;
-	};
-	;function invalidOpt(a) {
-		return a === NULL || $.type(a) !== 'object';
-	}
-
-	function invalidContent(c) {
-		return !($.isFunction(c) || c && c.attr) || c.length || $.type(c) === 'object' && (c.jquery || c.then);
-	}
-
-	// Option object sanitizer
-	function sanitizeOptions(opts) {
-		var content, text, ajax, once;
-
-		if(invalidOpt(opts)) { return FALSE; }
-
-		if(invalidOpt(opts.metadata)) {
-			opts.metadata = { type: opts.metadata };
-		}
-
-		if('content' in opts) {
-			content = opts.content;
-
-			if(invalidOpt(content) || content.jquery || content.done) {
-				text = invalidContent(content) ? FALSE : content;
-				content = opts.content = {
-					text: text
-				};
-			}
-			else { text = content.text; }
-
-			// DEPRECATED - Old content.ajax plugin functionality
-			// Converts it into the proper Deferred syntax
-			if('ajax' in content) {
-				ajax = content.ajax;
-				once = ajax && ajax.once !== FALSE;
-				delete content.ajax;
-
-				content.text = function(event, api) {
-					var loading = text || $(this).attr(api.options.content.attr) || 'Loading...',
-
-					deferred = $.ajax(
-						$.extend({}, ajax, { context: api })
-					)
-					.then(ajax.success, NULL, ajax.error)
-					.then(function(newContent) {
-						if(newContent && once) { api.set('content.text', newContent); }
-						return newContent;
-					},
-					function(xhr, status, error) {
-						if(api.destroyed || xhr.status === 0) { return; }
-						api.set('content.text', status + ': ' + error);
-					});
-
-					return !once ? (api.set('content.text', loading), deferred) : loading;
-				};
-			}
-
-			if('title' in content) {
-				if($.isPlainObject(content.title)) {
-					content.button = content.title.button;
-					content.title = content.title.text;
-				}
-
-				if(invalidContent(content.title || FALSE)) {
-					content.title = FALSE;
-				}
-			}
-		}
-
-		if('position' in opts && invalidOpt(opts.position)) {
-			opts.position = { my: opts.position, at: opts.position };
-		}
-
-		if('show' in opts && invalidOpt(opts.show)) {
-			opts.show = opts.show.jquery ? { target: opts.show } :
-				opts.show === TRUE ? { ready: TRUE } : { event: opts.show };
-		}
-
-		if('hide' in opts && invalidOpt(opts.hide)) {
-			opts.hide = opts.hide.jquery ? { target: opts.hide } : { event: opts.hide };
-		}
-
-		if('style' in opts && invalidOpt(opts.style)) {
-			opts.style = { classes: opts.style };
-		}
-
-		// Sanitize plugin options
-		$.each(PLUGINS, function() {
-			this.sanitize && this.sanitize(opts);
-		});
-
-		return opts;
-	}
-
-	// Setup builtin .set() option checks
-	CHECKS = PROTOTYPE.checks = {
-		builtin: {
-			// Core checks
-			'^id$': function(obj, o, v, prev) {
-				var id = v === TRUE ? QTIP.nextid : v,
-					newId = NAMESPACE + '-' + id;
-
-				if(id !== FALSE && id.length > 0 && !$('#'+newId).length) {
-					this._id = newId;
-
-					if(this.rendered) {
-						this.tooltip[0].id = this._id;
-						this.elements.content[0].id = this._id + '-content';
-						this.elements.title[0].id = this._id + '-title';
-					}
-				}
-				else { obj[o] = prev; }
-			},
-			'^prerender': function(obj, o, v) {
-				v && !this.rendered && this.render(this.options.show.ready);
-			},
-
-			// Content checks
-			'^content.text$': function(obj, o, v) {
-				this._updateContent(v);
-			},
-			'^content.attr$': function(obj, o, v, prev) {
-				if(this.options.content.text === this.target.attr(prev)) {
-					this._updateContent( this.target.attr(v) );
-				}
-			},
-			'^content.title$': function(obj, o, v) {
-				// Remove title if content is null
-				if(!v) { return this._removeTitle(); }
-
-				// If title isn't already created, create it now and update
-				v && !this.elements.title && this._createTitle();
-				this._updateTitle(v);
-			},
-			'^content.button$': function(obj, o, v) {
-				this._updateButton(v);
-			},
-			'^content.title.(text|button)$': function(obj, o, v) {
-				this.set('content.'+o, v); // Backwards title.text/button compat
-			},
-
-			// Position checks
-			'^position.(my|at)$': function(obj, o, v){
-				if('string' === typeof v) {
-					this.position[o] = obj[o] = new CORNER(v, o === 'at');
-				}
-			},
-			'^position.container$': function(obj, o, v){
-				this.rendered && this.tooltip.appendTo(v);
-			},
-
-			// Show checks
-			'^show.ready$': function(obj, o, v) {
-				v && (!this.rendered && this.render(TRUE) || this.toggle(TRUE));
-			},
-
-			// Style checks
-			'^style.classes$': function(obj, o, v, p) {
-				this.rendered && this.tooltip.removeClass(p).addClass(v);
-			},
-			'^style.(width|height)': function(obj, o, v) {
-				this.rendered && this.tooltip.css(o, v);
-			},
-			'^style.widget|content.title': function() {
-				this.rendered && this._setWidget();
-			},
-			'^style.def': function(obj, o, v) {
-				this.rendered && this.tooltip.toggleClass(CLASS_DEFAULT, !!v);
-			},
-
-			// Events check
-			'^events.(render|show|move|hide|focus|blur)$': function(obj, o, v) {
-				this.rendered && this.tooltip[($.isFunction(v) ? '' : 'un') + 'bind']('tooltip'+o, v);
-			},
-
-			// Properties which require event reassignment
-			'^(show|hide|position).(event|target|fixed|inactive|leave|distance|viewport|adjust)': function() {
-				if(!this.rendered) { return; }
-
-				// Set tracking flag
-				var posOptions = this.options.position;
-				this.tooltip.attr('tracking', posOptions.target === 'mouse' && posOptions.adjust.mouse);
-
-				// Reassign events
-				this._unassignEvents();
-				this._assignEvents();
-			}
-		}
-	};
-
-	// Dot notation converter
-	function convertNotation(options, notation) {
-		var i = 0, obj, option = options,
-
-		// Split notation into array
-		levels = notation.split('.');
-
-		// Loop through
-		while(option = option[ levels[i++] ]) {
-			if(i < levels.length) { obj = option; }
-		}
-
-		return [obj || options, levels.pop()];
-	}
-
-	PROTOTYPE.get = function(notation) {
-		if(this.destroyed) { return this; }
-
-		var o = convertNotation(this.options, notation.toLowerCase()),
-			result = o[0][ o[1] ];
-
-		return result.precedance ? result.string() : result;
-	};
-
-	function setCallback(notation, args) {
-		var category, rule, match;
-
-		for(category in this.checks) {
-			if (!this.checks.hasOwnProperty(category)) { continue; }
-
-			for(rule in this.checks[category]) {
-				if (!this.checks[category].hasOwnProperty(rule)) { continue; }
-
-				if(match = (new RegExp(rule, 'i')).exec(notation)) {
-					args.push(match);
-
-					if(category === 'builtin' || this.plugins[category]) {
-						this.checks[category][rule].apply(
-							this.plugins[category] || this, args
-						);
-					}
-				}
-			}
-		}
-	}
-
-	var rmove = /^position\.(my|at|adjust|target|container|viewport)|style|content|show\.ready/i,
-		rrender = /^prerender|show\.ready/i;
-
-	PROTOTYPE.set = function(option, value) {
-		if(this.destroyed) { return this; }
-
-		var rendered = this.rendered,
-			reposition = FALSE,
-			options = this.options,
-			name;
-
-		// Convert singular option/value pair into object form
-		if('string' === typeof option) {
-			name = option; option = {}; option[name] = value;
-		}
-		else { option = $.extend({}, option); }
-
-		// Set all of the defined options to their new values
-		$.each(option, function(notation, val) {
-			if(rendered && rrender.test(notation)) {
-				delete option[notation]; return;
-			}
-
-			// Set new obj value
-			var obj = convertNotation(options, notation.toLowerCase()), previous;
-			previous = obj[0][ obj[1] ];
-			obj[0][ obj[1] ] = val && val.nodeType ? $(val) : val;
-
-			// Also check if we need to reposition
-			reposition = rmove.test(notation) || reposition;
-
-			// Set the new params for the callback
-			option[notation] = [obj[0], obj[1], val, previous];
-		});
-
-		// Re-sanitize options
-		sanitizeOptions(options);
-
-		/*
-		 * Execute any valid callbacks for the set options
-		 * Also set positioning flag so we don't get loads of redundant repositioning calls.
-		 */
-		this.positioning = TRUE;
-		$.each(option, $.proxy(setCallback, this));
-		this.positioning = FALSE;
-
-		// Update position if needed
-		if(this.rendered && this.tooltip[0].offsetWidth > 0 && reposition) {
-			this.reposition( options.position.target === 'mouse' ? NULL : this.cache.event );
-		}
-
-		return this;
-	};
-	;PROTOTYPE._update = function(content, element) {
-		var self = this,
-			cache = this.cache;
-
-		// Make sure tooltip is rendered and content is defined. If not return
-		if(!this.rendered || !content) { return FALSE; }
-
-		// Use function to parse content
-		if($.isFunction(content)) {
-			content = content.call(this.elements.target, cache.event, this) || '';
-		}
-
-		// Handle deferred content
-		if($.isFunction(content.then)) {
-			cache.waiting = TRUE;
-			return content.then(function(c) {
-				cache.waiting = FALSE;
-				return self._update(c, element);
-			}, NULL, function(e) {
-				return self._update(e, element);
-			});
-		}
-
-		// If content is null... return false
-		if(content === FALSE || !content && content !== '') { return FALSE; }
-
-		// Append new content if its a DOM array and show it if hidden
-		if(content.jquery && content.length > 0) {
-			element.empty().append(
-				content.css({ display: 'block', visibility: 'visible' })
-			);
-		}
-
-		// Content is a regular string, insert the new content
-		else { element.html(content); }
-
-		// Wait for content to be loaded, and reposition
-		return this._waitForContent(element).then(function(images) {
-			if(self.rendered && self.tooltip[0].offsetWidth > 0) {
-				self.reposition(cache.event, !images.length);
-			}
-		});
-	};
-
-	PROTOTYPE._waitForContent = function(element) {
-		var cache = this.cache;
-
-		// Set flag
-		cache.waiting = TRUE;
-
-		// If imagesLoaded is included, ensure images have loaded and return promise
-		return ( $.fn.imagesLoaded ? element.imagesLoaded() : new $.Deferred().resolve([]) )
-			.done(function() { cache.waiting = FALSE; })
-			.promise();
-	};
-
-	PROTOTYPE._updateContent = function(content, reposition) {
-		this._update(content, this.elements.content, reposition);
-	};
-
-	PROTOTYPE._updateTitle = function(content, reposition) {
-		if(this._update(content, this.elements.title, reposition) === FALSE) {
-			this._removeTitle(FALSE);
-		}
-	};
-
-	PROTOTYPE._createTitle = function()
-	{
-		var elements = this.elements,
-			id = this._id+'-title';
-
-		// Destroy previous title element, if present
-		if(elements.titlebar) { this._removeTitle(); }
-
-		// Create title bar and title elements
-		elements.titlebar = $('<div />', {
-			'class': NAMESPACE + '-titlebar ' + (this.options.style.widget ? createWidgetClass('header') : '')
-		})
-		.append(
-			elements.title = $('<div />', {
-				'id': id,
-				'class': NAMESPACE + '-title',
-				'aria-atomic': TRUE
-			})
-		)
-		.insertBefore(elements.content)
-
-		// Button-specific events
-		.delegate('.qtip-close', 'mousedown keydown mouseup keyup mouseout', function(event) {
-			$(this).toggleClass('ui-state-active ui-state-focus', event.type.substr(-4) === 'down');
-		})
-		.delegate('.qtip-close', 'mouseover mouseout', function(event){
-			$(this).toggleClass('ui-state-hover', event.type === 'mouseover');
-		});
-
-		// Create button if enabled
-		if(this.options.content.button) { this._createButton(); }
-	};
-
-	PROTOTYPE._removeTitle = function(reposition)
-	{
-		var elements = this.elements;
-
-		if(elements.title) {
-			elements.titlebar.remove();
-			elements.titlebar = elements.title = elements.button = NULL;
-
-			// Reposition if enabled
-			if(reposition !== FALSE) { this.reposition(); }
-		}
-	};
-	;PROTOTYPE._createPosClass = function(my) {
-		return NAMESPACE + '-pos-' + (my || this.options.position.my).abbrev();
-	};
-
-	PROTOTYPE.reposition = function(event, effect) {
-		if(!this.rendered || this.positioning || this.destroyed) { return this; }
-
-		// Set positioning flag
-		this.positioning = TRUE;
-
-		var cache = this.cache,
-			tooltip = this.tooltip,
-			posOptions = this.options.position,
-			target = posOptions.target,
-			my = posOptions.my,
-			at = posOptions.at,
-			viewport = posOptions.viewport,
-			container = posOptions.container,
-			adjust = posOptions.adjust,
-			method = adjust.method.split(' '),
-			tooltipWidth = tooltip.outerWidth(FALSE),
-			tooltipHeight = tooltip.outerHeight(FALSE),
-			targetWidth = 0,
-			targetHeight = 0,
-			type = tooltip.css('position'),
-			position = { left: 0, top: 0 },
-			visible = tooltip[0].offsetWidth > 0,
-			isScroll = event && event.type === 'scroll',
-			win = $(window),
-			doc = container[0].ownerDocument,
-			mouse = this.mouse,
-			pluginCalculations, offset, adjusted, newClass;
-
-		// Check if absolute position was passed
-		if($.isArray(target) && target.length === 2) {
-			// Force left top and set position
-			at = { x: LEFT, y: TOP };
-			position = { left: target[0], top: target[1] };
-		}
-
-		// Check if mouse was the target
-		else if(target === 'mouse') {
-			// Force left top to allow flipping
-			at = { x: LEFT, y: TOP };
-
-			// Use the mouse origin that caused the show event, if distance hiding is enabled
-			if((!adjust.mouse || this.options.hide.distance) && cache.origin && cache.origin.pageX) {
-				event =  cache.origin;
-			}
-
-			// Use cached event for resize/scroll events
-			else if(!event || event && (event.type === 'resize' || event.type === 'scroll')) {
-				event = cache.event;
-			}
-
-			// Otherwise, use the cached mouse coordinates if available
-			else if(mouse && mouse.pageX) {
-				event = mouse;
-			}
-
-			// Calculate body and container offset and take them into account below
-			if(type !== 'static') { position = container.offset(); }
-			if(doc.body.offsetWidth !== (window.innerWidth || doc.documentElement.clientWidth)) {
-				offset = $(document.body).offset();
-			}
-
-			// Use event coordinates for position
-			position = {
-				left: event.pageX - position.left + (offset && offset.left || 0),
-				top: event.pageY - position.top + (offset && offset.top || 0)
-			};
-
-			// Scroll events are a pain, some browsers
-			if(adjust.mouse && isScroll && mouse) {
-				position.left -= (mouse.scrollX || 0) - win.scrollLeft();
-				position.top -= (mouse.scrollY || 0) - win.scrollTop();
-			}
-		}
-
-		// Target wasn't mouse or absolute...
-		else {
-			// Check if event targetting is being used
-			if(target === 'event') {
-				if(event && event.target && event.type !== 'scroll' && event.type !== 'resize') {
-					cache.target = $(event.target);
-				}
-				else if(!event.target) {
-					cache.target = this.elements.target;
-				}
-			}
-			else if(target !== 'event'){
-				cache.target = $(target.jquery ? target : this.elements.target);
-			}
-			target = cache.target;
-
-			// Parse the target into a jQuery object and make sure there's an element present
-			target = $(target).eq(0);
-			if(target.length === 0) { return this; }
-
-			// Check if window or document is the target
-			else if(target[0] === document || target[0] === window) {
-				targetWidth = BROWSER.iOS ? window.innerWidth : target.width();
-				targetHeight = BROWSER.iOS ? window.innerHeight : target.height();
-
-				if(target[0] === window) {
-					position = {
-						top: (viewport || target).scrollTop(),
-						left: (viewport || target).scrollLeft()
-					};
-				}
-			}
-
-			// Check if the target is an <AREA> element
-			else if(PLUGINS.imagemap && target.is('area')) {
-				pluginCalculations = PLUGINS.imagemap(this, target, at, PLUGINS.viewport ? method : FALSE);
-			}
-
-			// Check if the target is an SVG element
-			else if(PLUGINS.svg && target && target[0].ownerSVGElement) {
-				pluginCalculations = PLUGINS.svg(this, target, at, PLUGINS.viewport ? method : FALSE);
-			}
-
-			// Otherwise use regular jQuery methods
-			else {
-				targetWidth = target.outerWidth(FALSE);
-				targetHeight = target.outerHeight(FALSE);
-				position = target.offset();
-			}
-
-			// Parse returned plugin values into proper variables
-			if(pluginCalculations) {
-				targetWidth = pluginCalculations.width;
-				targetHeight = pluginCalculations.height;
-				offset = pluginCalculations.offset;
-				position = pluginCalculations.position;
-			}
-
-			// Adjust position to take into account offset parents
-			position = this.reposition.offset(target, position, container);
-
-			// Adjust for position.fixed tooltips (and also iOS scroll bug in v3.2-4.0 & v4.3-4.3.2)
-			if(BROWSER.iOS > 3.1 && BROWSER.iOS < 4.1 ||
-				BROWSER.iOS >= 4.3 && BROWSER.iOS < 4.33 ||
-				!BROWSER.iOS && type === 'fixed'
-			){
-				position.left -= win.scrollLeft();
-				position.top -= win.scrollTop();
-			}
-
-			// Adjust position relative to target
-			if(!pluginCalculations || pluginCalculations && pluginCalculations.adjustable !== FALSE) {
-				position.left += at.x === RIGHT ? targetWidth : at.x === CENTER ? targetWidth / 2 : 0;
-				position.top += at.y === BOTTOM ? targetHeight : at.y === CENTER ? targetHeight / 2 : 0;
-			}
-		}
-
-		// Adjust position relative to tooltip
-		position.left += adjust.x + (my.x === RIGHT ? -tooltipWidth : my.x === CENTER ? -tooltipWidth / 2 : 0);
-		position.top += adjust.y + (my.y === BOTTOM ? -tooltipHeight : my.y === CENTER ? -tooltipHeight / 2 : 0);
-
-		// Use viewport adjustment plugin if enabled
-		if(PLUGINS.viewport) {
-			adjusted = position.adjusted = PLUGINS.viewport(
-				this, position, posOptions, targetWidth, targetHeight, tooltipWidth, tooltipHeight
-			);
-
-			// Apply offsets supplied by positioning plugin (if used)
-			if(offset && adjusted.left) { position.left += offset.left; }
-			if(offset && adjusted.top) {  position.top += offset.top; }
-
-			// Apply any new 'my' position
-			if(adjusted.my) { this.position.my = adjusted.my; }
-		}
-
-		// Viewport adjustment is disabled, set values to zero
-		else { position.adjusted = { left: 0, top: 0 }; }
-
-		// Set tooltip position class if it's changed
-		if(cache.posClass !== (newClass = this._createPosClass(this.position.my))) {
-			cache.posClass = newClass;
-			tooltip.removeClass(cache.posClass).addClass(newClass);
-		}
-
-		// tooltipmove event
-		if(!this._trigger('move', [position, viewport.elem || viewport], event)) { return this; }
-		delete position.adjusted;
-
-		// If effect is disabled, target it mouse, no animation is defined or positioning gives NaN out, set CSS directly
-		if(effect === FALSE || !visible || isNaN(position.left) || isNaN(position.top) || target === 'mouse' || !$.isFunction(posOptions.effect)) {
-			tooltip.css(position);
-		}
-
-		// Use custom function if provided
-		else if($.isFunction(posOptions.effect)) {
-			posOptions.effect.call(tooltip, this, $.extend({}, position));
-			tooltip.queue(function(next) {
-				// Reset attributes to avoid cross-browser rendering bugs
-				$(this).css({ opacity: '', height: '' });
-				if(BROWSER.ie) { this.style.removeAttribute('filter'); }
-
-				next();
-			});
-		}
-
-		// Set positioning flag
-		this.positioning = FALSE;
-
-		return this;
-	};
-
-	// Custom (more correct for qTip!) offset calculator
-	PROTOTYPE.reposition.offset = function(elem, pos, container) {
-		if(!container[0]) { return pos; }
-
-		var ownerDocument = $(elem[0].ownerDocument),
-			quirks = !!BROWSER.ie && document.compatMode !== 'CSS1Compat',
-			parent = container[0],
-			scrolled, position, parentOffset, overflow;
-
-		function scroll(e, i) {
-			pos.left += i * e.scrollLeft();
-			pos.top += i * e.scrollTop();
-		}
-
-		// Compensate for non-static containers offset
-		do {
-			if((position = $.css(parent, 'position')) !== 'static') {
-				if(position === 'fixed') {
-					parentOffset = parent.getBoundingClientRect();
-					scroll(ownerDocument, -1);
-				}
-				else {
-					parentOffset = $(parent).position();
-					parentOffset.left += parseFloat($.css(parent, 'borderLeftWidth')) || 0;
-					parentOffset.top += parseFloat($.css(parent, 'borderTopWidth')) || 0;
-				}
-
-				pos.left -= parentOffset.left + (parseFloat($.css(parent, 'marginLeft')) || 0);
-				pos.top -= parentOffset.top + (parseFloat($.css(parent, 'marginTop')) || 0);
-
-				// If this is the first parent element with an overflow of "scroll" or "auto", store it
-				if(!scrolled && (overflow = $.css(parent, 'overflow')) !== 'hidden' && overflow !== 'visible') { scrolled = $(parent); }
-			}
-		}
-		while(parent = parent.offsetParent);
-
-		// Compensate for containers scroll if it also has an offsetParent (or in IE quirks mode)
-		if(scrolled && (scrolled[0] !== ownerDocument[0] || quirks)) {
-			scroll(scrolled, 1);
-		}
-
-		return pos;
-	};
-
-	// Corner class
-	var C = (CORNER = PROTOTYPE.reposition.Corner = function(corner, forceY) {
-		corner = ('' + corner).replace(/([A-Z])/, ' $1').replace(/middle/gi, CENTER).toLowerCase();
-		this.x = (corner.match(/left|right/i) || corner.match(/center/) || ['inherit'])[0].toLowerCase();
-		this.y = (corner.match(/top|bottom|center/i) || ['inherit'])[0].toLowerCase();
-		this.forceY = !!forceY;
-
-		var f = corner.charAt(0);
-		this.precedance = f === 't' || f === 'b' ? Y : X;
-	}).prototype;
-
-	C.invert = function(z, center) {
-		this[z] = this[z] === LEFT ? RIGHT : this[z] === RIGHT ? LEFT : center || this[z];
-	};
-
-	C.string = function(join) {
-		var x = this.x, y = this.y;
-
-		var result = x !== y ?
-			x === 'center' || y !== 'center' && (this.precedance === Y || this.forceY) ? 
-				[y,x] : 
-				[x,y] :
-			[x];
-
-		return join !== false ? result.join(' ') : result;
-	};
-
-	C.abbrev = function() {
-		var result = this.string(false);
-		return result[0].charAt(0) + (result[1] && result[1].charAt(0) || '');
-	};
-
-	C.clone = function() {
-		return new CORNER( this.string(), this.forceY );
-	};
-
-	;
-	PROTOTYPE.toggle = function(state, event) {
-		var cache = this.cache,
-			options = this.options,
-			tooltip = this.tooltip;
-
-		// Try to prevent flickering when tooltip overlaps show element
-		if(event) {
-			if((/over|enter/).test(event.type) && cache.event && (/out|leave/).test(cache.event.type) &&
-				options.show.target.add(event.target).length === options.show.target.length &&
-				tooltip.has(event.relatedTarget).length) {
-				return this;
-			}
-
-			// Cache event
-			cache.event = $.event.fix(event);
-		}
-
-		// If we're currently waiting and we've just hidden... stop it
-		this.waiting && !state && (this.hiddenDuringWait = TRUE);
-
-		// Render the tooltip if showing and it isn't already
-		if(!this.rendered) { return state ? this.render(1) : this; }
-		else if(this.destroyed || this.disabled) { return this; }
-
-		var type = state ? 'show' : 'hide',
-			opts = this.options[type],
-			posOptions = this.options.position,
-			contentOptions = this.options.content,
-			width = this.tooltip.css('width'),
-			visible = this.tooltip.is(':visible'),
-			animate = state || opts.target.length === 1,
-			sameTarget = !event || opts.target.length < 2 || cache.target[0] === event.target,
-			identicalState, allow, after;
-
-		// Detect state if valid one isn't provided
-		if((typeof state).search('boolean|number')) { state = !visible; }
-
-		// Check if the tooltip is in an identical state to the new would-be state
-		identicalState = !tooltip.is(':animated') && visible === state && sameTarget;
-
-		// Fire tooltip(show/hide) event and check if destroyed
-		allow = !identicalState ? !!this._trigger(type, [90]) : NULL;
-
-		// Check to make sure the tooltip wasn't destroyed in the callback
-		if(this.destroyed) { return this; }
-
-		// If the user didn't stop the method prematurely and we're showing the tooltip, focus it
-		if(allow !== FALSE && state) { this.focus(event); }
-
-		// If the state hasn't changed or the user stopped it, return early
-		if(!allow || identicalState) { return this; }
-
-		// Set ARIA hidden attribute
-		$.attr(tooltip[0], 'aria-hidden', !!!state);
-
-		// Execute state specific properties
-		if(state) {
-			// Store show origin coordinates
-			this.mouse && (cache.origin = $.event.fix(this.mouse));
-
-			// Update tooltip content & title if it's a dynamic function
-			if($.isFunction(contentOptions.text)) { this._updateContent(contentOptions.text, FALSE); }
-			if($.isFunction(contentOptions.title)) { this._updateTitle(contentOptions.title, FALSE); }
-
-			// Cache mousemove events for positioning purposes (if not already tracking)
-			if(!trackingBound && posOptions.target === 'mouse' && posOptions.adjust.mouse) {
-				$(document).bind('mousemove.'+NAMESPACE, this._storeMouse);
-				trackingBound = TRUE;
-			}
-
-			// Update the tooltip position (set width first to prevent viewport/max-width issues)
-			if(!width) { tooltip.css('width', tooltip.outerWidth(FALSE)); }
-			this.reposition(event, arguments[2]);
-			if(!width) { tooltip.css('width', ''); }
-
-			// Hide other tooltips if tooltip is solo
-			if(!!opts.solo) {
-				(typeof opts.solo === 'string' ? $(opts.solo) : $(SELECTOR, opts.solo))
-					.not(tooltip).not(opts.target).qtip('hide', new $.Event('tooltipsolo'));
-			}
-		}
-		else {
-			// Clear show timer if we're hiding
-			clearTimeout(this.timers.show);
-
-			// Remove cached origin on hide
-			delete cache.origin;
-
-			// Remove mouse tracking event if not needed (all tracking qTips are hidden)
-			if(trackingBound && !$(SELECTOR+'[tracking="true"]:visible', opts.solo).not(tooltip).length) {
-				$(document).unbind('mousemove.'+NAMESPACE);
-				trackingBound = FALSE;
-			}
-
-			// Blur the tooltip
-			this.blur(event);
-		}
-
-		// Define post-animation, state specific properties
-		after = $.proxy(function() {
-			if(state) {
-				// Prevent antialias from disappearing in IE by removing filter
-				if(BROWSER.ie) { tooltip[0].style.removeAttribute('filter'); }
-
-				// Remove overflow setting to prevent tip bugs
-				tooltip.css('overflow', '');
-
-				// Autofocus elements if enabled
-				if('string' === typeof opts.autofocus) {
-					$(this.options.show.autofocus, tooltip).focus();
-				}
-
-				// If set, hide tooltip when inactive for delay period
-				this.options.show.target.trigger('qtip-'+this.id+'-inactive');
-			}
-			else {
-				// Reset CSS states
-				tooltip.css({
-					display: '',
-					visibility: '',
-					opacity: '',
-					left: '',
-					top: ''
-				});
-			}
-
-			// tooltipvisible/tooltiphidden events
-			this._trigger(state ? 'visible' : 'hidden');
-		}, this);
-
-		// If no effect type is supplied, use a simple toggle
-		if(opts.effect === FALSE || animate === FALSE) {
-			tooltip[ type ]();
-			after();
-		}
-
-		// Use custom function if provided
-		else if($.isFunction(opts.effect)) {
-			tooltip.stop(1, 1);
-			opts.effect.call(tooltip, this);
-			tooltip.queue('fx', function(n) {
-				after(); n();
-			});
-		}
-
-		// Use basic fade function by default
-		else { tooltip.fadeTo(90, state ? 1 : 0, after); }
-
-		// If inactive hide method is set, active it
-		if(state) { opts.target.trigger('qtip-'+this.id+'-inactive'); }
-
-		return this;
-	};
-
-	PROTOTYPE.show = function(event) { return this.toggle(TRUE, event); };
-
-	PROTOTYPE.hide = function(event) { return this.toggle(FALSE, event); };
-	;PROTOTYPE.focus = function(event) {
-		if(!this.rendered || this.destroyed) { return this; }
-
-		var qtips = $(SELECTOR),
-			tooltip = this.tooltip,
-			curIndex = parseInt(tooltip[0].style.zIndex, 10),
-			newIndex = QTIP.zindex + qtips.length;
-
-		// Only update the z-index if it has changed and tooltip is not already focused
-		if(!tooltip.hasClass(CLASS_FOCUS)) {
-			// tooltipfocus event
-			if(this._trigger('focus', [newIndex], event)) {
-				// Only update z-index's if they've changed
-				if(curIndex !== newIndex) {
-					// Reduce our z-index's and keep them properly ordered
-					qtips.each(function() {
-						if(this.style.zIndex > curIndex) {
-							this.style.zIndex = this.style.zIndex - 1;
-						}
-					});
-
-					// Fire blur event for focused tooltip
-					qtips.filter('.' + CLASS_FOCUS).qtip('blur', event);
-				}
-
-				// Set the new z-index
-				tooltip.addClass(CLASS_FOCUS)[0].style.zIndex = newIndex;
-			}
-		}
-
-		return this;
-	};
-
-	PROTOTYPE.blur = function(event) {
-		if(!this.rendered || this.destroyed) { return this; }
-
-		// Set focused status to FALSE
-		this.tooltip.removeClass(CLASS_FOCUS);
-
-		// tooltipblur event
-		this._trigger('blur', [ this.tooltip.css('zIndex') ], event);
-
-		return this;
-	};
-	;PROTOTYPE.disable = function(state) {
-		if(this.destroyed) { return this; }
-
-		// If 'toggle' is passed, toggle the current state
-		if(state === 'toggle') {
-			state = !(this.rendered ? this.tooltip.hasClass(CLASS_DISABLED) : this.disabled);
-		}
-
-		// Disable if no state passed
-		else if('boolean' !== typeof state) {
-			state = TRUE;
-		}
-
-		if(this.rendered) {
-			this.tooltip.toggleClass(CLASS_DISABLED, state)
-				.attr('aria-disabled', state);
-		}
-
-		this.disabled = !!state;
-
-		return this;
-	};
-
-	PROTOTYPE.enable = function() { return this.disable(FALSE); };
-	;PROTOTYPE._createButton = function()
-	{
-		var self = this,
-			elements = this.elements,
-			tooltip = elements.tooltip,
-			button = this.options.content.button,
-			isString = typeof button === 'string',
-			close = isString ? button : 'Close tooltip';
-
-		if(elements.button) { elements.button.remove(); }
-
-		// Use custom button if one was supplied by user, else use default
-		if(button.jquery) {
-			elements.button = button;
-		}
-		else {
-			elements.button = $('<a />', {
-				'class': 'qtip-close ' + (this.options.style.widget ? '' : NAMESPACE+'-icon'),
-				'title': close,
-				'aria-label': close
-			})
-			.prepend(
-				$('<span />', {
-					'class': 'ui-icon ui-icon-close',
-					'html': '&times;'
-				})
-			);
-		}
-
-		// Create button and setup attributes
-		elements.button.appendTo(elements.titlebar || tooltip)
-			.attr('role', 'button')
-			.click(function(event) {
-				if(!tooltip.hasClass(CLASS_DISABLED)) { self.hide(event); }
-				return FALSE;
-			});
-	};
-
-	PROTOTYPE._updateButton = function(button)
-	{
-		// Make sure tooltip is rendered and if not, return
-		if(!this.rendered) { return FALSE; }
-
-		var elem = this.elements.button;
-		if(button) { this._createButton(); }
-		else { elem.remove(); }
-	};
-	;// Widget class creator
-	function createWidgetClass(cls) {
-		return WIDGET.concat('').join(cls ? '-'+cls+' ' : ' ');
-	}
-
-	// Widget class setter method
-	PROTOTYPE._setWidget = function()
-	{
-		var on = this.options.style.widget,
-			elements = this.elements,
-			tooltip = elements.tooltip,
-			disabled = tooltip.hasClass(CLASS_DISABLED);
-
-		tooltip.removeClass(CLASS_DISABLED);
-		CLASS_DISABLED = on ? 'ui-state-disabled' : 'qtip-disabled';
-		tooltip.toggleClass(CLASS_DISABLED, disabled);
-
-		tooltip.toggleClass('ui-helper-reset '+createWidgetClass(), on).toggleClass(CLASS_DEFAULT, this.options.style.def && !on);
-
-		if(elements.content) {
-			elements.content.toggleClass( createWidgetClass('content'), on);
-		}
-		if(elements.titlebar) {
-			elements.titlebar.toggleClass( createWidgetClass('header'), on);
-		}
-		if(elements.button) {
-			elements.button.toggleClass(NAMESPACE+'-icon', !on);
-		}
-	};
-	;function delay(callback, duration) {
-		// If tooltip has displayed, start hide timer
-		if(duration > 0) {
-			return setTimeout(
-				$.proxy(callback, this), duration
-			);
-		}
-		else{ callback.call(this); }
-	}
-
-	function showMethod(event) {
-		if(this.tooltip.hasClass(CLASS_DISABLED)) { return; }
-
-		// Clear hide timers
-		clearTimeout(this.timers.show);
-		clearTimeout(this.timers.hide);
-
-		// Start show timer
-		this.timers.show = delay.call(this,
-			function() { this.toggle(TRUE, event); },
-			this.options.show.delay
-		);
-	}
-
-	function hideMethod(event) {
-		if(this.tooltip.hasClass(CLASS_DISABLED) || this.destroyed) { return; }
-
-		// Check if new target was actually the tooltip element
-		var relatedTarget = $(event.relatedTarget),
-			ontoTooltip = relatedTarget.closest(SELECTOR)[0] === this.tooltip[0],
-			ontoTarget = relatedTarget[0] === this.options.show.target[0];
-
-		// Clear timers and stop animation queue
-		clearTimeout(this.timers.show);
-		clearTimeout(this.timers.hide);
-
-		// Prevent hiding if tooltip is fixed and event target is the tooltip.
-		// Or if mouse positioning is enabled and cursor momentarily overlaps
-		if(this !== relatedTarget[0] &&
-			(this.options.position.target === 'mouse' && ontoTooltip) ||
-			this.options.hide.fixed && (
-				(/mouse(out|leave|move)/).test(event.type) && (ontoTooltip || ontoTarget))
-			)
-		{
-			/* eslint-disable no-empty */
-			try {
-				event.preventDefault();
-				event.stopImmediatePropagation();
-			} catch(e) {}
-			/* eslint-enable no-empty */
-
-			return;
-		}
-
-		// If tooltip has displayed, start hide timer
-		this.timers.hide = delay.call(this,
-			function() { this.toggle(FALSE, event); },
-			this.options.hide.delay,
-			this
-		);
-	}
-
-	function inactiveMethod(event) {
-		if(this.tooltip.hasClass(CLASS_DISABLED) || !this.options.hide.inactive) { return; }
-
-		// Clear timer
-		clearTimeout(this.timers.inactive);
-
-		this.timers.inactive = delay.call(this,
-			function(){ this.hide(event); },
-			this.options.hide.inactive
-		);
-	}
-
-	function repositionMethod(event) {
-		if(this.rendered && this.tooltip[0].offsetWidth > 0) { this.reposition(event); }
-	}
-
-	// Store mouse coordinates
-	PROTOTYPE._storeMouse = function(event) {
-		(this.mouse = $.event.fix(event)).type = 'mousemove';
-		return this;
-	};
-
-	// Bind events
-	PROTOTYPE._bind = function(targets, events, method, suffix, context) {
-		if(!targets || !method || !events.length) { return; }
-		var ns = '.' + this._id + (suffix ? '-'+suffix : '');
-		$(targets).bind(
-			(events.split ? events : events.join(ns + ' ')) + ns,
-			$.proxy(method, context || this)
-		);
-		return this;
-	};
-	PROTOTYPE._unbind = function(targets, suffix) {
-		targets && $(targets).unbind('.' + this._id + (suffix ? '-'+suffix : ''));
-		return this;
-	};
-
-	// Global delegation helper
-	function delegate(selector, events, method) {
-		$(document.body).delegate(selector,
-			(events.split ? events : events.join('.'+NAMESPACE + ' ')) + '.'+NAMESPACE,
-			function() {
-				var api = QTIP.api[ $.attr(this, ATTR_ID) ];
-				api && !api.disabled && method.apply(api, arguments);
-			}
-		);
-	}
-	// Event trigger
-	PROTOTYPE._trigger = function(type, args, event) {
-		var callback = new $.Event('tooltip'+type);
-		callback.originalEvent = event && $.extend({}, event) || this.cache.event || NULL;
-
-		this.triggering = type;
-		this.tooltip.trigger(callback, [this].concat(args || []));
-		this.triggering = FALSE;
-
-		return !callback.isDefaultPrevented();
-	};
-
-	PROTOTYPE._bindEvents = function(showEvents, hideEvents, showTargets, hideTargets, showCallback, hideCallback) {
-		// Get tasrgets that lye within both
-		var similarTargets = showTargets.filter( hideTargets ).add( hideTargets.filter(showTargets) ),
-			toggleEvents = [];
-
-		// If hide and show targets are the same...
-		if(similarTargets.length) {
-
-			// Filter identical show/hide events
-			$.each(hideEvents, function(i, type) {
-				var showIndex = $.inArray(type, showEvents);
-
-				// Both events are identical, remove from both hide and show events
-				// and append to toggleEvents
-				showIndex > -1 && toggleEvents.push( showEvents.splice( showIndex, 1 )[0] );
-			});
-
-			// Toggle events are special case of identical show/hide events, which happen in sequence
-			if(toggleEvents.length) {
-				// Bind toggle events to the similar targets
-				this._bind(similarTargets, toggleEvents, function(event) {
-					var state = this.rendered ? this.tooltip[0].offsetWidth > 0 : false;
-					(state ? hideCallback : showCallback).call(this, event);
-				});
-
-				// Remove the similar targets from the regular show/hide bindings
-				showTargets = showTargets.not(similarTargets);
-				hideTargets = hideTargets.not(similarTargets);
-			}
-		}
-
-		// Apply show/hide/toggle events
-		this._bind(showTargets, showEvents, showCallback);
-		this._bind(hideTargets, hideEvents, hideCallback);
-	};
-
-	PROTOTYPE._assignInitialEvents = function(event) {
-		var options = this.options,
-			showTarget = options.show.target,
-			hideTarget = options.hide.target,
-			showEvents = options.show.event ? $.trim('' + options.show.event).split(' ') : [],
-			hideEvents = options.hide.event ? $.trim('' + options.hide.event).split(' ') : [];
-
-		// Catch remove/removeqtip events on target element to destroy redundant tooltips
-		this._bind(this.elements.target, ['remove', 'removeqtip'], function() {
-			this.destroy(true);
-		}, 'destroy');
-
-		/*
-		 * Make sure hoverIntent functions properly by using mouseleave as a hide event if
-		 * mouseenter/mouseout is used for show.event, even if it isn't in the users options.
-		 */
-		if(/mouse(over|enter)/i.test(options.show.event) && !/mouse(out|leave)/i.test(options.hide.event)) {
-			hideEvents.push('mouseleave');
-		}
-
-		/*
-		 * Also make sure initial mouse targetting works correctly by caching mousemove coords
-		 * on show targets before the tooltip has rendered. Also set onTarget when triggered to
-		 * keep mouse tracking working.
-		 */
-		this._bind(showTarget, 'mousemove', function(moveEvent) {
-			this._storeMouse(moveEvent);
-			this.cache.onTarget = TRUE;
-		});
-
-		// Define hoverIntent function
-		function hoverIntent(hoverEvent) {
-			// Only continue if tooltip isn't disabled
-			if(this.disabled || this.destroyed) { return FALSE; }
-
-			// Cache the event data
-			this.cache.event = hoverEvent && $.event.fix(hoverEvent);
-			this.cache.target = hoverEvent && $(hoverEvent.target);
-
-			// Start the event sequence
-			clearTimeout(this.timers.show);
-			this.timers.show = delay.call(this,
-				function() { this.render(typeof hoverEvent === 'object' || options.show.ready); },
-				options.prerender ? 0 : options.show.delay
-			);
-		}
-
-		// Filter and bind events
-		this._bindEvents(showEvents, hideEvents, showTarget, hideTarget, hoverIntent, function() {
-			if(!this.timers) { return FALSE; }
-			clearTimeout(this.timers.show);
-		});
-
-		// Prerendering is enabled, create tooltip now
-		if(options.show.ready || options.prerender) { hoverIntent.call(this, event); }
-	};
-
-	// Event assignment method
-	PROTOTYPE._assignEvents = function() {
-		var self = this,
-			options = this.options,
-			posOptions = options.position,
-
-			tooltip = this.tooltip,
-			showTarget = options.show.target,
-			hideTarget = options.hide.target,
-			containerTarget = posOptions.container,
-			viewportTarget = posOptions.viewport,
-			documentTarget = $(document),
-			windowTarget = $(window),
-
-			showEvents = options.show.event ? $.trim('' + options.show.event).split(' ') : [],
-			hideEvents = options.hide.event ? $.trim('' + options.hide.event).split(' ') : [];
-
-
-		// Assign passed event callbacks
-		$.each(options.events, function(name, callback) {
-			self._bind(tooltip, name === 'toggle' ? ['tooltipshow','tooltiphide'] : ['tooltip'+name], callback, null, tooltip);
-		});
-
-		// Hide tooltips when leaving current window/frame (but not select/option elements)
-		if(/mouse(out|leave)/i.test(options.hide.event) && options.hide.leave === 'window') {
-			this._bind(documentTarget, ['mouseout', 'blur'], function(event) {
-				if(!/select|option/.test(event.target.nodeName) && !event.relatedTarget) {
-					this.hide(event);
-				}
-			});
-		}
-
-		// Enable hide.fixed by adding appropriate class
-		if(options.hide.fixed) {
-			hideTarget = hideTarget.add( tooltip.addClass(CLASS_FIXED) );
-		}
-
-		/*
-		 * Make sure hoverIntent functions properly by using mouseleave to clear show timer if
-		 * mouseenter/mouseout is used for show.event, even if it isn't in the users options.
-		 */
-		else if(/mouse(over|enter)/i.test(options.show.event)) {
-			this._bind(hideTarget, 'mouseleave', function() {
-				clearTimeout(this.timers.show);
-			});
-		}
-
-		// Hide tooltip on document mousedown if unfocus events are enabled
-		if(('' + options.hide.event).indexOf('unfocus') > -1) {
-			this._bind(containerTarget.closest('html'), ['mousedown', 'touchstart'], function(event) {
-				var elem = $(event.target),
-					enabled = this.rendered && !this.tooltip.hasClass(CLASS_DISABLED) && this.tooltip[0].offsetWidth > 0,
-					isAncestor = elem.parents(SELECTOR).filter(this.tooltip[0]).length > 0;
-
-				if(elem[0] !== this.target[0] && elem[0] !== this.tooltip[0] && !isAncestor &&
-					!this.target.has(elem[0]).length && enabled
-				) {
-					this.hide(event);
-				}
-			});
-		}
-
-		// Check if the tooltip hides when inactive
-		if('number' === typeof options.hide.inactive) {
-			// Bind inactive method to show target(s) as a custom event
-			this._bind(showTarget, 'qtip-'+this.id+'-inactive', inactiveMethod, 'inactive');
-
-			// Define events which reset the 'inactive' event handler
-			this._bind(hideTarget.add(tooltip), QTIP.inactiveEvents, inactiveMethod);
-		}
-
-		// Filter and bind events
-		this._bindEvents(showEvents, hideEvents, showTarget, hideTarget, showMethod, hideMethod);
-
-		// Mouse movement bindings
-		this._bind(showTarget.add(tooltip), 'mousemove', function(event) {
-			// Check if the tooltip hides when mouse is moved a certain distance
-			if('number' === typeof options.hide.distance) {
-				var origin = this.cache.origin || {},
-					limit = this.options.hide.distance,
-					abs = Math.abs;
-
-				// Check if the movement has gone beyond the limit, and hide it if so
-				if(abs(event.pageX - origin.pageX) >= limit || abs(event.pageY - origin.pageY) >= limit) {
-					this.hide(event);
-				}
-			}
-
-			// Cache mousemove coords on show targets
-			this._storeMouse(event);
-		});
-
-		// Mouse positioning events
-		if(posOptions.target === 'mouse') {
-			// If mouse adjustment is on...
-			if(posOptions.adjust.mouse) {
-				// Apply a mouseleave event so we don't get problems with overlapping
-				if(options.hide.event) {
-					// Track if we're on the target or not
-					this._bind(showTarget, ['mouseenter', 'mouseleave'], function(event) {
-						if(!this.cache) {return FALSE; }
-						this.cache.onTarget = event.type === 'mouseenter';
-					});
-				}
-
-				// Update tooltip position on mousemove
-				this._bind(documentTarget, 'mousemove', function(event) {
-					// Update the tooltip position only if the tooltip is visible and adjustment is enabled
-					if(this.rendered && this.cache.onTarget && !this.tooltip.hasClass(CLASS_DISABLED) && this.tooltip[0].offsetWidth > 0) {
-						this.reposition(event);
-					}
-				});
-			}
-		}
-
-		// Adjust positions of the tooltip on window resize if enabled
-		if(posOptions.adjust.resize || viewportTarget.length) {
-			this._bind( $.event.special.resize ? viewportTarget : windowTarget, 'resize', repositionMethod );
-		}
-
-		// Adjust tooltip position on scroll of the window or viewport element if present
-		if(posOptions.adjust.scroll) {
-			this._bind( windowTarget.add(posOptions.container), 'scroll', repositionMethod );
-		}
-	};
-
-	// Un-assignment method
-	PROTOTYPE._unassignEvents = function() {
-		var options = this.options,
-			showTargets = options.show.target,
-			hideTargets = options.hide.target,
-			targets = $.grep([
-				this.elements.target[0],
-				this.rendered && this.tooltip[0],
-				options.position.container[0],
-				options.position.viewport[0],
-				options.position.container.closest('html')[0], // unfocus
-				window,
-				document
-			], function(i) {
-				return typeof i === 'object';
-			});
-
-		// Add show and hide targets if they're valid
-		if(showTargets && showTargets.toArray) {
-			targets = targets.concat(showTargets.toArray());
-		}
-		if(hideTargets && hideTargets.toArray) {
-			targets = targets.concat(hideTargets.toArray());
-		}
-
-		// Unbind the events
-		this._unbind(targets)
-			._unbind(targets, 'destroy')
-			._unbind(targets, 'inactive');
-	};
-
-	// Apply common event handlers using delegate (avoids excessive .bind calls!)
-	$(function() {
-		delegate(SELECTOR, ['mouseenter', 'mouseleave'], function(event) {
-			var state = event.type === 'mouseenter',
-				tooltip = $(event.currentTarget),
-				target = $(event.relatedTarget || event.target),
-				options = this.options;
-
-			// On mouseenter...
-			if(state) {
-				// Focus the tooltip on mouseenter (z-index stacking)
-				this.focus(event);
-
-				// Clear hide timer on tooltip hover to prevent it from closing
-				tooltip.hasClass(CLASS_FIXED) && !tooltip.hasClass(CLASS_DISABLED) && clearTimeout(this.timers.hide);
-			}
-
-			// On mouseleave...
-			else {
-				// When mouse tracking is enabled, hide when we leave the tooltip and not onto the show target (if a hide event is set)
-				if(options.position.target === 'mouse' && options.position.adjust.mouse &&
-					options.hide.event && options.show.target && !target.closest(options.show.target[0]).length) {
-					this.hide(event);
-				}
-			}
-
-			// Add hover class
-			tooltip.toggleClass(CLASS_HOVER, state);
-		});
-
-		// Define events which reset the 'inactive' event handler
-		delegate('['+ATTR_ID+']', INACTIVE_EVENTS, inactiveMethod);
+	/* WEBPACK VAR INJECTION */(function(global) {/*!
+	* Parsley.js
+	* Version 2.3.11 - built Fri, Apr 15th 2016, 9:21 am
+	* http://parsleyjs.org
+	* Guillaume Potier - <guillaume@wisembly.com>
+	* Marc-Andre Lafortune - <petroselinum@marc-andre.ca>
+	* MIT Licensed
+	*/
+
+	// The source code below is generated by babel as
+	// Parsley is written in ECMAScript 6
+	//
+	var _slice = Array.prototype.slice;
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
+	(function (global, factory) {
+	   true ? module.exports = factory(__webpack_require__(168)) : typeof define === 'function' && define.amd ? define(['jquery'], factory) : global.parsley = factory(global.jQuery);
+	})(this, function ($) {
+	  'use strict';
+
+	  var globalID = 1;
+	  var pastWarnings = {};
+
+	  var ParsleyUtils__ParsleyUtils = {
+	    // Parsley DOM-API
+	    // returns object from dom attributes and values
+	    attr: function attr($element, namespace, obj) {
+	      var i;
+	      var attribute;
+	      var attributes;
+	      var regex = new RegExp('^' + namespace, 'i');
+
+	      if ('undefined' === typeof obj) obj = {};else {
+	        // Clear all own properties. This won't affect prototype's values
+	        for (i in obj) {
+	          if (obj.hasOwnProperty(i)) delete obj[i];
+	        }
+	      }
+
+	      if ('undefined' === typeof $element || 'undefined' === typeof $element[0]) return obj;
+
+	      attributes = $element[0].attributes;
+	      for (i = attributes.length; i--;) {
+	        attribute = attributes[i];
+
+	        if (attribute && attribute.specified && regex.test(attribute.name)) {
+	          obj[this.camelize(attribute.name.slice(namespace.length))] = this.deserializeValue(attribute.value);
+	        }
+	      }
+
+	      return obj;
+	    },
+
+	    checkAttr: function checkAttr($element, namespace, _checkAttr) {
+	      return $element.is('[' + namespace + _checkAttr + ']');
+	    },
+
+	    setAttr: function setAttr($element, namespace, attr, value) {
+	      $element[0].setAttribute(this.dasherize(namespace + attr), String(value));
+	    },
+
+	    generateID: function generateID() {
+	      return '' + globalID++;
+	    },
+
+	    /** Third party functions **/
+	    // Zepto deserialize function
+	    deserializeValue: function deserializeValue(value) {
+	      var num;
+
+	      try {
+	        return value ? value == "true" || (value == "false" ? false : value == "null" ? null : !isNaN(num = Number(value)) ? num : /^[\[\{]/.test(value) ? $.parseJSON(value) : value) : value;
+	      } catch (e) {
+	        return value;
+	      }
+	    },
+
+	    // Zepto camelize function
+	    camelize: function camelize(str) {
+	      return str.replace(/-+(.)?/g, function (match, chr) {
+	        return chr ? chr.toUpperCase() : '';
+	      });
+	    },
+
+	    // Zepto dasherize function
+	    dasherize: function dasherize(str) {
+	      return str.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2').replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/_/g, '-').toLowerCase();
+	    },
+
+	    warn: function warn() {
+	      var _window$console;
+
+	      if (window.console && 'function' === typeof window.console.warn) (_window$console = window.console).warn.apply(_window$console, arguments);
+	    },
+
+	    warnOnce: function warnOnce(msg) {
+	      if (!pastWarnings[msg]) {
+	        pastWarnings[msg] = true;
+	        this.warn.apply(this, arguments);
+	      }
+	    },
+
+	    _resetWarnings: function _resetWarnings() {
+	      pastWarnings = {};
+	    },
+
+	    trimString: function trimString(string) {
+	      return string.replace(/^\s+|\s+$/g, '');
+	    },
+
+	    namespaceEvents: function namespaceEvents(events, namespace) {
+	      events = this.trimString(events || '').split(/\s+/);
+	      if (!events[0]) return '';
+	      return $.map(events, function (evt) {
+	        return evt + '.' + namespace;
+	      }).join(' ');
+	    },
+
+	    // Object.create polyfill, see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create#Polyfill
+	    objectCreate: Object.create || (function () {
+	      var Object = function Object() {};
+	      return function (prototype) {
+	        if (arguments.length > 1) {
+	          throw Error('Second argument not supported');
+	        }
+	        if (typeof prototype != 'object') {
+	          throw TypeError('Argument must be an object');
+	        }
+	        Object.prototype = prototype;
+	        var result = new Object();
+	        Object.prototype = null;
+	        return result;
+	      };
+	    })()
+	  };
+
+	  var ParsleyUtils__default = ParsleyUtils__ParsleyUtils;
+
+	  // All these options could be overriden and specified directly in DOM using
+	  // `data-parsley-` default DOM-API
+	  // eg: `inputs` can be set in DOM using `data-parsley-inputs="input, textarea"`
+	  // eg: `data-parsley-stop-on-first-failing-constraint="false"`
+
+	  var ParsleyDefaults = {
+	    // ### General
+
+	    // Default data-namespace for DOM API
+	    namespace: 'data-parsley-',
+
+	    // Supported inputs by default
+	    inputs: 'input, textarea, select',
+
+	    // Excluded inputs by default
+	    excluded: 'input[type=button], input[type=submit], input[type=reset], input[type=hidden]',
+
+	    // Stop validating field on highest priority failing constraint
+	    priorityEnabled: true,
+
+	    // ### Field only
+
+	    // identifier used to group together inputs (e.g. radio buttons...)
+	    multiple: null,
+
+	    // identifier (or array of identifiers) used to validate only a select group of inputs
+	    group: null,
+
+	    // ### UI
+	    // Enable\Disable error messages
+	    uiEnabled: true,
+
+	    // Key events threshold before validation
+	    validationThreshold: 3,
+
+	    // Focused field on form validation error. 'first'|'last'|'none'
+	    focus: 'first',
+
+	    // event(s) that will trigger validation before first failure. eg: `input`...
+	    trigger: false,
+
+	    // event(s) that will trigger validation after first failure.
+	    triggerAfterFailure: 'input',
+
+	    // Class that would be added on every failing validation Parsley field
+	    errorClass: 'parsley-error',
+
+	    // Same for success validation
+	    successClass: 'parsley-success',
+
+	    // Return the `$element` that will receive these above success or error classes
+	    // Could also be (and given directly from DOM) a valid selector like `'#div'`
+	    classHandler: function classHandler(ParsleyField) {},
+
+	    // Return the `$element` where errors will be appended
+	    // Could also be (and given directly from DOM) a valid selector like `'#div'`
+	    errorsContainer: function errorsContainer(ParsleyField) {},
+
+	    // ul elem that would receive errors' list
+	    errorsWrapper: '<ul class="parsley-errors-list"></ul>',
+
+	    // li elem that would receive error message
+	    errorTemplate: '<li></li>'
+	  };
+
+	  var ParsleyAbstract = function ParsleyAbstract() {
+	    this.__id__ = ParsleyUtils__default.generateID();
+	  };
+
+	  ParsleyAbstract.prototype = {
+	    asyncSupport: true, // Deprecated
+
+	    _pipeAccordingToValidationResult: function _pipeAccordingToValidationResult() {
+	      var _this = this;
+
+	      var pipe = function pipe() {
+	        var r = $.Deferred();
+	        if (true !== _this.validationResult) r.reject();
+	        return r.resolve().promise();
+	      };
+	      return [pipe, pipe];
+	    },
+
+	    actualizeOptions: function actualizeOptions() {
+	      ParsleyUtils__default.attr(this.$element, this.options.namespace, this.domOptions);
+	      if (this.parent && this.parent.actualizeOptions) this.parent.actualizeOptions();
+	      return this;
+	    },
+
+	    _resetOptions: function _resetOptions(initOptions) {
+	      this.domOptions = ParsleyUtils__default.objectCreate(this.parent.options);
+	      this.options = ParsleyUtils__default.objectCreate(this.domOptions);
+	      // Shallow copy of ownProperties of initOptions:
+	      for (var i in initOptions) {
+	        if (initOptions.hasOwnProperty(i)) this.options[i] = initOptions[i];
+	      }
+	      this.actualizeOptions();
+	    },
+
+	    _listeners: null,
+
+	    // Register a callback for the given event name
+	    // Callback is called with context as the first argument and the `this`
+	    // The context is the current parsley instance, or window.Parsley if global
+	    // A return value of `false` will interrupt the calls
+	    on: function on(name, fn) {
+	      this._listeners = this._listeners || {};
+	      var queue = this._listeners[name] = this._listeners[name] || [];
+	      queue.push(fn);
+
+	      return this;
+	    },
+
+	    // Deprecated. Use `on` instead
+	    subscribe: function subscribe(name, fn) {
+	      $.listenTo(this, name.toLowerCase(), fn);
+	    },
+
+	    // Unregister a callback (or all if none is given) for the given event name
+	    off: function off(name, fn) {
+	      var queue = this._listeners && this._listeners[name];
+	      if (queue) {
+	        if (!fn) {
+	          delete this._listeners[name];
+	        } else {
+	          for (var i = queue.length; i--;) if (queue[i] === fn) queue.splice(i, 1);
+	        }
+	      }
+	      return this;
+	    },
+
+	    // Deprecated. Use `off`
+	    unsubscribe: function unsubscribe(name, fn) {
+	      $.unsubscribeTo(this, name.toLowerCase());
+	    },
+
+	    // Trigger an event of the given name
+	    // A return value of `false` interrupts the callback chain
+	    // Returns false if execution was interrupted
+	    trigger: function trigger(name, target, extraArg) {
+	      target = target || this;
+	      var queue = this._listeners && this._listeners[name];
+	      var result;
+	      var parentResult;
+	      if (queue) {
+	        for (var i = queue.length; i--;) {
+	          result = queue[i].call(target, target, extraArg);
+	          if (result === false) return result;
+	        }
+	      }
+	      if (this.parent) {
+	        return this.parent.trigger(name, target, extraArg);
+	      }
+	      return true;
+	    },
+
+	    // Reset UI
+	    reset: function reset() {
+	      // Field case: just emit a reset event for UI
+	      if ('ParsleyForm' !== this.__class__) {
+	        this._resetUI();
+	        return this._trigger('reset');
+	      }
+
+	      // Form case: emit a reset event for each field
+	      for (var i = 0; i < this.fields.length; i++) this.fields[i].reset();
+
+	      this._trigger('reset');
+	    },
+
+	    // Destroy Parsley instance (+ UI)
+	    destroy: function destroy() {
+	      // Field case: emit destroy event to clean UI and then destroy stored instance
+	      this._destroyUI();
+	      if ('ParsleyForm' !== this.__class__) {
+	        this.$element.removeData('Parsley');
+	        this.$element.removeData('ParsleyFieldMultiple');
+	        this._trigger('destroy');
+
+	        return;
+	      }
+
+	      // Form case: destroy all its fields and then destroy stored instance
+	      for (var i = 0; i < this.fields.length; i++) this.fields[i].destroy();
+
+	      this.$element.removeData('Parsley');
+	      this._trigger('destroy');
+	    },
+
+	    asyncIsValid: function asyncIsValid(group, force) {
+	      ParsleyUtils__default.warnOnce("asyncIsValid is deprecated; please use whenValid instead");
+	      return this.whenValid({ group: group, force: force });
+	    },
+
+	    _findRelated: function _findRelated() {
+	      return this.options.multiple ? this.parent.$element.find('[' + this.options.namespace + 'multiple="' + this.options.multiple + '"]') : this.$element;
+	    }
+	  };
+
+	  var requirementConverters = {
+	    string: function string(_string) {
+	      return _string;
+	    },
+	    integer: function integer(string) {
+	      if (isNaN(string)) throw 'Requirement is not an integer: "' + string + '"';
+	      return parseInt(string, 10);
+	    },
+	    number: function number(string) {
+	      if (isNaN(string)) throw 'Requirement is not a number: "' + string + '"';
+	      return parseFloat(string);
+	    },
+	    reference: function reference(string) {
+	      // Unused for now
+	      var result = $(string);
+	      if (result.length === 0) throw 'No such reference: "' + string + '"';
+	      return result;
+	    },
+	    boolean: function boolean(string) {
+	      return string !== 'false';
+	    },
+	    object: function object(string) {
+	      return ParsleyUtils__default.deserializeValue(string);
+	    },
+	    regexp: function regexp(_regexp) {
+	      var flags = '';
+
+	      // Test if RegExp is literal, if not, nothing to be done, otherwise, we need to isolate flags and pattern
+	      if (/^\/.*\/(?:[gimy]*)$/.test(_regexp)) {
+	        // Replace the regexp literal string with the first match group: ([gimy]*)
+	        // If no flag is present, this will be a blank string
+	        flags = _regexp.replace(/.*\/([gimy]*)$/, '$1');
+	        // Again, replace the regexp literal string with the first match group:
+	        // everything excluding the opening and closing slashes and the flags
+	        _regexp = _regexp.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
+	      } else {
+	        // Anchor regexp:
+	        _regexp = '^' + _regexp + '$';
+	      }
+	      return new RegExp(_regexp, flags);
+	    }
+	  };
+
+	  var convertArrayRequirement = function convertArrayRequirement(string, length) {
+	    var m = string.match(/^\s*\[(.*)\]\s*$/);
+	    if (!m) throw 'Requirement is not an array: "' + string + '"';
+	    var values = m[1].split(',').map(ParsleyUtils__default.trimString);
+	    if (values.length !== length) throw 'Requirement has ' + values.length + ' values when ' + length + ' are needed';
+	    return values;
+	  };
+
+	  var convertRequirement = function convertRequirement(requirementType, string) {
+	    var converter = requirementConverters[requirementType || 'string'];
+	    if (!converter) throw 'Unknown requirement specification: "' + requirementType + '"';
+	    return converter(string);
+	  };
+
+	  var convertExtraOptionRequirement = function convertExtraOptionRequirement(requirementSpec, string, extraOptionReader) {
+	    var main = null;
+	    var extra = {};
+	    for (var key in requirementSpec) {
+	      if (key) {
+	        var value = extraOptionReader(key);
+	        if ('string' === typeof value) value = convertRequirement(requirementSpec[key], value);
+	        extra[key] = value;
+	      } else {
+	        main = convertRequirement(requirementSpec[key], string);
+	      }
+	    }
+	    return [main, extra];
+	  };
+
+	  // A Validator needs to implement the methods `validate` and `parseRequirements`
+
+	  var ParsleyValidator = function ParsleyValidator(spec) {
+	    $.extend(true, this, spec);
+	  };
+
+	  ParsleyValidator.prototype = {
+	    // Returns `true` iff the given `value` is valid according the given requirements.
+	    validate: function validate(value, requirementFirstArg) {
+	      if (this.fn) {
+	        // Legacy style validator
+
+	        if (arguments.length > 3) // If more args then value, requirement, instance...
+	          requirementFirstArg = [].slice.call(arguments, 1, -1); // Skip first arg (value) and last (instance), combining the rest
+	        return this.fn.call(this, value, requirementFirstArg);
+	      }
+
+	      if ($.isArray(value)) {
+	        if (!this.validateMultiple) throw 'Validator `' + this.name + '` does not handle multiple values';
+	        return this.validateMultiple.apply(this, arguments);
+	      } else {
+	        if (this.validateNumber) {
+	          if (isNaN(value)) return false;
+	          arguments[0] = parseFloat(arguments[0]);
+	          return this.validateNumber.apply(this, arguments);
+	        }
+	        if (this.validateString) {
+	          return this.validateString.apply(this, arguments);
+	        }
+	        throw 'Validator `' + this.name + '` only handles multiple values';
+	      }
+	    },
+
+	    // Parses `requirements` into an array of arguments,
+	    // according to `this.requirementType`
+	    parseRequirements: function parseRequirements(requirements, extraOptionReader) {
+	      if ('string' !== typeof requirements) {
+	        // Assume requirement already parsed
+	        // but make sure we return an array
+	        return $.isArray(requirements) ? requirements : [requirements];
+	      }
+	      var type = this.requirementType;
+	      if ($.isArray(type)) {
+	        var values = convertArrayRequirement(requirements, type.length);
+	        for (var i = 0; i < values.length; i++) values[i] = convertRequirement(type[i], values[i]);
+	        return values;
+	      } else if ($.isPlainObject(type)) {
+	        return convertExtraOptionRequirement(type, requirements, extraOptionReader);
+	      } else {
+	        return [convertRequirement(type, requirements)];
+	      }
+	    },
+	    // Defaults:
+	    requirementType: 'string',
+
+	    priority: 2
+
+	  };
+
+	  var ParsleyValidatorRegistry = function ParsleyValidatorRegistry(validators, catalog) {
+	    this.__class__ = 'ParsleyValidatorRegistry';
+
+	    // Default Parsley locale is en
+	    this.locale = 'en';
+
+	    this.init(validators || {}, catalog || {});
+	  };
+
+	  var typeRegexes = {
+	    email: /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
+
+	    // Follow https://www.w3.org/TR/html5/infrastructure.html#floating-point-numbers
+	    number: /^-?(\d*\.)?\d+(e[-+]?\d+)?$/i,
+
+	    integer: /^-?\d+$/,
+
+	    digits: /^\d+$/,
+
+	    alphanum: /^\w+$/i,
+
+	    url: new RegExp("^" +
+	    // protocol identifier
+	    "(?:(?:https?|ftp)://)?" + // ** mod: make scheme optional
+	    // user:pass authentication
+	    "(?:\\S+(?::\\S*)?@)?" + "(?:" +
+	    // IP address exclusion
+	    // private & local networks
+	    // "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +   // ** mod: allow local networks
+	    // "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
+	    // "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
+	    // IP address dotted notation octets
+	    // excludes loopback network 0.0.0.0
+	    // excludes reserved space >= 224.0.0.0
+	    // excludes network & broacast addresses
+	    // (first & last IP address of each class)
+	    "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" + "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" + "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" + "|" +
+	    // host name
+	    '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
+	    // domain name
+	    '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
+	    // TLD identifier
+	    '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' + ")" +
+	    // port number
+	    "(?::\\d{2,5})?" +
+	    // resource path
+	    "(?:/\\S*)?" + "$", 'i')
+	  };
+	  typeRegexes.range = typeRegexes.number;
+
+	  // See http://stackoverflow.com/a/10454560/8279
+	  var decimalPlaces = function decimalPlaces(num) {
+	    var match = ('' + num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+	    if (!match) {
+	      return 0;
+	    }
+	    return Math.max(0,
+	    // Number of digits right of decimal point.
+	    (match[1] ? match[1].length : 0) - (
+	    // Adjust for scientific notation.
+	    match[2] ? +match[2] : 0));
+	  };
+
+	  ParsleyValidatorRegistry.prototype = {
+	    init: function init(validators, catalog) {
+	      this.catalog = catalog;
+	      // Copy prototype's validators:
+	      this.validators = $.extend({}, this.validators);
+
+	      for (var name in validators) this.addValidator(name, validators[name].fn, validators[name].priority);
+
+	      window.Parsley.trigger('parsley:validator:init');
+	    },
+
+	    // Set new messages locale if we have dictionary loaded in ParsleyConfig.i18n
+	    setLocale: function setLocale(locale) {
+	      if ('undefined' === typeof this.catalog[locale]) throw new Error(locale + ' is not available in the catalog');
+
+	      this.locale = locale;
+
+	      return this;
+	    },
+
+	    // Add a new messages catalog for a given locale. Set locale for this catalog if set === `true`
+	    addCatalog: function addCatalog(locale, messages, set) {
+	      if ('object' === typeof messages) this.catalog[locale] = messages;
+
+	      if (true === set) return this.setLocale(locale);
+
+	      return this;
+	    },
+
+	    // Add a specific message for a given constraint in a given locale
+	    addMessage: function addMessage(locale, name, message) {
+	      if ('undefined' === typeof this.catalog[locale]) this.catalog[locale] = {};
+
+	      this.catalog[locale][name] = message;
+
+	      return this;
+	    },
+
+	    // Add messages for a given locale
+	    addMessages: function addMessages(locale, nameMessageObject) {
+	      for (var name in nameMessageObject) this.addMessage(locale, name, nameMessageObject[name]);
+
+	      return this;
+	    },
+
+	    // Add a new validator
+	    //
+	    //    addValidator('custom', {
+	    //        requirementType: ['integer', 'integer'],
+	    //        validateString: function(value, from, to) {},
+	    //        priority: 22,
+	    //        messages: {
+	    //          en: "Hey, that's no good",
+	    //          fr: "Aye aye, pas bon du tout",
+	    //        }
+	    //    })
+	    //
+	    // Old API was addValidator(name, function, priority)
+	    //
+	    addValidator: function addValidator(name, arg1, arg2) {
+	      if (this.validators[name]) ParsleyUtils__default.warn('Validator "' + name + '" is already defined.');else if (ParsleyDefaults.hasOwnProperty(name)) {
+	        ParsleyUtils__default.warn('"' + name + '" is a restricted keyword and is not a valid validator name.');
+	        return;
+	      }
+	      return this._setValidator.apply(this, arguments);
+	    },
+
+	    updateValidator: function updateValidator(name, arg1, arg2) {
+	      if (!this.validators[name]) {
+	        ParsleyUtils__default.warn('Validator "' + name + '" is not already defined.');
+	        return this.addValidator.apply(this, arguments);
+	      }
+	      return this._setValidator.apply(this, arguments);
+	    },
+
+	    removeValidator: function removeValidator(name) {
+	      if (!this.validators[name]) ParsleyUtils__default.warn('Validator "' + name + '" is not defined.');
+
+	      delete this.validators[name];
+
+	      return this;
+	    },
+
+	    _setValidator: function _setValidator(name, validator, priority) {
+	      if ('object' !== typeof validator) {
+	        // Old style validator, with `fn` and `priority`
+	        validator = {
+	          fn: validator,
+	          priority: priority
+	        };
+	      }
+	      if (!validator.validate) {
+	        validator = new ParsleyValidator(validator);
+	      }
+	      this.validators[name] = validator;
+
+	      for (var locale in validator.messages || {}) this.addMessage(locale, name, validator.messages[locale]);
+
+	      return this;
+	    },
+
+	    getErrorMessage: function getErrorMessage(constraint) {
+	      var message;
+
+	      // Type constraints are a bit different, we have to match their requirements too to find right error message
+	      if ('type' === constraint.name) {
+	        var typeMessages = this.catalog[this.locale][constraint.name] || {};
+	        message = typeMessages[constraint.requirements];
+	      } else message = this.formatMessage(this.catalog[this.locale][constraint.name], constraint.requirements);
+
+	      return message || this.catalog[this.locale].defaultMessage || this.catalog.en.defaultMessage;
+	    },
+
+	    // Kind of light `sprintf()` implementation
+	    formatMessage: function formatMessage(string, parameters) {
+	      if ('object' === typeof parameters) {
+	        for (var i in parameters) string = this.formatMessage(string, parameters[i]);
+
+	        return string;
+	      }
+
+	      return 'string' === typeof string ? string.replace(/%s/i, parameters) : '';
+	    },
+
+	    // Here is the Parsley default validators list.
+	    // A validator is an object with the following key values:
+	    //  - priority: an integer
+	    //  - requirement: 'string' (default), 'integer', 'number', 'regexp' or an Array of these
+	    //  - validateString, validateMultiple, validateNumber: functions returning `true`, `false` or a promise
+	    // Alternatively, a validator can be a function that returns such an object
+	    //
+	    validators: {
+	      notblank: {
+	        validateString: function validateString(value) {
+	          return (/\S/.test(value)
+	          );
+	        },
+	        priority: 2
+	      },
+	      required: {
+	        validateMultiple: function validateMultiple(values) {
+	          return values.length > 0;
+	        },
+	        validateString: function validateString(value) {
+	          return (/\S/.test(value)
+	          );
+	        },
+	        priority: 512
+	      },
+	      type: {
+	        validateString: function validateString(value, type) {
+	          var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+	          var _ref$step = _ref.step;
+	          var step = _ref$step === undefined ? '1' : _ref$step;
+	          var _ref$base = _ref.base;
+	          var base = _ref$base === undefined ? 0 : _ref$base;
+
+	          var regex = typeRegexes[type];
+	          if (!regex) {
+	            throw new Error('validator type `' + type + '` is not supported');
+	          }
+	          if (!regex.test(value)) return false;
+	          if ('number' === type) {
+	            if (!/^any$/i.test(step || '')) {
+	              var nb = Number(value);
+	              var decimals = Math.max(decimalPlaces(step), decimalPlaces(base));
+	              if (decimalPlaces(nb) > decimals) // Value can't have too many decimals
+	                return false;
+	              // Be careful of rounding errors by using integers.
+	              var toInt = function toInt(f) {
+	                return Math.round(f * Math.pow(10, decimals));
+	              };
+	              if ((toInt(nb) - toInt(base)) % toInt(step) != 0) return false;
+	            }
+	          }
+	          return true;
+	        },
+	        requirementType: {
+	          '': 'string',
+	          step: 'string',
+	          base: 'number'
+	        },
+	        priority: 256
+	      },
+	      pattern: {
+	        validateString: function validateString(value, regexp) {
+	          return regexp.test(value);
+	        },
+	        requirementType: 'regexp',
+	        priority: 64
+	      },
+	      minlength: {
+	        validateString: function validateString(value, requirement) {
+	          return value.length >= requirement;
+	        },
+	        requirementType: 'integer',
+	        priority: 30
+	      },
+	      maxlength: {
+	        validateString: function validateString(value, requirement) {
+	          return value.length <= requirement;
+	        },
+	        requirementType: 'integer',
+	        priority: 30
+	      },
+	      length: {
+	        validateString: function validateString(value, min, max) {
+	          return value.length >= min && value.length <= max;
+	        },
+	        requirementType: ['integer', 'integer'],
+	        priority: 30
+	      },
+	      mincheck: {
+	        validateMultiple: function validateMultiple(values, requirement) {
+	          return values.length >= requirement;
+	        },
+	        requirementType: 'integer',
+	        priority: 30
+	      },
+	      maxcheck: {
+	        validateMultiple: function validateMultiple(values, requirement) {
+	          return values.length <= requirement;
+	        },
+	        requirementType: 'integer',
+	        priority: 30
+	      },
+	      check: {
+	        validateMultiple: function validateMultiple(values, min, max) {
+	          return values.length >= min && values.length <= max;
+	        },
+	        requirementType: ['integer', 'integer'],
+	        priority: 30
+	      },
+	      min: {
+	        validateNumber: function validateNumber(value, requirement) {
+	          return value >= requirement;
+	        },
+	        requirementType: 'number',
+	        priority: 30
+	      },
+	      max: {
+	        validateNumber: function validateNumber(value, requirement) {
+	          return value <= requirement;
+	        },
+	        requirementType: 'number',
+	        priority: 30
+	      },
+	      range: {
+	        validateNumber: function validateNumber(value, min, max) {
+	          return value >= min && value <= max;
+	        },
+	        requirementType: ['number', 'number'],
+	        priority: 30
+	      },
+	      equalto: {
+	        validateString: function validateString(value, refOrValue) {
+	          var $reference = $(refOrValue);
+	          if ($reference.length) return value === $reference.val();else return value === refOrValue;
+	        },
+	        priority: 256
+	      }
+	    }
+	  };
+
+	  var ParsleyUI = {};
+
+	  var diffResults = function diffResults(newResult, oldResult, deep) {
+	    var added = [];
+	    var kept = [];
+
+	    for (var i = 0; i < newResult.length; i++) {
+	      var found = false;
+
+	      for (var j = 0; j < oldResult.length; j++) if (newResult[i].assert.name === oldResult[j].assert.name) {
+	        found = true;
+	        break;
+	      }
+
+	      if (found) kept.push(newResult[i]);else added.push(newResult[i]);
+	    }
+
+	    return {
+	      kept: kept,
+	      added: added,
+	      removed: !deep ? diffResults(oldResult, newResult, true).added : []
+	    };
+	  };
+
+	  ParsleyUI.Form = {
+
+	    _actualizeTriggers: function _actualizeTriggers() {
+	      var _this2 = this;
+
+	      this.$element.on('submit.Parsley', function (evt) {
+	        _this2.onSubmitValidate(evt);
+	      });
+	      this.$element.on('click.Parsley', 'input[type="submit"], button[type="submit"]', function (evt) {
+	        _this2.onSubmitButton(evt);
+	      });
+
+	      // UI could be disabled
+	      if (false === this.options.uiEnabled) return;
+
+	      this.$element.attr('novalidate', '');
+	    },
+
+	    focus: function focus() {
+	      this._focusedField = null;
+
+	      if (true === this.validationResult || 'none' === this.options.focus) return null;
+
+	      for (var i = 0; i < this.fields.length; i++) {
+	        var field = this.fields[i];
+	        if (true !== field.validationResult && field.validationResult.length > 0 && 'undefined' === typeof field.options.noFocus) {
+	          this._focusedField = field.$element;
+	          if ('first' === this.options.focus) break;
+	        }
+	      }
+
+	      if (null === this._focusedField) return null;
+
+	      return this._focusedField.focus();
+	    },
+
+	    _destroyUI: function _destroyUI() {
+	      // Reset all event listeners
+	      this.$element.off('.Parsley');
+	    }
+
+	  };
+
+	  ParsleyUI.Field = {
+
+	    _reflowUI: function _reflowUI() {
+	      this._buildUI();
+
+	      // If this field doesn't have an active UI don't bother doing something
+	      if (!this._ui) return;
+
+	      // Diff between two validation results
+	      var diff = diffResults(this.validationResult, this._ui.lastValidationResult);
+
+	      // Then store current validation result for next reflow
+	      this._ui.lastValidationResult = this.validationResult;
+
+	      // Handle valid / invalid / none field class
+	      this._manageStatusClass();
+
+	      // Add, remove, updated errors messages
+	      this._manageErrorsMessages(diff);
+
+	      // Triggers impl
+	      this._actualizeTriggers();
+
+	      // If field is not valid for the first time, bind keyup trigger to ease UX and quickly inform user
+	      if ((diff.kept.length || diff.added.length) && !this._failedOnce) {
+	        this._failedOnce = true;
+	        this._actualizeTriggers();
+	      }
+	    },
+
+	    // Returns an array of field's error message(s)
+	    getErrorsMessages: function getErrorsMessages() {
+	      // No error message, field is valid
+	      if (true === this.validationResult) return [];
+
+	      var messages = [];
+
+	      for (var i = 0; i < this.validationResult.length; i++) messages.push(this.validationResult[i].errorMessage || this._getErrorMessage(this.validationResult[i].assert));
+
+	      return messages;
+	    },
+
+	    // It's a goal of Parsley that this method is no longer required [#1073]
+	    addError: function addError(name) {
+	      var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var message = _ref2.message;
+	      var assert = _ref2.assert;
+	      var _ref2$updateClass = _ref2.updateClass;
+	      var updateClass = _ref2$updateClass === undefined ? true : _ref2$updateClass;
+
+	      this._buildUI();
+	      this._addError(name, { message: message, assert: assert });
+
+	      if (updateClass) this._errorClass();
+	    },
+
+	    // It's a goal of Parsley that this method is no longer required [#1073]
+	    updateError: function updateError(name) {
+	      var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var message = _ref3.message;
+	      var assert = _ref3.assert;
+	      var _ref3$updateClass = _ref3.updateClass;
+	      var updateClass = _ref3$updateClass === undefined ? true : _ref3$updateClass;
+
+	      this._buildUI();
+	      this._updateError(name, { message: message, assert: assert });
+
+	      if (updateClass) this._errorClass();
+	    },
+
+	    // It's a goal of Parsley that this method is no longer required [#1073]
+	    removeError: function removeError(name) {
+	      var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	      var _ref4$updateClass = _ref4.updateClass;
+	      var updateClass = _ref4$updateClass === undefined ? true : _ref4$updateClass;
+
+	      this._buildUI();
+	      this._removeError(name);
+
+	      // edge case possible here: remove a standard Parsley error that is still failing in this.validationResult
+	      // but highly improbable cuz' manually removing a well Parsley handled error makes no sense.
+	      if (updateClass) this._manageStatusClass();
+	    },
+
+	    _manageStatusClass: function _manageStatusClass() {
+	      if (this.hasConstraints() && this.needsValidation() && true === this.validationResult) this._successClass();else if (this.validationResult.length > 0) this._errorClass();else this._resetClass();
+	    },
+
+	    _manageErrorsMessages: function _manageErrorsMessages(diff) {
+	      if ('undefined' !== typeof this.options.errorsMessagesDisabled) return;
+
+	      // Case where we have errorMessage option that configure an unique field error message, regardless failing validators
+	      if ('undefined' !== typeof this.options.errorMessage) {
+	        if (diff.added.length || diff.kept.length) {
+	          this._insertErrorWrapper();
+
+	          if (0 === this._ui.$errorsWrapper.find('.parsley-custom-error-message').length) this._ui.$errorsWrapper.append($(this.options.errorTemplate).addClass('parsley-custom-error-message'));
+
+	          return this._ui.$errorsWrapper.addClass('filled').find('.parsley-custom-error-message').html(this.options.errorMessage);
+	        }
+
+	        return this._ui.$errorsWrapper.removeClass('filled').find('.parsley-custom-error-message').remove();
+	      }
+
+	      // Show, hide, update failing constraints messages
+	      for (var i = 0; i < diff.removed.length; i++) this._removeError(diff.removed[i].assert.name);
+
+	      for (i = 0; i < diff.added.length; i++) this._addError(diff.added[i].assert.name, { message: diff.added[i].errorMessage, assert: diff.added[i].assert });
+
+	      for (i = 0; i < diff.kept.length; i++) this._updateError(diff.kept[i].assert.name, { message: diff.kept[i].errorMessage, assert: diff.kept[i].assert });
+	    },
+
+	    _addError: function _addError(name, _ref5) {
+	      var message = _ref5.message;
+	      var assert = _ref5.assert;
+
+	      this._insertErrorWrapper();
+	      this._ui.$errorsWrapper.addClass('filled').append($(this.options.errorTemplate).addClass('parsley-' + name).html(message || this._getErrorMessage(assert)));
+	    },
+
+	    _updateError: function _updateError(name, _ref6) {
+	      var message = _ref6.message;
+	      var assert = _ref6.assert;
+
+	      this._ui.$errorsWrapper.addClass('filled').find('.parsley-' + name).html(message || this._getErrorMessage(assert));
+	    },
+
+	    _removeError: function _removeError(name) {
+	      this._ui.$errorsWrapper.removeClass('filled').find('.parsley-' + name).remove();
+	    },
+
+	    _getErrorMessage: function _getErrorMessage(constraint) {
+	      var customConstraintErrorMessage = constraint.name + 'Message';
+
+	      if ('undefined' !== typeof this.options[customConstraintErrorMessage]) return window.Parsley.formatMessage(this.options[customConstraintErrorMessage], constraint.requirements);
+
+	      return window.Parsley.getErrorMessage(constraint);
+	    },
+
+	    _buildUI: function _buildUI() {
+	      // UI could be already built or disabled
+	      if (this._ui || false === this.options.uiEnabled) return;
+
+	      var _ui = {};
+
+	      // Give field its Parsley id in DOM
+	      this.$element.attr(this.options.namespace + 'id', this.__id__);
+
+	      /** Generate important UI elements and store them in this **/
+	      // $errorClassHandler is the $element that woul have parsley-error and parsley-success classes
+	      _ui.$errorClassHandler = this._manageClassHandler();
+
+	      // $errorsWrapper is a div that would contain the various field errors, it will be appended into $errorsContainer
+	      _ui.errorsWrapperId = 'parsley-id-' + (this.options.multiple ? 'multiple-' + this.options.multiple : this.__id__);
+	      _ui.$errorsWrapper = $(this.options.errorsWrapper).attr('id', _ui.errorsWrapperId);
+
+	      // ValidationResult UI storage to detect what have changed bwt two validations, and update DOM accordingly
+	      _ui.lastValidationResult = [];
+	      _ui.validationInformationVisible = false;
+
+	      // Store it in this for later
+	      this._ui = _ui;
+	    },
+
+	    // Determine which element will have `parsley-error` and `parsley-success` classes
+	    _manageClassHandler: function _manageClassHandler() {
+	      // An element selector could be passed through DOM with `data-parsley-class-handler=#foo`
+	      if ('string' === typeof this.options.classHandler && $(this.options.classHandler).length) return $(this.options.classHandler);
+
+	      // Class handled could also be determined by function given in Parsley options
+	      var $handler = this.options.classHandler.call(this, this);
+
+	      // If this function returned a valid existing DOM element, go for it
+	      if ('undefined' !== typeof $handler && $handler.length) return $handler;
+
+	      // Otherwise, if simple element (input, texatrea, select...) it will perfectly host the classes
+	      if (!this.options.multiple || this.$element.is('select')) return this.$element;
+
+	      // But if multiple element (radio, checkbox), that would be their parent
+	      return this.$element.parent();
+	    },
+
+	    _insertErrorWrapper: function _insertErrorWrapper() {
+	      var $errorsContainer;
+
+	      // Nothing to do if already inserted
+	      if (0 !== this._ui.$errorsWrapper.parent().length) return this._ui.$errorsWrapper.parent();
+
+	      if ('string' === typeof this.options.errorsContainer) {
+	        if ($(this.options.errorsContainer).length) return $(this.options.errorsContainer).append(this._ui.$errorsWrapper);else ParsleyUtils__default.warn('The errors container `' + this.options.errorsContainer + '` does not exist in DOM');
+	      } else if ('function' === typeof this.options.errorsContainer) $errorsContainer = this.options.errorsContainer.call(this, this);
+
+	      if ('undefined' !== typeof $errorsContainer && $errorsContainer.length) return $errorsContainer.append(this._ui.$errorsWrapper);
+
+	      var $from = this.$element;
+	      if (this.options.multiple) $from = $from.parent();
+	      return $from.after(this._ui.$errorsWrapper);
+	    },
+
+	    _actualizeTriggers: function _actualizeTriggers() {
+	      var _this3 = this;
+
+	      var $toBind = this._findRelated();
+	      var trigger;
+
+	      // Remove Parsley events already bound on this field
+	      $toBind.off('.Parsley');
+	      if (this._failedOnce) $toBind.on(ParsleyUtils__default.namespaceEvents(this.options.triggerAfterFailure, 'Parsley'), function () {
+	        _this3.validate();
+	      });else if (trigger = ParsleyUtils__default.namespaceEvents(this.options.trigger, 'Parsley')) {
+	        $toBind.on(trigger, function (event) {
+	          _this3._eventValidate(event);
+	        });
+	      }
+	    },
+
+	    _eventValidate: function _eventValidate(event) {
+	      // For keyup, keypress, keydown, input... events that could be a little bit obstrusive
+	      // do not validate if val length < min threshold on first validation. Once field have been validated once and info
+	      // about success or failure have been displayed, always validate with this trigger to reflect every yalidation change.
+	      if (/key|input/.test(event.type)) if (!(this._ui && this._ui.validationInformationVisible) && this.getValue().length <= this.options.validationThreshold) return;
+
+	      this.validate();
+	    },
+
+	    _resetUI: function _resetUI() {
+	      // Reset all event listeners
+	      this._failedOnce = false;
+	      this._actualizeTriggers();
+
+	      // Nothing to do if UI never initialized for this field
+	      if ('undefined' === typeof this._ui) return;
+
+	      // Reset all errors' li
+	      this._ui.$errorsWrapper.removeClass('filled').children().remove();
+
+	      // Reset validation class
+	      this._resetClass();
+
+	      // Reset validation flags and last validation result
+	      this._ui.lastValidationResult = [];
+	      this._ui.validationInformationVisible = false;
+	    },
+
+	    _destroyUI: function _destroyUI() {
+	      this._resetUI();
+
+	      if ('undefined' !== typeof this._ui) this._ui.$errorsWrapper.remove();
+
+	      delete this._ui;
+	    },
+
+	    _successClass: function _successClass() {
+	      this._ui.validationInformationVisible = true;
+	      this._ui.$errorClassHandler.removeClass(this.options.errorClass).addClass(this.options.successClass);
+	    },
+	    _errorClass: function _errorClass() {
+	      this._ui.validationInformationVisible = true;
+	      this._ui.$errorClassHandler.removeClass(this.options.successClass).addClass(this.options.errorClass);
+	    },
+	    _resetClass: function _resetClass() {
+	      this._ui.$errorClassHandler.removeClass(this.options.successClass).removeClass(this.options.errorClass);
+	    }
+	  };
+
+	  var ParsleyForm = function ParsleyForm(element, domOptions, options) {
+	    this.__class__ = 'ParsleyForm';
+
+	    this.$element = $(element);
+	    this.domOptions = domOptions;
+	    this.options = options;
+	    this.parent = window.Parsley;
+
+	    this.fields = [];
+	    this.validationResult = null;
+	  };
+
+	  var ParsleyForm__statusMapping = { pending: null, resolved: true, rejected: false };
+
+	  ParsleyForm.prototype = {
+	    onSubmitValidate: function onSubmitValidate(event) {
+	      var _this4 = this;
+
+	      // This is a Parsley generated submit event, do not validate, do not prevent, simply exit and keep normal behavior
+	      if (true === event.parsley) return;
+
+	      // If we didn't come here through a submit button, use the first one in the form
+	      var $submitSource = this._$submitSource || this.$element.find('input[type="submit"], button[type="submit"]').first();
+	      this._$submitSource = null;
+	      this.$element.find('.parsley-synthetic-submit-button').prop('disabled', true);
+	      if ($submitSource.is('[formnovalidate]')) return;
+
+	      var promise = this.whenValidate({ event: event });
+
+	      if ('resolved' === promise.state() && false !== this._trigger('submit')) {
+	        // All good, let event go through. We make this distinction because browsers
+	        // differ in their handling of `submit` being called from inside a submit event [#1047]
+	      } else {
+	          // Rejected or pending: cancel this submit
+	          event.stopImmediatePropagation();
+	          event.preventDefault();
+	          if ('pending' === promise.state()) promise.done(function () {
+	            _this4._submit($submitSource);
+	          });
+	        }
+	    },
+
+	    onSubmitButton: function onSubmitButton(event) {
+	      this._$submitSource = $(event.target);
+	    },
+	    // internal
+	    // _submit submits the form, this time without going through the validations.
+	    // Care must be taken to "fake" the actual submit button being clicked.
+	    _submit: function _submit($submitSource) {
+	      if (false === this._trigger('submit')) return;
+	      // Add submit button's data
+	      if ($submitSource) {
+	        var $synthetic = this.$element.find('.parsley-synthetic-submit-button').prop('disabled', false);
+	        if (0 === $synthetic.length) $synthetic = $('<input class="parsley-synthetic-submit-button" type="hidden">').appendTo(this.$element);
+	        $synthetic.attr({
+	          name: $submitSource.attr('name'),
+	          value: $submitSource.attr('value')
+	        });
+	      }
+
+	      this.$element.trigger($.extend($.Event('submit'), { parsley: true }));
+	    },
+
+	    // Performs validation on fields while triggering events.
+	    // @returns `true` if all validations succeeds, `false`
+	    // if a failure is immediately detected, or `null`
+	    // if dependant on a promise.
+	    // Consider using `whenValidate` instead.
+	    validate: function validate(options) {
+	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
+	        ParsleyUtils__default.warnOnce('Calling validate on a parsley form without passing arguments as an object is deprecated.');
+
+	        var _arguments = _slice.call(arguments);
+
+	        var group = _arguments[0];
+	        var force = _arguments[1];
+	        var event = _arguments[2];
+
+	        options = { group: group, force: force, event: event };
+	      }
+	      return ParsleyForm__statusMapping[this.whenValidate(options).state()];
+	    },
+
+	    whenValidate: function whenValidate() {
+	      var _$$when$done$fail$always,
+	          _this5 = this;
+
+	      var _ref7 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      var group = _ref7.group;
+	      var force = _ref7.force;
+	      var event = _ref7.event;
+
+	      this.submitEvent = event;
+	      if (event) {
+	        this.submitEvent = $.extend({}, event, { preventDefault: function preventDefault() {
+	            ParsleyUtils__default.warnOnce("Using `this.submitEvent.preventDefault()` is deprecated; instead, call `this.validationResult = false`");
+	            _this5.validationResult = false;
+	          } });
+	      }
+	      this.validationResult = true;
+
+	      // fire validate event to eventually modify things before very validation
+	      this._trigger('validate');
+
+	      // Refresh form DOM options and form's fields that could have changed
+	      this._refreshFields();
+
+	      var promises = this._withoutReactualizingFormOptions(function () {
+	        return $.map(_this5.fields, function (field) {
+	          return field.whenValidate({ force: force, group: group });
+	        });
+	      });
+
+	      return (_$$when$done$fail$always = $.when.apply($, _toConsumableArray(promises)).done(function () {
+	        _this5._trigger('success');
+	      }).fail(function () {
+	        _this5.validationResult = false;
+	        _this5.focus();
+	        _this5._trigger('error');
+	      }).always(function () {
+	        _this5._trigger('validated');
+	      })).pipe.apply(_$$when$done$fail$always, _toConsumableArray(this._pipeAccordingToValidationResult()));
+	    },
+
+	    // Iterate over refreshed fields, and stop on first failure.
+	    // Returns `true` if all fields are valid, `false` if a failure is detected
+	    // or `null` if the result depends on an unresolved promise.
+	    // Prefer using `whenValid` instead.
+	    isValid: function isValid(options) {
+	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
+	        ParsleyUtils__default.warnOnce('Calling isValid on a parsley form without passing arguments as an object is deprecated.');
+
+	        var _arguments2 = _slice.call(arguments);
+
+	        var group = _arguments2[0];
+	        var force = _arguments2[1];
+
+	        options = { group: group, force: force };
+	      }
+	      return ParsleyForm__statusMapping[this.whenValid(options).state()];
+	    },
+
+	    // Iterate over refreshed fields and validate them.
+	    // Returns a promise.
+	    // A validation that immediately fails will interrupt the validations.
+	    whenValid: function whenValid() {
+	      var _this6 = this;
+
+	      var _ref8 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      var group = _ref8.group;
+	      var force = _ref8.force;
+
+	      this._refreshFields();
+
+	      var promises = this._withoutReactualizingFormOptions(function () {
+	        return $.map(_this6.fields, function (field) {
+	          return field.whenValid({ group: group, force: force });
+	        });
+	      });
+	      return $.when.apply($, _toConsumableArray(promises));
+	    },
+
+	    _refreshFields: function _refreshFields() {
+	      return this.actualizeOptions()._bindFields();
+	    },
+
+	    _bindFields: function _bindFields() {
+	      var _this7 = this;
+
+	      var oldFields = this.fields;
+
+	      this.fields = [];
+	      this.fieldsMappedById = {};
+
+	      this._withoutReactualizingFormOptions(function () {
+	        _this7.$element.find(_this7.options.inputs).not(_this7.options.excluded).each(function (_, element) {
+	          var fieldInstance = new window.Parsley.Factory(element, {}, _this7);
+
+	          // Only add valid and not excluded `ParsleyField` and `ParsleyFieldMultiple` children
+	          if (('ParsleyField' === fieldInstance.__class__ || 'ParsleyFieldMultiple' === fieldInstance.__class__) && true !== fieldInstance.options.excluded) if ('undefined' === typeof _this7.fieldsMappedById[fieldInstance.__class__ + '-' + fieldInstance.__id__]) {
+	            _this7.fieldsMappedById[fieldInstance.__class__ + '-' + fieldInstance.__id__] = fieldInstance;
+	            _this7.fields.push(fieldInstance);
+	          }
+	        });
+
+	        $(oldFields).not(_this7.fields).each(function (_, field) {
+	          field._trigger('reset');
+	        });
+	      });
+	      return this;
+	    },
+
+	    // Internal only.
+	    // Looping on a form's fields to do validation or similar
+	    // will trigger reactualizing options on all of them, which
+	    // in turn will reactualize the form's options.
+	    // To avoid calling actualizeOptions so many times on the form
+	    // for nothing, _withoutReactualizingFormOptions temporarily disables
+	    // the method actualizeOptions on this form while `fn` is called.
+	    _withoutReactualizingFormOptions: function _withoutReactualizingFormOptions(fn) {
+	      var oldActualizeOptions = this.actualizeOptions;
+	      this.actualizeOptions = function () {
+	        return this;
+	      };
+	      var result = fn();
+	      this.actualizeOptions = oldActualizeOptions;
+	      return result;
+	    },
+
+	    // Internal only.
+	    // Shortcut to trigger an event
+	    // Returns true iff event is not interrupted and default not prevented.
+	    _trigger: function _trigger(eventName) {
+	      return this.trigger('form:' + eventName);
+	    }
+
+	  };
+
+	  var ConstraintFactory = function ConstraintFactory(parsleyField, name, requirements, priority, isDomConstraint) {
+	    if (!/ParsleyField/.test(parsleyField.__class__)) throw new Error('ParsleyField or ParsleyFieldMultiple instance expected');
+
+	    var validatorSpec = window.Parsley._validatorRegistry.validators[name];
+	    var validator = new ParsleyValidator(validatorSpec);
+
+	    $.extend(this, {
+	      validator: validator,
+	      name: name,
+	      requirements: requirements,
+	      priority: priority || parsleyField.options[name + 'Priority'] || validator.priority,
+	      isDomConstraint: true === isDomConstraint
+	    });
+	    this._parseRequirements(parsleyField.options);
+	  };
+
+	  var capitalize = function capitalize(str) {
+	    var cap = str[0].toUpperCase();
+	    return cap + str.slice(1);
+	  };
+
+	  ConstraintFactory.prototype = {
+	    validate: function validate(value, instance) {
+	      var args = this.requirementList.slice(0); // Make copy
+	      args.unshift(value);
+	      args.push(instance);
+	      return this.validator.validate.apply(this.validator, args);
+	    },
+
+	    _parseRequirements: function _parseRequirements(options) {
+	      var _this8 = this;
+
+	      this.requirementList = this.validator.parseRequirements(this.requirements, function (key) {
+	        return options[_this8.name + capitalize(key)];
+	      });
+	    }
+	  };
+
+	  var ParsleyField = function ParsleyField(field, domOptions, options, parsleyFormInstance) {
+	    this.__class__ = 'ParsleyField';
+
+	    this.$element = $(field);
+
+	    // Set parent if we have one
+	    if ('undefined' !== typeof parsleyFormInstance) {
+	      this.parent = parsleyFormInstance;
+	    }
+
+	    this.options = options;
+	    this.domOptions = domOptions;
+
+	    // Initialize some properties
+	    this.constraints = [];
+	    this.constraintsByName = {};
+	    this.validationResult = true;
+
+	    // Bind constraints
+	    this._bindConstraints();
+	  };
+
+	  var parsley_field__statusMapping = { pending: null, resolved: true, rejected: false };
+
+	  ParsleyField.prototype = {
+	    // # Public API
+	    // Validate field and trigger some events for mainly `ParsleyUI`
+	    // @returns `true`, an array of the validators that failed, or
+	    // `null` if validation is not finished. Prefer using whenValidate
+	    validate: function validate(options) {
+	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
+	        ParsleyUtils__default.warnOnce('Calling validate on a parsley field without passing arguments as an object is deprecated.');
+	        options = { options: options };
+	      }
+	      var promise = this.whenValidate(options);
+	      if (!promise) // If excluded with `group` option
+	        return true;
+	      switch (promise.state()) {
+	        case 'pending':
+	          return null;
+	        case 'resolved':
+	          return true;
+	        case 'rejected':
+	          return this.validationResult;
+	      }
+	    },
+
+	    // Validate field and trigger some events for mainly `ParsleyUI`
+	    // @returns a promise that succeeds only when all validations do
+	    // or `undefined` if field is not in the given `group`.
+	    whenValidate: function whenValidate() {
+	      var _whenValid$always$done$fail$always,
+	          _this9 = this;
+
+	      var _ref9 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      var force = _ref9.force;
+	      var group = _ref9.group;
+
+	      // do not validate a field if not the same as given validation group
+	      this.refreshConstraints();
+	      if (group && !this._isInGroup(group)) return;
+
+	      this.value = this.getValue();
+
+	      // Field Validate event. `this.value` could be altered for custom needs
+	      this._trigger('validate');
+
+	      return (_whenValid$always$done$fail$always = this.whenValid({ force: force, value: this.value, _refreshed: true }).always(function () {
+	        _this9._reflowUI();
+	      }).done(function () {
+	        _this9._trigger('success');
+	      }).fail(function () {
+	        _this9._trigger('error');
+	      }).always(function () {
+	        _this9._trigger('validated');
+	      })).pipe.apply(_whenValid$always$done$fail$always, _toConsumableArray(this._pipeAccordingToValidationResult()));
+	    },
+
+	    hasConstraints: function hasConstraints() {
+	      return 0 !== this.constraints.length;
+	    },
+
+	    // An empty optional field does not need validation
+	    needsValidation: function needsValidation(value) {
+	      if ('undefined' === typeof value) value = this.getValue();
+
+	      // If a field is empty and not required, it is valid
+	      // Except if `data-parsley-validate-if-empty` explicitely added, useful for some custom validators
+	      if (!value.length && !this._isRequired() && 'undefined' === typeof this.options.validateIfEmpty) return false;
+
+	      return true;
+	    },
+
+	    _isInGroup: function _isInGroup(group) {
+	      if ($.isArray(this.options.group)) return -1 !== $.inArray(group, this.options.group);
+	      return this.options.group === group;
+	    },
+
+	    // Just validate field. Do not trigger any event.
+	    // Returns `true` iff all constraints pass, `false` if there are failures,
+	    // or `null` if the result can not be determined yet (depends on a promise)
+	    // See also `whenValid`.
+	    isValid: function isValid(options) {
+	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
+	        ParsleyUtils__default.warnOnce('Calling isValid on a parsley field without passing arguments as an object is deprecated.');
+
+	        var _arguments3 = _slice.call(arguments);
+
+	        var force = _arguments3[0];
+	        var value = _arguments3[1];
+
+	        options = { force: force, value: value };
+	      }
+	      var promise = this.whenValid(options);
+	      if (!promise) // Excluded via `group`
+	        return true;
+	      return parsley_field__statusMapping[promise.state()];
+	    },
+
+	    // Just validate field. Do not trigger any event.
+	    // @returns a promise that succeeds only when all validations do
+	    // or `undefined` if the field is not in the given `group`.
+	    // The argument `force` will force validation of empty fields.
+	    // If a `value` is given, it will be validated instead of the value of the input.
+	    whenValid: function whenValid() {
+	      var _this10 = this;
+
+	      var _ref10 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	      var _ref10$force = _ref10.force;
+	      var force = _ref10$force === undefined ? false : _ref10$force;
+	      var value = _ref10.value;
+	      var group = _ref10.group;
+	      var _refreshed = _ref10._refreshed;
+
+	      // Recompute options and rebind constraints to have latest changes
+	      if (!_refreshed) this.refreshConstraints();
+	      // do not validate a field if not the same as given validation group
+	      if (group && !this._isInGroup(group)) return;
+
+	      this.validationResult = true;
+
+	      // A field without constraint is valid
+	      if (!this.hasConstraints()) return $.when();
+
+	      // Value could be passed as argument, needed to add more power to 'field:validate'
+	      if ('undefined' === typeof value || null === value) value = this.getValue();
+
+	      if (!this.needsValidation(value) && true !== force) return $.when();
+
+	      var groupedConstraints = this._getGroupedConstraints();
+	      var promises = [];
+	      $.each(groupedConstraints, function (_, constraints) {
+	        // Process one group of constraints at a time, we validate the constraints
+	        // and combine the promises together.
+	        var promise = $.when.apply($, _toConsumableArray($.map(constraints, function (constraint) {
+	          return _this10._validateConstraint(value, constraint);
+	        })));
+	        promises.push(promise);
+	        if (promise.state() === 'rejected') return false; // Interrupt processing if a group has already failed
+	      });
+	      return $.when.apply($, promises);
+	    },
+
+	    // @returns a promise
+	    _validateConstraint: function _validateConstraint(value, constraint) {
+	      var _this11 = this;
+
+	      var result = constraint.validate(value, this);
+	      // Map false to a failed promise
+	      if (false === result) result = $.Deferred().reject();
+	      // Make sure we return a promise and that we record failures
+	      return $.when(result).fail(function (errorMessage) {
+	        if (!(_this11.validationResult instanceof Array)) _this11.validationResult = [];
+	        _this11.validationResult.push({
+	          assert: constraint,
+	          errorMessage: 'string' === typeof errorMessage && errorMessage
+	        });
+	      });
+	    },
+
+	    // @returns Parsley field computed value that could be overrided or configured in DOM
+	    getValue: function getValue() {
+	      var value;
+
+	      // Value could be overriden in DOM or with explicit options
+	      if ('function' === typeof this.options.value) value = this.options.value(this);else if ('undefined' !== typeof this.options.value) value = this.options.value;else value = this.$element.val();
+
+	      // Handle wrong DOM or configurations
+	      if ('undefined' === typeof value || null === value) return '';
+
+	      return this._handleWhitespace(value);
+	    },
+
+	    // Actualize options that could have change since previous validation
+	    // Re-bind accordingly constraints (could be some new, removed or updated)
+	    refreshConstraints: function refreshConstraints() {
+	      return this.actualizeOptions()._bindConstraints();
+	    },
+
+	    /**
+	    * Add a new constraint to a field
+	    *
+	    * @param {String}   name
+	    * @param {Mixed}    requirements      optional
+	    * @param {Number}   priority          optional
+	    * @param {Boolean}  isDomConstraint   optional
+	    */
+	    addConstraint: function addConstraint(name, requirements, priority, isDomConstraint) {
+
+	      if (window.Parsley._validatorRegistry.validators[name]) {
+	        var constraint = new ConstraintFactory(this, name, requirements, priority, isDomConstraint);
+
+	        // if constraint already exist, delete it and push new version
+	        if ('undefined' !== this.constraintsByName[constraint.name]) this.removeConstraint(constraint.name);
+
+	        this.constraints.push(constraint);
+	        this.constraintsByName[constraint.name] = constraint;
+	      }
+
+	      return this;
+	    },
+
+	    // Remove a constraint
+	    removeConstraint: function removeConstraint(name) {
+	      for (var i = 0; i < this.constraints.length; i++) if (name === this.constraints[i].name) {
+	        this.constraints.splice(i, 1);
+	        break;
+	      }
+	      delete this.constraintsByName[name];
+	      return this;
+	    },
+
+	    // Update a constraint (Remove + re-add)
+	    updateConstraint: function updateConstraint(name, parameters, priority) {
+	      return this.removeConstraint(name).addConstraint(name, parameters, priority);
+	    },
+
+	    // # Internals
+
+	    // Internal only.
+	    // Bind constraints from config + options + DOM
+	    _bindConstraints: function _bindConstraints() {
+	      var constraints = [];
+	      var constraintsByName = {};
+
+	      // clean all existing DOM constraints to only keep javascript user constraints
+	      for (var i = 0; i < this.constraints.length; i++) if (false === this.constraints[i].isDomConstraint) {
+	        constraints.push(this.constraints[i]);
+	        constraintsByName[this.constraints[i].name] = this.constraints[i];
+	      }
+
+	      this.constraints = constraints;
+	      this.constraintsByName = constraintsByName;
+
+	      // then re-add Parsley DOM-API constraints
+	      for (var name in this.options) this.addConstraint(name, this.options[name], undefined, true);
+
+	      // finally, bind special HTML5 constraints
+	      return this._bindHtml5Constraints();
+	    },
+
+	    // Internal only.
+	    // Bind specific HTML5 constraints to be HTML5 compliant
+	    _bindHtml5Constraints: function _bindHtml5Constraints() {
+	      // html5 required
+	      if (this.$element.hasClass('required') || this.$element.attr('required')) this.addConstraint('required', true, undefined, true);
+
+	      // html5 pattern
+	      if ('string' === typeof this.$element.attr('pattern')) this.addConstraint('pattern', this.$element.attr('pattern'), undefined, true);
+
+	      // range
+	      if ('undefined' !== typeof this.$element.attr('min') && 'undefined' !== typeof this.$element.attr('max')) this.addConstraint('range', [this.$element.attr('min'), this.$element.attr('max')], undefined, true);
+
+	      // HTML5 min
+	      else if ('undefined' !== typeof this.$element.attr('min')) this.addConstraint('min', this.$element.attr('min'), undefined, true);
+
+	        // HTML5 max
+	        else if ('undefined' !== typeof this.$element.attr('max')) this.addConstraint('max', this.$element.attr('max'), undefined, true);
+
+	      // length
+	      if ('undefined' !== typeof this.$element.attr('minlength') && 'undefined' !== typeof this.$element.attr('maxlength')) this.addConstraint('length', [this.$element.attr('minlength'), this.$element.attr('maxlength')], undefined, true);
+
+	      // HTML5 minlength
+	      else if ('undefined' !== typeof this.$element.attr('minlength')) this.addConstraint('minlength', this.$element.attr('minlength'), undefined, true);
+
+	        // HTML5 maxlength
+	        else if ('undefined' !== typeof this.$element.attr('maxlength')) this.addConstraint('maxlength', this.$element.attr('maxlength'), undefined, true);
+
+	      // html5 types
+	      var type = this.$element.attr('type');
+
+	      if ('undefined' === typeof type) return this;
+
+	      // Small special case here for HTML5 number: integer validator if step attribute is undefined or an integer value, number otherwise
+	      if ('number' === type) {
+	        return this.addConstraint('type', ['number', {
+	          step: this.$element.attr('step'),
+	          base: this.$element.attr('min') || this.$element.attr('value')
+	        }], undefined, true);
+	        // Regular other HTML5 supported types
+	      } else if (/^(email|url|range)$/i.test(type)) {
+	          return this.addConstraint('type', type, undefined, true);
+	        }
+	      return this;
+	    },
+
+	    // Internal only.
+	    // Field is required if have required constraint without `false` value
+	    _isRequired: function _isRequired() {
+	      if ('undefined' === typeof this.constraintsByName.required) return false;
+
+	      return false !== this.constraintsByName.required.requirements;
+	    },
+
+	    // Internal only.
+	    // Shortcut to trigger an event
+	    _trigger: function _trigger(eventName) {
+	      return this.trigger('field:' + eventName);
+	    },
+
+	    // Internal only
+	    // Handles whitespace in a value
+	    // Use `data-parsley-whitespace="squish"` to auto squish input value
+	    // Use `data-parsley-whitespace="trim"` to auto trim input value
+	    _handleWhitespace: function _handleWhitespace(value) {
+	      if (true === this.options.trimValue) ParsleyUtils__default.warnOnce('data-parsley-trim-value="true" is deprecated, please use data-parsley-whitespace="trim"');
+
+	      if ('squish' === this.options.whitespace) value = value.replace(/\s{2,}/g, ' ');
+
+	      if ('trim' === this.options.whitespace || 'squish' === this.options.whitespace || true === this.options.trimValue) value = ParsleyUtils__default.trimString(value);
+
+	      return value;
+	    },
+
+	    // Internal only.
+	    // Returns the constraints, grouped by descending priority.
+	    // The result is thus an array of arrays of constraints.
+	    _getGroupedConstraints: function _getGroupedConstraints() {
+	      if (false === this.options.priorityEnabled) return [this.constraints];
+
+	      var groupedConstraints = [];
+	      var index = {};
+
+	      // Create array unique of priorities
+	      for (var i = 0; i < this.constraints.length; i++) {
+	        var p = this.constraints[i].priority;
+	        if (!index[p]) groupedConstraints.push(index[p] = []);
+	        index[p].push(this.constraints[i]);
+	      }
+	      // Sort them by priority DESC
+	      groupedConstraints.sort(function (a, b) {
+	        return b[0].priority - a[0].priority;
+	      });
+
+	      return groupedConstraints;
+	    }
+
+	  };
+
+	  var parsley_field = ParsleyField;
+
+	  var ParsleyMultiple = function ParsleyMultiple() {
+	    this.__class__ = 'ParsleyFieldMultiple';
+	  };
+
+	  ParsleyMultiple.prototype = {
+	    // Add new `$element` sibling for multiple field
+	    addElement: function addElement($element) {
+	      this.$elements.push($element);
+
+	      return this;
+	    },
+
+	    // See `ParsleyField.refreshConstraints()`
+	    refreshConstraints: function refreshConstraints() {
+	      var fieldConstraints;
+
+	      this.constraints = [];
+
+	      // Select multiple special treatment
+	      if (this.$element.is('select')) {
+	        this.actualizeOptions()._bindConstraints();
+
+	        return this;
+	      }
+
+	      // Gather all constraints for each input in the multiple group
+	      for (var i = 0; i < this.$elements.length; i++) {
+
+	        // Check if element have not been dynamically removed since last binding
+	        if (!$('html').has(this.$elements[i]).length) {
+	          this.$elements.splice(i, 1);
+	          continue;
+	        }
+
+	        fieldConstraints = this.$elements[i].data('ParsleyFieldMultiple').refreshConstraints().constraints;
+
+	        for (var j = 0; j < fieldConstraints.length; j++) this.addConstraint(fieldConstraints[j].name, fieldConstraints[j].requirements, fieldConstraints[j].priority, fieldConstraints[j].isDomConstraint);
+	      }
+
+	      return this;
+	    },
+
+	    // See `ParsleyField.getValue()`
+	    getValue: function getValue() {
+	      // Value could be overriden in DOM
+	      if ('function' === typeof this.options.value) return this.options.value(this);else if ('undefined' !== typeof this.options.value) return this.options.value;
+
+	      // Radio input case
+	      if (this.$element.is('input[type=radio]')) return this._findRelated().filter(':checked').val() || '';
+
+	      // checkbox input case
+	      if (this.$element.is('input[type=checkbox]')) {
+	        var values = [];
+
+	        this._findRelated().filter(':checked').each(function () {
+	          values.push($(this).val());
+	        });
+
+	        return values;
+	      }
+
+	      // Select multiple case
+	      if (this.$element.is('select') && null === this.$element.val()) return [];
+
+	      // Default case that should never happen
+	      return this.$element.val();
+	    },
+
+	    _init: function _init() {
+	      this.$elements = [this.$element];
+
+	      return this;
+	    }
+	  };
+
+	  var ParsleyFactory = function ParsleyFactory(element, options, parsleyFormInstance) {
+	    this.$element = $(element);
+
+	    // If the element has already been bound, returns its saved Parsley instance
+	    var savedparsleyFormInstance = this.$element.data('Parsley');
+	    if (savedparsleyFormInstance) {
+
+	      // If the saved instance has been bound without a ParsleyForm parent and there is one given in this call, add it
+	      if ('undefined' !== typeof parsleyFormInstance && savedparsleyFormInstance.parent === window.Parsley) {
+	        savedparsleyFormInstance.parent = parsleyFormInstance;
+	        savedparsleyFormInstance._resetOptions(savedparsleyFormInstance.options);
+	      }
+
+	      return savedparsleyFormInstance;
+	    }
+
+	    // Parsley must be instantiated with a DOM element or jQuery $element
+	    if (!this.$element.length) throw new Error('You must bind Parsley on an existing element.');
+
+	    if ('undefined' !== typeof parsleyFormInstance && 'ParsleyForm' !== parsleyFormInstance.__class__) throw new Error('Parent instance must be a ParsleyForm instance');
+
+	    this.parent = parsleyFormInstance || window.Parsley;
+	    return this.init(options);
+	  };
+
+	  ParsleyFactory.prototype = {
+	    init: function init(options) {
+	      this.__class__ = 'Parsley';
+	      this.__version__ = '2.3.11';
+	      this.__id__ = ParsleyUtils__default.generateID();
+
+	      // Pre-compute options
+	      this._resetOptions(options);
+
+	      // A ParsleyForm instance is obviously a `<form>` element but also every node that is not an input and has the `data-parsley-validate` attribute
+	      if (this.$element.is('form') || ParsleyUtils__default.checkAttr(this.$element, this.options.namespace, 'validate') && !this.$element.is(this.options.inputs)) return this.bind('parsleyForm');
+
+	      // Every other element is bound as a `ParsleyField` or `ParsleyFieldMultiple`
+	      return this.isMultiple() ? this.handleMultiple() : this.bind('parsleyField');
+	    },
+
+	    isMultiple: function isMultiple() {
+	      return this.$element.is('input[type=radio], input[type=checkbox]') || this.$element.is('select') && 'undefined' !== typeof this.$element.attr('multiple');
+	    },
+
+	    // Multiples fields are a real nightmare :(
+	    // Maybe some refactoring would be appreciated here...
+	    handleMultiple: function handleMultiple() {
+	      var _this12 = this;
+
+	      var name;
+	      var multiple;
+	      var parsleyMultipleInstance;
+
+	      // Handle multiple name
+	      if (this.options.multiple) ; // We already have our 'multiple' identifier
+	      else if ('undefined' !== typeof this.$element.attr('name') && this.$element.attr('name').length) this.options.multiple = name = this.$element.attr('name');else if ('undefined' !== typeof this.$element.attr('id') && this.$element.attr('id').length) this.options.multiple = this.$element.attr('id');
+
+	      // Special select multiple input
+	      if (this.$element.is('select') && 'undefined' !== typeof this.$element.attr('multiple')) {
+	        this.options.multiple = this.options.multiple || this.__id__;
+	        return this.bind('parsleyFieldMultiple');
+
+	        // Else for radio / checkboxes, we need a `name` or `data-parsley-multiple` to properly bind it
+	      } else if (!this.options.multiple) {
+	          ParsleyUtils__default.warn('To be bound by Parsley, a radio, a checkbox and a multiple select input must have either a name or a multiple option.', this.$element);
+	          return this;
+	        }
+
+	      // Remove special chars
+	      this.options.multiple = this.options.multiple.replace(/(:|\.|\[|\]|\{|\}|\$)/g, '');
+
+	      // Add proper `data-parsley-multiple` to siblings if we have a valid multiple name
+	      if ('undefined' !== typeof name) {
+	        $('input[name="' + name + '"]').each(function (i, input) {
+	          if ($(input).is('input[type=radio], input[type=checkbox]')) $(input).attr(_this12.options.namespace + 'multiple', _this12.options.multiple);
+	        });
+	      }
+
+	      // Check here if we don't already have a related multiple instance saved
+	      var $previouslyRelated = this._findRelated();
+	      for (var i = 0; i < $previouslyRelated.length; i++) {
+	        parsleyMultipleInstance = $($previouslyRelated.get(i)).data('Parsley');
+	        if ('undefined' !== typeof parsleyMultipleInstance) {
+
+	          if (!this.$element.data('ParsleyFieldMultiple')) {
+	            parsleyMultipleInstance.addElement(this.$element);
+	          }
+
+	          break;
+	        }
+	      }
+
+	      // Create a secret ParsleyField instance for every multiple field. It will be stored in `data('ParsleyFieldMultiple')`
+	      // And will be useful later to access classic `ParsleyField` stuff while being in a `ParsleyFieldMultiple` instance
+	      this.bind('parsleyField', true);
+
+	      return parsleyMultipleInstance || this.bind('parsleyFieldMultiple');
+	    },
+
+	    // Return proper `ParsleyForm`, `ParsleyField` or `ParsleyFieldMultiple`
+	    bind: function bind(type, doNotStore) {
+	      var parsleyInstance;
+
+	      switch (type) {
+	        case 'parsleyForm':
+	          parsleyInstance = $.extend(new ParsleyForm(this.$element, this.domOptions, this.options), new ParsleyAbstract(), window.ParsleyExtend)._bindFields();
+	          break;
+	        case 'parsleyField':
+	          parsleyInstance = $.extend(new parsley_field(this.$element, this.domOptions, this.options, this.parent), new ParsleyAbstract(), window.ParsleyExtend);
+	          break;
+	        case 'parsleyFieldMultiple':
+	          parsleyInstance = $.extend(new parsley_field(this.$element, this.domOptions, this.options, this.parent), new ParsleyMultiple(), new ParsleyAbstract(), window.ParsleyExtend)._init();
+	          break;
+	        default:
+	          throw new Error(type + 'is not a supported Parsley type');
+	      }
+
+	      if (this.options.multiple) ParsleyUtils__default.setAttr(this.$element, this.options.namespace, 'multiple', this.options.multiple);
+
+	      if ('undefined' !== typeof doNotStore) {
+	        this.$element.data('ParsleyFieldMultiple', parsleyInstance);
+
+	        return parsleyInstance;
+	      }
+
+	      // Store the freshly bound instance in a DOM element for later access using jQuery `data()`
+	      this.$element.data('Parsley', parsleyInstance);
+
+	      // Tell the world we have a new ParsleyForm or ParsleyField instance!
+	      parsleyInstance._actualizeTriggers();
+	      parsleyInstance._trigger('init');
+
+	      return parsleyInstance;
+	    }
+	  };
+
+	  var vernums = $.fn.jquery.split('.');
+	  if (parseInt(vernums[0]) <= 1 && parseInt(vernums[1]) < 8) {
+	    throw "The loaded version of jQuery is too old. Please upgrade to 1.8.x or better.";
+	  }
+	  if (!vernums.forEach) {
+	    ParsleyUtils__default.warn('Parsley requires ES5 to run properly. Please include https://github.com/es-shims/es5-shim');
+	  }
+	  // Inherit `on`, `off` & `trigger` to Parsley:
+	  var Parsley = $.extend(new ParsleyAbstract(), {
+	    $element: $(document),
+	    actualizeOptions: null,
+	    _resetOptions: null,
+	    Factory: ParsleyFactory,
+	    version: '2.3.11'
+	  });
+
+	  // Supplement ParsleyField and Form with ParsleyAbstract
+	  // This way, the constructors will have access to those methods
+	  $.extend(parsley_field.prototype, ParsleyUI.Field, ParsleyAbstract.prototype);
+	  $.extend(ParsleyForm.prototype, ParsleyUI.Form, ParsleyAbstract.prototype);
+	  // Inherit actualizeOptions and _resetOptions:
+	  $.extend(ParsleyFactory.prototype, ParsleyAbstract.prototype);
+
+	  // ### jQuery API
+	  // `$('.elem').parsley(options)` or `$('.elem').psly(options)`
+	  $.fn.parsley = $.fn.psly = function (options) {
+	    if (this.length > 1) {
+	      var instances = [];
+
+	      this.each(function () {
+	        instances.push($(this).parsley(options));
+	      });
+
+	      return instances;
+	    }
+
+	    // Return undefined if applied to non existing DOM element
+	    if (!$(this).length) {
+	      ParsleyUtils__default.warn('You must bind Parsley on an existing element.');
+
+	      return;
+	    }
+
+	    return new ParsleyFactory(this, options);
+	  };
+
+	  // ### ParsleyField and ParsleyForm extension
+	  // Ensure the extension is now defined if it wasn't previously
+	  if ('undefined' === typeof window.ParsleyExtend) window.ParsleyExtend = {};
+
+	  // ### Parsley config
+	  // Inherit from ParsleyDefault, and copy over any existing values
+	  Parsley.options = $.extend(ParsleyUtils__default.objectCreate(ParsleyDefaults), window.ParsleyConfig);
+	  window.ParsleyConfig = Parsley.options; // Old way of accessing global options
+
+	  // ### Globals
+	  window.Parsley = window.psly = Parsley;
+	  window.ParsleyUtils = ParsleyUtils__default;
+
+	  // ### Define methods that forward to the registry, and deprecate all access except through window.Parsley
+	  var registry = window.Parsley._validatorRegistry = new ParsleyValidatorRegistry(window.ParsleyConfig.validators, window.ParsleyConfig.i18n);
+	  window.ParsleyValidator = {};
+	  $.each('setLocale addCatalog addMessage addMessages getErrorMessage formatMessage addValidator updateValidator removeValidator'.split(' '), function (i, method) {
+	    window.Parsley[method] = $.proxy(registry, method);
+	    window.ParsleyValidator[method] = function () {
+	      var _window$Parsley;
+
+	      ParsleyUtils__default.warnOnce('Accessing the method \'' + method + '\' through ParsleyValidator is deprecated. Simply call \'window.Parsley.' + method + '(...)\'');
+	      return (_window$Parsley = window.Parsley)[method].apply(_window$Parsley, arguments);
+	    };
+	  });
+
+	  // ### ParsleyUI
+	  // Deprecated global object
+	  window.Parsley.UI = ParsleyUI;
+	  window.ParsleyUI = {
+	    removeError: function removeError(instance, name, doNotUpdateClass) {
+	      var updateClass = true !== doNotUpdateClass;
+	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'removeError\' on the instance directly. Please comment in issue 1073 as to your need to call this method.');
+	      return instance.removeError(name, { updateClass: updateClass });
+	    },
+	    getErrorsMessages: function getErrorsMessages(instance) {
+	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'getErrorsMessages\' on the instance directly.');
+	      return instance.getErrorsMessages();
+	    }
+	  };
+	  $.each('addError updateError'.split(' '), function (i, method) {
+	    window.ParsleyUI[method] = function (instance, name, message, assert, doNotUpdateClass) {
+	      var updateClass = true !== doNotUpdateClass;
+	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'' + method + '\' on the instance directly. Please comment in issue 1073 as to your need to call this method.');
+	      return instance[method](name, { message: message, assert: assert, updateClass: updateClass });
+	    };
+	  });
+
+	  // ### PARSLEY auto-binding
+	  // Prevent it by setting `ParsleyConfig.autoBind` to `false`
+	  if (false !== window.ParsleyConfig.autoBind) {
+	    $(function () {
+	      // Works only on `data-parsley-validate`.
+	      if ($('[data-parsley-validate]').length) $('[data-parsley-validate]').parsley();
+	    });
+	  }
+
+	  var o = $({});
+	  var deprecated = function deprecated() {
+	    ParsleyUtils__default.warnOnce("Parsley's pubsub module is deprecated; use the 'on' and 'off' methods on parsley instances or window.Parsley");
+	  };
+
+	  // Returns an event handler that calls `fn` with the arguments it expects
+	  function adapt(fn, context) {
+	    // Store to allow unbinding
+	    if (!fn.parsleyAdaptedCallback) {
+	      fn.parsleyAdaptedCallback = function () {
+	        var args = Array.prototype.slice.call(arguments, 0);
+	        args.unshift(this);
+	        fn.apply(context || o, args);
+	      };
+	    }
+	    return fn.parsleyAdaptedCallback;
+	  }
+
+	  var eventPrefix = 'parsley:';
+	  // Converts 'parsley:form:validate' into 'form:validate'
+	  function eventName(name) {
+	    if (name.lastIndexOf(eventPrefix, 0) === 0) return name.substr(eventPrefix.length);
+	    return name;
+	  }
+
+	  // $.listen is deprecated. Use Parsley.on instead.
+	  $.listen = function (name, callback) {
+	    var context;
+	    deprecated();
+	    if ('object' === typeof arguments[1] && 'function' === typeof arguments[2]) {
+	      context = arguments[1];
+	      callback = arguments[2];
+	    }
+
+	    if ('function' !== typeof callback) throw new Error('Wrong parameters');
+
+	    window.Parsley.on(eventName(name), adapt(callback, context));
+	  };
+
+	  $.listenTo = function (instance, name, fn) {
+	    deprecated();
+	    if (!(instance instanceof parsley_field) && !(instance instanceof ParsleyForm)) throw new Error('Must give Parsley instance');
+
+	    if ('string' !== typeof name || 'function' !== typeof fn) throw new Error('Wrong parameters');
+
+	    instance.on(eventName(name), adapt(fn));
+	  };
+
+	  $.unsubscribe = function (name, fn) {
+	    deprecated();
+	    if ('string' !== typeof name || 'function' !== typeof fn) throw new Error('Wrong arguments');
+	    window.Parsley.off(eventName(name), fn.parsleyAdaptedCallback);
+	  };
+
+	  $.unsubscribeTo = function (instance, name) {
+	    deprecated();
+	    if (!(instance instanceof parsley_field) && !(instance instanceof ParsleyForm)) throw new Error('Must give Parsley instance');
+	    instance.off(eventName(name));
+	  };
+
+	  $.unsubscribeAll = function (name) {
+	    deprecated();
+	    window.Parsley.off(eventName(name));
+	    $('form,input,textarea,select').each(function () {
+	      var instance = $(this).data('Parsley');
+	      if (instance) {
+	        instance.off(eventName(name));
+	      }
+	    });
+	  };
+
+	  // $.emit is deprecated. Use jQuery events instead.
+	  $.emit = function (name, instance) {
+	    var _instance;
+
+	    deprecated();
+	    var instanceGiven = instance instanceof parsley_field || instance instanceof ParsleyForm;
+	    var args = Array.prototype.slice.call(arguments, instanceGiven ? 2 : 1);
+	    args.unshift(eventName(name));
+	    if (!instanceGiven) {
+	      instance = window.Parsley;
+	    }
+	    (_instance = instance).trigger.apply(_instance, _toConsumableArray(args));
+	  };
+
+	  var pubsub = {};
+
+	  $.extend(true, Parsley, {
+	    asyncValidators: {
+	      'default': {
+	        fn: function fn(xhr) {
+	          // By default, only status 2xx are deemed successful.
+	          // Note: we use status instead of state() because responses with status 200
+	          // but invalid messages (e.g. an empty body for content type set to JSON) will
+	          // result in state() === 'rejected'.
+	          return xhr.status >= 200 && xhr.status < 300;
+	        },
+	        url: false
+	      },
+	      reverse: {
+	        fn: function fn(xhr) {
+	          // If reverse option is set, a failing ajax request is considered successful
+	          return xhr.status < 200 || xhr.status >= 300;
+	        },
+	        url: false
+	      }
+	    },
+
+	    addAsyncValidator: function addAsyncValidator(name, fn, url, options) {
+	      Parsley.asyncValidators[name] = {
+	        fn: fn,
+	        url: url || false,
+	        options: options || {}
+	      };
+
+	      return this;
+	    }
+
+	  });
+
+	  Parsley.addValidator('remote', {
+	    requirementType: {
+	      '': 'string',
+	      'validator': 'string',
+	      'reverse': 'boolean',
+	      'options': 'object'
+	    },
+
+	    validateString: function validateString(value, url, options, instance) {
+	      var data = {};
+	      var ajaxOptions;
+	      var csr;
+	      var validator = options.validator || (true === options.reverse ? 'reverse' : 'default');
+
+	      if ('undefined' === typeof Parsley.asyncValidators[validator]) throw new Error('Calling an undefined async validator: `' + validator + '`');
+
+	      url = Parsley.asyncValidators[validator].url || url;
+
+	      // Fill current value
+	      if (url.indexOf('{value}') > -1) {
+	        url = url.replace('{value}', encodeURIComponent(value));
+	      } else {
+	        data[instance.$element.attr('name') || instance.$element.attr('id')] = value;
+	      }
+
+	      // Merge options passed in from the function with the ones in the attribute
+	      var remoteOptions = $.extend(true, options.options || {}, Parsley.asyncValidators[validator].options);
+
+	      // All `$.ajax(options)` could be overridden or extended directly from DOM in `data-parsley-remote-options`
+	      ajaxOptions = $.extend(true, {}, {
+	        url: url,
+	        data: data,
+	        type: 'GET'
+	      }, remoteOptions);
+
+	      // Generate store key based on ajax options
+	      instance.trigger('field:ajaxoptions', instance, ajaxOptions);
+
+	      csr = $.param(ajaxOptions);
+
+	      // Initialise querry cache
+	      if ('undefined' === typeof Parsley._remoteCache) Parsley._remoteCache = {};
+
+	      // Try to retrieve stored xhr
+	      var xhr = Parsley._remoteCache[csr] = Parsley._remoteCache[csr] || $.ajax(ajaxOptions);
+
+	      var handleXhr = function handleXhr() {
+	        var result = Parsley.asyncValidators[validator].fn.call(instance, xhr, url, options);
+	        if (!result) // Map falsy results to rejected promise
+	          result = $.Deferred().reject();
+	        return $.when(result);
+	      };
+
+	      return xhr.then(handleXhr, handleXhr);
+	    },
+
+	    priority: -1
+	  });
+
+	  Parsley.on('form:submit', function () {
+	    Parsley._remoteCache = {};
+	  });
+
+	  window.ParsleyExtend.addAsyncValidator = function () {
+	    ParsleyUtils.warnOnce('Accessing the method `addAsyncValidator` through an instance is deprecated. Simply call `Parsley.addAsyncValidator(...)`');
+	    return Parsley.addAsyncValidator.apply(Parsley, arguments);
+	  };
+
+	  // This is included with the Parsley library itself,
+	  // thus there is no use in adding it to your project.
+	  Parsley.addMessages('en', {
+	    defaultMessage: "This value seems to be invalid.",
+	    type: {
+	      email: "This value should be a valid email.",
+	      url: "This value should be a valid url.",
+	      number: "This value should be a valid number.",
+	      integer: "This value should be a valid integer.",
+	      digits: "This value should be digits.",
+	      alphanum: "This value should be alphanumeric."
+	    },
+	    notblank: "This value should not be blank.",
+	    required: "This value is required.",
+	    pattern: "This value seems to be invalid.",
+	    min: "This value should be greater than or equal to %s.",
+	    max: "This value should be lower than or equal to %s.",
+	    range: "This value should be between %s and %s.",
+	    minlength: "This value is too short. It should have %s characters or more.",
+	    maxlength: "This value is too long. It should have %s characters or fewer.",
+	    length: "This value length is invalid. It should be between %s and %s characters long.",
+	    mincheck: "You must select at least %s choices.",
+	    maxcheck: "You must select %s choices or fewer.",
+	    check: "You must select between %s and %s choices.",
+	    equalto: "This value should be the same."
+	  });
+
+	  Parsley.setLocale('en');
+
+	  /**
+	   * inputevent - Alleviate browser bugs for input events
+	   * https://github.com/marcandre/inputevent
+	   * @version v0.0.3 - (built Thu, Apr 14th 2016, 5:58 pm)
+	   * @author Marc-Andre Lafortune <github@marc-andre.ca>
+	   * @license MIT
+	   */
+
+	  function InputEvent() {
+	    var _this13 = this;
+
+	    var globals = window || global;
+
+	    // Slightly odd way construct our object. This way methods are force bound.
+	    // Used to test for duplicate library.
+	    $.extend(this, {
+
+	      // For browsers that do not support isTrusted, assumes event is native.
+	      isNativeEvent: function isNativeEvent(evt) {
+	        return evt.originalEvent && evt.originalEvent.isTrusted !== false;
+	      },
+
+	      fakeInputEvent: function fakeInputEvent(evt) {
+	        if (_this13.isNativeEvent(evt)) {
+	          $(evt.target).trigger('input');
+	        }
+	      },
+
+	      misbehaves: function misbehaves(evt) {
+	        if (_this13.isNativeEvent(evt)) {
+	          _this13.behavesOk(evt);
+	          $(document).on('change.inputevent', evt.data.selector, _this13.fakeInputEvent);
+	          _this13.fakeInputEvent(evt);
+	        }
+	      },
+
+	      behavesOk: function behavesOk(evt) {
+	        if (_this13.isNativeEvent(evt)) {
+	          $(document) // Simply unbinds the testing handler
+	          .off('input.inputevent', evt.data.selector, _this13.behavesOk).off('change.inputevent', evt.data.selector, _this13.misbehaves);
+	        }
+	      },
+
+	      // Bind the testing handlers
+	      install: function install() {
+	        if (globals.inputEventPatched) {
+	          return;
+	        }
+	        globals.inputEventPatched = '0.0.3';
+	        var _arr = ['select', 'input[type="checkbox"]', 'input[type="radio"]', 'input[type="file"]'];
+	        for (var _i = 0; _i < _arr.length; _i++) {
+	          var selector = _arr[_i];
+	          $(document).on('input.inputevent', selector, { selector: selector }, _this13.behavesOk).on('change.inputevent', selector, { selector: selector }, _this13.misbehaves);
+	        }
+	      },
+
+	      uninstall: function uninstall() {
+	        delete globals.inputEventPatched;
+	        $(document).off('.inputevent');
+	      }
+
+	    });
+	  };
+
+	  var inputevent = new InputEvent();
+
+	  inputevent.install();
+
+	  var parsley = Parsley;
+
+	  return parsley;
 	});
-	;// Initialization method
-	function init(elem, id, opts) {
-		var obj, posOptions, attr, config, title,
+	//# sourceMappingURL=parsley.js.map
 
-		// Setup element references
-		docBody = $(document.body),
-
-		// Use document body instead of document element if needed
-		newTarget = elem[0] === document ? docBody : elem,
-
-		// Grab metadata from element if plugin is present
-		metadata = elem.metadata ? elem.metadata(opts.metadata) : NULL,
-
-		// If metadata type if HTML5, grab 'name' from the object instead, or use the regular data object otherwise
-		metadata5 = opts.metadata.type === 'html5' && metadata ? metadata[opts.metadata.name] : NULL,
-
-		// Grab data from metadata.name (or data-qtipopts as fallback) using .data() method,
-		html5 = elem.data(opts.metadata.name || 'qtipopts');
-
-		// If we don't get an object returned attempt to parse it manualyl without parseJSON
-		/* eslint-disable no-empty */
-		try { html5 = typeof html5 === 'string' ? $.parseJSON(html5) : html5; }
-		catch(e) {}
-		/* eslint-enable no-empty */
-
-		// Merge in and sanitize metadata
-		config = $.extend(TRUE, {}, QTIP.defaults, opts,
-			typeof html5 === 'object' ? sanitizeOptions(html5) : NULL,
-			sanitizeOptions(metadata5 || metadata));
-
-		// Re-grab our positioning options now we've merged our metadata and set id to passed value
-		posOptions = config.position;
-		config.id = id;
-
-		// Setup missing content if none is detected
-		if('boolean' === typeof config.content.text) {
-			attr = elem.attr(config.content.attr);
-
-			// Grab from supplied attribute if available
-			if(config.content.attr !== FALSE && attr) { config.content.text = attr; }
-
-			// No valid content was found, abort render
-			else { return FALSE; }
-		}
-
-		// Setup target options
-		if(!posOptions.container.length) { posOptions.container = docBody; }
-		if(posOptions.target === FALSE) { posOptions.target = newTarget; }
-		if(config.show.target === FALSE) { config.show.target = newTarget; }
-		if(config.show.solo === TRUE) { config.show.solo = posOptions.container.closest('body'); }
-		if(config.hide.target === FALSE) { config.hide.target = newTarget; }
-		if(config.position.viewport === TRUE) { config.position.viewport = posOptions.container; }
-
-		// Ensure we only use a single container
-		posOptions.container = posOptions.container.eq(0);
-
-		// Convert position corner values into x and y strings
-		posOptions.at = new CORNER(posOptions.at, TRUE);
-		posOptions.my = new CORNER(posOptions.my);
-
-		// Destroy previous tooltip if overwrite is enabled, or skip element if not
-		if(elem.data(NAMESPACE)) {
-			if(config.overwrite) {
-				elem.qtip('destroy', true);
-			}
-			else if(config.overwrite === FALSE) {
-				return FALSE;
-			}
-		}
-
-		// Add has-qtip attribute
-		elem.attr(ATTR_HAS, id);
-
-		// Remove title attribute and store it if present
-		if(config.suppress && (title = elem.attr('title'))) {
-			// Final attr call fixes event delegatiom and IE default tooltip showing problem
-			elem.removeAttr('title').attr(oldtitle, title).attr('title', '');
-		}
-
-		// Initialize the tooltip and add API reference
-		obj = new QTip(elem, config, id, !!attr);
-		elem.data(NAMESPACE, obj);
-
-		return obj;
-	}
-
-	// jQuery $.fn extension method
-	QTIP = $.fn.qtip = function(options, notation, newValue)
-	{
-		var command = ('' + options).toLowerCase(), // Parse command
-			returned = NULL,
-			args = $.makeArray(arguments).slice(1),
-			event = args[args.length - 1],
-			opts = this[0] ? $.data(this[0], NAMESPACE) : NULL;
-
-		// Check for API request
-		if(!arguments.length && opts || command === 'api') {
-			return opts;
-		}
-
-		// Execute API command if present
-		else if('string' === typeof options) {
-			this.each(function() {
-				var api = $.data(this, NAMESPACE);
-				if(!api) { return TRUE; }
-
-				// Cache the event if possible
-				if(event && event.timeStamp) { api.cache.event = event; }
-
-				// Check for specific API commands
-				if(notation && (command === 'option' || command === 'options')) {
-					if(newValue !== undefined || $.isPlainObject(notation)) {
-						api.set(notation, newValue);
-					}
-					else {
-						returned = api.get(notation);
-						return FALSE;
-					}
-				}
-
-				// Execute API command
-				else if(api[command]) {
-					api[command].apply(api, args);
-				}
-			});
-
-			return returned !== NULL ? returned : this;
-		}
-
-		// No API commands. validate provided options and setup qTips
-		else if('object' === typeof options || !arguments.length) {
-			// Sanitize options first
-			opts = sanitizeOptions($.extend(TRUE, {}, options));
-
-			return this.each(function(i) {
-				var api, id;
-
-				// Find next available ID, or use custom ID if provided
-				id = $.isArray(opts.id) ? opts.id[i] : opts.id;
-				id = !id || id === FALSE || id.length < 1 || QTIP.api[id] ? QTIP.nextid++ : id;
-
-				// Initialize the qTip and re-grab newly sanitized options
-				api = init($(this), id, opts);
-				if(api === FALSE) { return TRUE; }
-				else { QTIP.api[id] = api; }
-
-				// Initialize plugins
-				$.each(PLUGINS, function() {
-					if(this.initialize === 'initialize') { this(api); }
-				});
-
-				// Assign initial pre-render events
-				api._assignInitialEvents(event);
-			});
-		}
-	};
-
-	// Expose class
-	$.qtip = QTip;
-
-	// Populated in render method
-	QTIP.api = {};
-	;$.each({
-		/* Allow other plugins to successfully retrieve the title of an element with a qTip applied */
-		attr: function(attr, val) {
-			if(this.length) {
-				var self = this[0],
-					title = 'title',
-					api = $.data(self, 'qtip');
-
-				if(attr === title && api && api.options && 'object' === typeof api && 'object' === typeof api.options && api.options.suppress) {
-					if(arguments.length < 2) {
-						return $.attr(self, oldtitle);
-					}
-
-					// If qTip is rendered and title was originally used as content, update it
-					if(api && api.options.content.attr === title && api.cache.attr) {
-						api.set('content.text', val);
-					}
-
-					// Use the regular attr method to set, then cache the result
-					return this.attr(oldtitle, val);
-				}
-			}
-
-			return $.fn['attr'+replaceSuffix].apply(this, arguments);
-		},
-
-		/* Allow clone to correctly retrieve cached title attributes */
-		clone: function(keepData) {
-			// Clone our element using the real clone method
-			var elems = $.fn['clone'+replaceSuffix].apply(this, arguments);
-
-			// Grab all elements with an oldtitle set, and change it to regular title attribute, if keepData is false
-			if(!keepData) {
-				elems.filter('['+oldtitle+']').attr('title', function() {
-					return $.attr(this, oldtitle);
-				})
-				.removeAttr(oldtitle);
-			}
-
-			return elems;
-		}
-	}, function(name, func) {
-		if(!func || $.fn[name+replaceSuffix]) { return TRUE; }
-
-		var old = $.fn[name+replaceSuffix] = $.fn[name];
-		$.fn[name] = function() {
-			return func.apply(this, arguments) || old.apply(this, arguments);
-		};
-	});
-
-	/* Fire off 'removeqtip' handler in $.cleanData if jQuery UI not present (it already does similar).
-	 * This snippet is taken directly from jQuery UI source code found here:
-	 *     http://code.jquery.com/ui/jquery-ui-git.js
-	 */
-	if(!$.ui) {
-		$['cleanData'+replaceSuffix] = $.cleanData;
-		$.cleanData = function( elems ) {
-			for(var i = 0, elem; (elem = $( elems[i] )).length; i++) {
-				if(elem.attr(ATTR_HAS)) {
-					/* eslint-disable no-empty */
-					try { elem.triggerHandler('removeqtip'); }
-					catch( e ) {}
-					/* eslint-enable no-empty */
-				}
-			}
-			$['cleanData'+replaceSuffix].apply(this, arguments);
-		};
-	}
-	;// qTip version
-	QTIP.version = '3.0.2';
-
-	// Base ID for all qTips
-	QTIP.nextid = 0;
-
-	// Inactive events array
-	QTIP.inactiveEvents = INACTIVE_EVENTS;
-
-	// Base z-index for all qTips
-	QTIP.zindex = 15000;
-
-	// Define configuration defaults
-	QTIP.defaults = {
-		prerender: FALSE,
-		id: FALSE,
-		overwrite: TRUE,
-		suppress: TRUE,
-		content: {
-			text: TRUE,
-			attr: 'title',
-			title: FALSE,
-			button: FALSE
-		},
-		position: {
-			my: 'top left',
-			at: 'bottom right',
-			target: FALSE,
-			container: FALSE,
-			viewport: FALSE,
-			adjust: {
-				x: 0, y: 0,
-				mouse: TRUE,
-				scroll: TRUE,
-				resize: TRUE,
-				method: 'flipinvert flipinvert'
-			},
-			effect: function(api, pos) {
-				$(this).animate(pos, {
-					duration: 200,
-					queue: FALSE
-				});
-			}
-		},
-		show: {
-			target: FALSE,
-			event: 'mouseenter',
-			effect: TRUE,
-			delay: 90,
-			solo: FALSE,
-			ready: FALSE,
-			autofocus: FALSE
-		},
-		hide: {
-			target: FALSE,
-			event: 'mouseleave',
-			effect: TRUE,
-			delay: 0,
-			fixed: FALSE,
-			inactive: FALSE,
-			leave: 'window',
-			distance: FALSE
-		},
-		style: {
-			classes: '',
-			widget: FALSE,
-			width: FALSE,
-			height: FALSE,
-			def: TRUE
-		},
-		events: {
-			render: NULL,
-			move: NULL,
-			show: NULL,
-			hide: NULL,
-			toggle: NULL,
-			visible: NULL,
-			hidden: NULL,
-			focus: NULL,
-			blur: NULL
-		}
-	};
-	;var TIP,
-	createVML,
-	SCALE,
-	PIXEL_RATIO,
-	BACKING_STORE_RATIO,
-
-	// Common CSS strings
-	MARGIN = 'margin',
-	BORDER = 'border',
-	COLOR = 'color',
-	BG_COLOR = 'background-color',
-	TRANSPARENT = 'transparent',
-	IMPORTANT = ' !important',
-
-	// Check if the browser supports <canvas/> elements
-	HASCANVAS = !!document.createElement('canvas').getContext,
-
-	// Invalid colour values used in parseColours()
-	INVALID = /rgba?\(0, 0, 0(, 0)?\)|transparent|#123456/i;
-
-	// Camel-case method, taken from jQuery source
-	// http://code.jquery.com/jquery-1.8.0.js
-	function camel(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-	/*
-	 * Modified from Modernizr's testPropsAll()
-	 * http://modernizr.com/downloads/modernizr-latest.js
-	 */
-	var cssProps = {}, cssPrefixes = ['Webkit', 'O', 'Moz', 'ms'];
-	function vendorCss(elem, prop) {
-		var ucProp = prop.charAt(0).toUpperCase() + prop.slice(1),
-			props = (prop + ' ' + cssPrefixes.join(ucProp + ' ') + ucProp).split(' '),
-			cur, val, i = 0;
-
-		// If the property has already been mapped...
-		if(cssProps[prop]) { return elem.css(cssProps[prop]); }
-
-		while(cur = props[i++]) {
-			if((val = elem.css(cur)) !== undefined) {
-				cssProps[prop] = cur;
-				return val;
-			}
-		}
-	}
-
-	// Parse a given elements CSS property into an int
-	function intCss(elem, prop) {
-		return Math.ceil(parseFloat(vendorCss(elem, prop)));
-	}
-
-
-	// VML creation (for IE only)
-	if(!HASCANVAS) {
-		createVML = function(tag, props, style) {
-			return '<qtipvml:'+tag+' xmlns="urn:schemas-microsoft.com:vml" class="qtip-vml" '+(props||'')+
-				' style="behavior: url(#default#VML); '+(style||'')+ '" />';
-		};
-	}
-
-	// Canvas only definitions
-	else {
-		PIXEL_RATIO = window.devicePixelRatio || 1;
-		BACKING_STORE_RATIO = (function() {
-			var context = document.createElement('canvas').getContext('2d');
-			return context.backingStorePixelRatio || context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio ||
-					context.msBackingStorePixelRatio || context.oBackingStorePixelRatio || 1;
-		})();
-		SCALE = PIXEL_RATIO / BACKING_STORE_RATIO;
-	}
-
-
-	function Tip(qtip, options) {
-		this._ns = 'tip';
-		this.options = options;
-		this.offset = options.offset;
-		this.size = [ options.width, options.height ];
-
-		// Initialize
-		this.qtip = qtip;
-		this.init(qtip);
-	}
-
-	$.extend(Tip.prototype, {
-		init: function(qtip) {
-			var context, tip;
-
-			// Create tip element and prepend to the tooltip
-			tip = this.element = qtip.elements.tip = $('<div />', { 'class': NAMESPACE+'-tip' }).prependTo(qtip.tooltip);
-
-			// Create tip drawing element(s)
-			if(HASCANVAS) {
-				// save() as soon as we create the canvas element so FF2 doesn't bork on our first restore()!
-				context = $('<canvas />').appendTo(this.element)[0].getContext('2d');
-
-				// Setup constant parameters
-				context.lineJoin = 'miter';
-				context.miterLimit = 100000;
-				context.save();
-			}
-			else {
-				context = createVML('shape', 'coordorigin="0,0"', 'position:absolute;');
-				this.element.html(context + context);
-
-				// Prevent mousing down on the tip since it causes problems with .live() handling in IE due to VML
-				qtip._bind( $('*', tip).add(tip), ['click', 'mousedown'], function(event) { event.stopPropagation(); }, this._ns);
-			}
-
-			// Bind update events
-			qtip._bind(qtip.tooltip, 'tooltipmove', this.reposition, this._ns, this);
-
-			// Create it
-			this.create();
-		},
-
-		_swapDimensions: function() {
-			this.size[0] = this.options.height;
-			this.size[1] = this.options.width;
-		},
-		_resetDimensions: function() {
-			this.size[0] = this.options.width;
-			this.size[1] = this.options.height;
-		},
-
-		_useTitle: function(corner) {
-			var titlebar = this.qtip.elements.titlebar;
-			return titlebar && (
-				corner.y === TOP || corner.y === CENTER && this.element.position().top + this.size[1] / 2 + this.options.offset < titlebar.outerHeight(TRUE)
-			);
-		},
-
-		_parseCorner: function(corner) {
-			var my = this.qtip.options.position.my;
-
-			// Detect corner and mimic properties
-			if(corner === FALSE || my === FALSE) {
-				corner = FALSE;
-			}
-			else if(corner === TRUE) {
-				corner = new CORNER( my.string() );
-			}
-			else if(!corner.string) {
-				corner = new CORNER(corner);
-				corner.fixed = TRUE;
-			}
-
-			return corner;
-		},
-
-		_parseWidth: function(corner, side, use) {
-			var elements = this.qtip.elements,
-				prop = BORDER + camel(side) + 'Width';
-
-			return (use ? intCss(use, prop) : 
-				intCss(elements.content, prop) ||
-				intCss(this._useTitle(corner) && elements.titlebar || elements.content, prop) ||
-				intCss(elements.tooltip, prop)
-			) || 0;
-		},
-
-		_parseRadius: function(corner) {
-			var elements = this.qtip.elements,
-				prop = BORDER + camel(corner.y) + camel(corner.x) + 'Radius';
-
-			return BROWSER.ie < 9 ? 0 :
-				intCss(this._useTitle(corner) && elements.titlebar || elements.content, prop) ||
-				intCss(elements.tooltip, prop) || 0;
-		},
-
-		_invalidColour: function(elem, prop, compare) {
-			var val = elem.css(prop);
-			return !val || compare && val === elem.css(compare) || INVALID.test(val) ? FALSE : val;
-		},
-
-		_parseColours: function(corner) {
-			var elements = this.qtip.elements,
-				tip = this.element.css('cssText', ''),
-				borderSide = BORDER + camel(corner[ corner.precedance ]) + camel(COLOR),
-				colorElem = this._useTitle(corner) && elements.titlebar || elements.content,
-				css = this._invalidColour, color = [];
-
-			// Attempt to detect the background colour from various elements, left-to-right precedance
-			color[0] = css(tip, BG_COLOR) || css(colorElem, BG_COLOR) || css(elements.content, BG_COLOR) ||
-				css(elements.tooltip, BG_COLOR) || tip.css(BG_COLOR);
-
-			// Attempt to detect the correct border side colour from various elements, left-to-right precedance
-			color[1] = css(tip, borderSide, COLOR) || css(colorElem, borderSide, COLOR) ||
-				css(elements.content, borderSide, COLOR) || css(elements.tooltip, borderSide, COLOR) || elements.tooltip.css(borderSide);
-
-			// Reset background and border colours
-			$('*', tip).add(tip).css('cssText', BG_COLOR+':'+TRANSPARENT+IMPORTANT+';'+BORDER+':0'+IMPORTANT+';');
-
-			return color;
-		},
-
-		_calculateSize: function(corner) {
-			var y = corner.precedance === Y,
-				width = this.options.width,
-				height = this.options.height,
-				isCenter = corner.abbrev() === 'c',
-				base = (y ? width: height) * (isCenter ? 0.5 : 1),
-				pow = Math.pow,
-				round = Math.round,
-				bigHyp, ratio, result,
-
-			smallHyp = Math.sqrt( pow(base, 2) + pow(height, 2) ),
-			hyp = [
-				this.border / base * smallHyp,
-				this.border / height * smallHyp
-			];
-
-			hyp[2] = Math.sqrt( pow(hyp[0], 2) - pow(this.border, 2) );
-			hyp[3] = Math.sqrt( pow(hyp[1], 2) - pow(this.border, 2) );
-
-			bigHyp = smallHyp + hyp[2] + hyp[3] + (isCenter ? 0 : hyp[0]);
-			ratio = bigHyp / smallHyp;
-
-			result = [ round(ratio * width), round(ratio * height) ];
-			return y ? result : result.reverse();
-		},
-
-		// Tip coordinates calculator
-		_calculateTip: function(corner, size, scale) {
-			scale = scale || 1;
-			size = size || this.size;
-
-			var width = size[0] * scale,
-				height = size[1] * scale,
-				width2 = Math.ceil(width / 2), height2 = Math.ceil(height / 2),
-
-			// Define tip coordinates in terms of height and width values
-			tips = {
-				br:	[0,0,		width,height,	width,0],
-				bl:	[0,0,		width,0,		0,height],
-				tr:	[0,height,	width,0,		width,height],
-				tl:	[0,0,		0,height,		width,height],
-				tc:	[0,height,	width2,0,		width,height],
-				bc:	[0,0,		width,0,		width2,height],
-				rc:	[0,0,		width,height2,	0,height],
-				lc:	[width,0,	width,height,	0,height2]
-			};
-
-			// Set common side shapes
-			tips.lt = tips.br; tips.rt = tips.bl;
-			tips.lb = tips.tr; tips.rb = tips.tl;
-
-			return tips[ corner.abbrev() ];
-		},
-
-		// Tip coordinates drawer (canvas)
-		_drawCoords: function(context, coords) {
-			context.beginPath();
-			context.moveTo(coords[0], coords[1]);
-			context.lineTo(coords[2], coords[3]);
-			context.lineTo(coords[4], coords[5]);
-			context.closePath();
-		},
-
-		create: function() {
-			// Determine tip corner
-			var c = this.corner = (HASCANVAS || BROWSER.ie) && this._parseCorner(this.options.corner);
-
-			// If we have a tip corner...
-			this.enabled = !!this.corner && this.corner.abbrev() !== 'c';
-			if(this.enabled) {
-				// Cache it
-				this.qtip.cache.corner = c.clone();
-
-				// Create it
-				this.update();
-			}
-
-			// Toggle tip element
-			this.element.toggle(this.enabled);
-
-			return this.corner;
-		},
-
-		update: function(corner, position) {
-			if(!this.enabled) { return this; }
-
-			var elements = this.qtip.elements,
-				tip = this.element,
-				inner = tip.children(),
-				options = this.options,
-				curSize = this.size,
-				mimic = options.mimic,
-				round = Math.round,
-				color, precedance, context,
-				coords, bigCoords, translate, newSize, border;
-
-			// Re-determine tip if not already set
-			if(!corner) { corner = this.qtip.cache.corner || this.corner; }
-
-			// Use corner property if we detect an invalid mimic value
-			if(mimic === FALSE) { mimic = corner; }
-
-			// Otherwise inherit mimic properties from the corner object as necessary
-			else {
-				mimic = new CORNER(mimic);
-				mimic.precedance = corner.precedance;
-
-				if(mimic.x === 'inherit') { mimic.x = corner.x; }
-				else if(mimic.y === 'inherit') { mimic.y = corner.y; }
-				else if(mimic.x === mimic.y) {
-					mimic[ corner.precedance ] = corner[ corner.precedance ];
-				}
-			}
-			precedance = mimic.precedance;
-
-			// Ensure the tip width.height are relative to the tip position
-			if(corner.precedance === X) { this._swapDimensions(); }
-			else { this._resetDimensions(); }
-
-			// Update our colours
-			color = this.color = this._parseColours(corner);
-
-			// Detect border width, taking into account colours
-			if(color[1] !== TRANSPARENT) {
-				// Grab border width
-				border = this.border = this._parseWidth(corner, corner[corner.precedance]);
-
-				// If border width isn't zero, use border color as fill if it's not invalid (1.0 style tips)
-				if(options.border && border < 1 && !INVALID.test(color[1])) { color[0] = color[1]; }
-
-				// Set border width (use detected border width if options.border is true)
-				this.border = border = options.border !== TRUE ? options.border : border;
-			}
-
-			// Border colour was invalid, set border to zero
-			else { this.border = border = 0; }
-
-			// Determine tip size
-			newSize = this.size = this._calculateSize(corner);
-			tip.css({
-				width: newSize[0],
-				height: newSize[1],
-				lineHeight: newSize[1]+'px'
-			});
-
-			// Calculate tip translation
-			if(corner.precedance === Y) {
-				translate = [
-					round(mimic.x === LEFT ? border : mimic.x === RIGHT ? newSize[0] - curSize[0] - border : (newSize[0] - curSize[0]) / 2),
-					round(mimic.y === TOP ? newSize[1] - curSize[1] : 0)
-				];
-			}
-			else {
-				translate = [
-					round(mimic.x === LEFT ? newSize[0] - curSize[0] : 0),
-					round(mimic.y === TOP ? border : mimic.y === BOTTOM ? newSize[1] - curSize[1] - border : (newSize[1] - curSize[1]) / 2)
-				];
-			}
-
-			// Canvas drawing implementation
-			if(HASCANVAS) {
-				// Grab canvas context and clear/save it
-				context = inner[0].getContext('2d');
-				context.restore(); context.save();
-				context.clearRect(0,0,6000,6000);
-
-				// Calculate coordinates
-				coords = this._calculateTip(mimic, curSize, SCALE);
-				bigCoords = this._calculateTip(mimic, this.size, SCALE);
-
-				// Set the canvas size using calculated size
-				inner.attr(WIDTH, newSize[0] * SCALE).attr(HEIGHT, newSize[1] * SCALE);
-				inner.css(WIDTH, newSize[0]).css(HEIGHT, newSize[1]);
-
-				// Draw the outer-stroke tip
-				this._drawCoords(context, bigCoords);
-				context.fillStyle = color[1];
-				context.fill();
-
-				// Draw the actual tip
-				context.translate(translate[0] * SCALE, translate[1] * SCALE);
-				this._drawCoords(context, coords);
-				context.fillStyle = color[0];
-				context.fill();
-			}
-
-			// VML (IE Proprietary implementation)
-			else {
-				// Calculate coordinates
-				coords = this._calculateTip(mimic);
-
-				// Setup coordinates string
-				coords = 'm' + coords[0] + ',' + coords[1] + ' l' + coords[2] +
-					',' + coords[3] + ' ' + coords[4] + ',' + coords[5] + ' xe';
-
-				// Setup VML-specific offset for pixel-perfection
-				translate[2] = border && /^(r|b)/i.test(corner.string()) ?
-					BROWSER.ie === 8 ? 2 : 1 : 0;
-
-				// Set initial CSS
-				inner.css({
-					coordsize: newSize[0]+border + ' ' + newSize[1]+border,
-					antialias: ''+(mimic.string().indexOf(CENTER) > -1),
-					left: translate[0] - translate[2] * Number(precedance === X),
-					top: translate[1] - translate[2] * Number(precedance === Y),
-					width: newSize[0] + border,
-					height: newSize[1] + border
-				})
-				.each(function(i) {
-					var $this = $(this);
-
-					// Set shape specific attributes
-					$this[ $this.prop ? 'prop' : 'attr' ]({
-						coordsize: newSize[0]+border + ' ' + newSize[1]+border,
-						path: coords,
-						fillcolor: color[0],
-						filled: !!i,
-						stroked: !i
-					})
-					.toggle(!!(border || i));
-
-					// Check if border is enabled and add stroke element
-					!i && $this.html( createVML(
-						'stroke', 'weight="'+border*2+'px" color="'+color[1]+'" miterlimit="1000" joinstyle="miter"'
-					) );
-				});
-			}
-
-			// Opera bug #357 - Incorrect tip position
-			// https://github.com/Craga89/qTip2/issues/367
-			window.opera && setTimeout(function() {
-				elements.tip.css({
-					display: 'inline-block',
-					visibility: 'visible'
-				});
-			}, 1);
-
-			// Position if needed
-			if(position !== FALSE) { this.calculate(corner, newSize); }
-		},
-
-		calculate: function(corner, size) {
-			if(!this.enabled) { return FALSE; }
-
-			var self = this,
-				elements = this.qtip.elements,
-				tip = this.element,
-				userOffset = this.options.offset,
-				position = {},
-				precedance, corners;
-
-			// Inherit corner if not provided
-			corner = corner || this.corner;
-			precedance = corner.precedance;
-
-			// Determine which tip dimension to use for adjustment
-			size = size || this._calculateSize(corner);
-
-			// Setup corners and offset array
-			corners = [ corner.x, corner.y ];
-			if(precedance === X) { corners.reverse(); }
-
-			// Calculate tip position
-			$.each(corners, function(i, side) {
-				var b, bc, br;
-
-				if(side === CENTER) {
-					b = precedance === Y ? LEFT : TOP;
-					position[ b ] = '50%';
-					position[MARGIN+'-' + b] = -Math.round(size[ precedance === Y ? 0 : 1 ] / 2) + userOffset;
-				}
-				else {
-					b = self._parseWidth(corner, side, elements.tooltip);
-					bc = self._parseWidth(corner, side, elements.content);
-					br = self._parseRadius(corner);
-
-					position[ side ] = Math.max(-self.border, i ? bc : userOffset + (br > b ? br : -b));
-				}
-			});
-
-			// Adjust for tip size
-			position[ corner[precedance] ] -= size[ precedance === X ? 0 : 1 ];
-
-			// Set and return new position
-			tip.css({ margin: '', top: '', bottom: '', left: '', right: '' }).css(position);
-			return position;
-		},
-
-		reposition: function(event, api, pos) {
-			if(!this.enabled) { return; }
-
-			var cache = api.cache,
-				newCorner = this.corner.clone(),
-				adjust = pos.adjusted,
-				method = api.options.position.adjust.method.split(' '),
-				horizontal = method[0],
-				vertical = method[1] || method[0],
-				shift = { left: FALSE, top: FALSE, x: 0, y: 0 },
-				offset, css = {}, props;
-
-			function shiftflip(direction, precedance, popposite, side, opposite) {
-				// Horizontal - Shift or flip method
-				if(direction === SHIFT && newCorner.precedance === precedance && adjust[side] && newCorner[popposite] !== CENTER) {
-					newCorner.precedance = newCorner.precedance === X ? Y : X;
-				}
-				else if(direction !== SHIFT && adjust[side]){
-					newCorner[precedance] = newCorner[precedance] === CENTER ?
-						adjust[side] > 0 ? side : opposite :
-						newCorner[precedance] === side ? opposite : side;
-				}
-			}
-
-			function shiftonly(xy, side, opposite) {
-				if(newCorner[xy] === CENTER) {
-					css[MARGIN+'-'+side] = shift[xy] = offset[MARGIN+'-'+side] - adjust[side];
-				}
-				else {
-					props = offset[opposite] !== undefined ?
-						[ adjust[side], -offset[side] ] : [ -adjust[side], offset[side] ];
-
-					if( (shift[xy] = Math.max(props[0], props[1])) > props[0] ) {
-						pos[side] -= adjust[side];
-						shift[side] = FALSE;
-					}
-
-					css[ offset[opposite] !== undefined ? opposite : side ] = shift[xy];
-				}
-			}
-
-			// If our tip position isn't fixed e.g. doesn't adjust with viewport...
-			if(this.corner.fixed !== TRUE) {
-				// Perform shift/flip adjustments
-				shiftflip(horizontal, X, Y, LEFT, RIGHT);
-				shiftflip(vertical, Y, X, TOP, BOTTOM);
-
-				// Update and redraw the tip if needed (check cached details of last drawn tip)
-				if(newCorner.string() !== cache.corner.string() || cache.cornerTop !== adjust.top || cache.cornerLeft !== adjust.left) {
-					this.update(newCorner, FALSE);
-				}
-			}
-
-			// Setup tip offset properties
-			offset = this.calculate(newCorner);
-
-			// Readjust offset object to make it left/top
-			if(offset.right !== undefined) { offset.left = -offset.right; }
-			if(offset.bottom !== undefined) { offset.top = -offset.bottom; }
-			offset.user = this.offset;
-
-			// Perform shift adjustments
-			shift.left = horizontal === SHIFT && !!adjust.left;
-			if(shift.left) {
-				shiftonly(X, LEFT, RIGHT);
-			}
-			shift.top = vertical === SHIFT && !!adjust.top;
-			if(shift.top) {
-				shiftonly(Y, TOP, BOTTOM);
-			}
-
-			/*
-			* If the tip is adjusted in both dimensions, or in a
-			* direction that would cause it to be anywhere but the
-			* outer border, hide it!
-			*/
-			this.element.css(css).toggle(
-				!(shift.x && shift.y || newCorner.x === CENTER && shift.y || newCorner.y === CENTER && shift.x)
-			);
-
-			// Adjust position to accomodate tip dimensions
-			pos.left -= offset.left.charAt ? offset.user :
-				horizontal !== SHIFT || shift.top || !shift.left && !shift.top ? offset.left + this.border : 0;
-			pos.top -= offset.top.charAt ? offset.user :
-				vertical !== SHIFT || shift.left || !shift.left && !shift.top ? offset.top + this.border : 0;
-
-			// Cache details
-			cache.cornerLeft = adjust.left; cache.cornerTop = adjust.top;
-			cache.corner = newCorner.clone();
-		},
-
-		destroy: function() {
-			// Unbind events
-			this.qtip._unbind(this.qtip.tooltip, this._ns);
-
-			// Remove the tip element(s)
-			if(this.qtip.elements.tip) {
-				this.qtip.elements.tip.find('*')
-					.remove().end().remove();
-			}
-		}
-	});
-
-	TIP = PLUGINS.tip = function(api) {
-		return new Tip(api, api.options.style.tip);
-	};
-
-	// Initialize tip on render
-	TIP.initialize = 'render';
-
-	// Setup plugin sanitization options
-	TIP.sanitize = function(options) {
-		if(options.style && 'tip' in options.style) {
-			var opts = options.style.tip;
-			if(typeof opts !== 'object') { opts = options.style.tip = { corner: opts }; }
-			if(!(/string|boolean/i).test(typeof opts.corner)) { opts.corner = TRUE; }
-		}
-	};
-
-	// Add new option checks for the plugin
-	CHECKS.tip = {
-		'^position.my|style.tip.(corner|mimic|border)$': function() {
-			// Make sure a tip can be drawn
-			this.create();
-
-			// Reposition the tooltip
-			this.qtip.reposition();
-		},
-		'^style.tip.(height|width)$': function(obj) {
-			// Re-set dimensions and redraw the tip
-			this.size = [ obj.width, obj.height ];
-			this.update();
-
-			// Reposition the tooltip
-			this.qtip.reposition();
-		},
-		'^content.title|style.(classes|widget)$': function() {
-			this.update();
-		}
-	};
-
-	// Extend original qTip defaults
-	$.extend(TRUE, QTIP.defaults, {
-		style: {
-			tip: {
-				corner: TRUE,
-				mimic: FALSE,
-				width: 6,
-				height: 6,
-				border: TRUE,
-				offset: 0
-			}
-		}
-	});
-	;var MODAL, OVERLAY,
-		MODALCLASS = 'qtip-modal',
-		MODALSELECTOR = '.'+MODALCLASS;
-
-	OVERLAY = function()
-	{
-		var self = this,
-			focusableElems = {},
-			current,
-			prevState,
-			elem;
-
-		// Modified code from jQuery UI 1.10.0 source
-		// http://code.jquery.com/ui/1.10.0/jquery-ui.js
-		function focusable(element) {
-			// Use the defined focusable checker when possible
-			if($.expr[':'].focusable) { return $.expr[':'].focusable; }
-
-			var isTabIndexNotNaN = !isNaN($.attr(element, 'tabindex')),
-				nodeName = element.nodeName && element.nodeName.toLowerCase(),
-				map, mapName, img;
-
-			if('area' === nodeName) {
-				map = element.parentNode;
-				mapName = map.name;
-				if(!element.href || !mapName || map.nodeName.toLowerCase() !== 'map') {
-					return false;
-				}
-				img = $('img[usemap=#' + mapName + ']')[0];
-				return !!img && img.is(':visible');
-			}
-
-			return /input|select|textarea|button|object/.test( nodeName ) ?
-				!element.disabled :
-				'a' === nodeName ?
-					element.href || isTabIndexNotNaN :
-					isTabIndexNotNaN
-			;
-		}
-
-		// Focus inputs using cached focusable elements (see update())
-		function focusInputs(blurElems) {
-			// Blurring body element in IE causes window.open windows to unfocus!
-			if(focusableElems.length < 1 && blurElems.length) { blurElems.not('body').blur(); }
-
-			// Focus the inputs
-			else { focusableElems.first().focus(); }
-		}
-
-		// Steal focus from elements outside tooltip
-		function stealFocus(event) {
-			if(!elem.is(':visible')) { return; }
-
-			var target = $(event.target),
-				tooltip = current.tooltip,
-				container = target.closest(SELECTOR),
-				targetOnTop;
-
-			// Determine if input container target is above this
-			targetOnTop = container.length < 1 ? FALSE :
-				parseInt(container[0].style.zIndex, 10) > parseInt(tooltip[0].style.zIndex, 10);
-
-			// If we're showing a modal, but focus has landed on an input below
-			// this modal, divert focus to the first visible input in this modal
-			// or if we can't find one... the tooltip itself
-			if(!targetOnTop && target.closest(SELECTOR)[0] !== tooltip[0]) {
-				focusInputs(target);
-			}
-		}
-
-		$.extend(self, {
-			init: function() {
-				// Create document overlay
-				elem = self.elem = $('<div />', {
-					id: 'qtip-overlay',
-					html: '<div></div>',
-					mousedown: function() { return FALSE; }
-				})
-				.hide();
-
-				// Make sure we can't focus anything outside the tooltip
-				$(document.body).bind('focusin'+MODALSELECTOR, stealFocus);
-
-				// Apply keyboard "Escape key" close handler
-				$(document).bind('keydown'+MODALSELECTOR, function(event) {
-					if(current && current.options.show.modal.escape && event.keyCode === 27) {
-						current.hide(event);
-					}
-				});
-
-				// Apply click handler for blur option
-				elem.bind('click'+MODALSELECTOR, function(event) {
-					if(current && current.options.show.modal.blur) {
-						current.hide(event);
-					}
-				});
-
-				return self;
-			},
-
-			update: function(api) {
-				// Update current API reference
-				current = api;
-
-				// Update focusable elements if enabled
-				if(api.options.show.modal.stealfocus !== FALSE) {
-					focusableElems = api.tooltip.find('*').filter(function() {
-						return focusable(this);
-					});
-				}
-				else { focusableElems = []; }
-			},
-
-			toggle: function(api, state, duration) {
-				var tooltip = api.tooltip,
-					options = api.options.show.modal,
-					effect = options.effect,
-					type = state ? 'show': 'hide',
-					visible = elem.is(':visible'),
-					visibleModals = $(MODALSELECTOR).filter(':visible:not(:animated)').not(tooltip);
-
-				// Set active tooltip API reference
-				self.update(api);
-
-				// If the modal can steal the focus...
-				// Blur the current item and focus anything in the modal we an
-				if(state && options.stealfocus !== FALSE) {
-					focusInputs( $(':focus') );
-				}
-
-				// Toggle backdrop cursor style on show
-				elem.toggleClass('blurs', options.blur);
-
-				// Append to body on show
-				if(state) {
-					elem.appendTo(document.body);
-				}
-
-				// Prevent modal from conflicting with show.solo, and don't hide backdrop is other modals are visible
-				if(elem.is(':animated') && visible === state && prevState !== FALSE || !state && visibleModals.length) {
-					return self;
-				}
-
-				// Stop all animations
-				elem.stop(TRUE, FALSE);
-
-				// Use custom function if provided
-				if($.isFunction(effect)) {
-					effect.call(elem, state);
-				}
-
-				// If no effect type is supplied, use a simple toggle
-				else if(effect === FALSE) {
-					elem[ type ]();
-				}
-
-				// Use basic fade function
-				else {
-					elem.fadeTo( parseInt(duration, 10) || 90, state ? 1 : 0, function() {
-						if(!state) { elem.hide(); }
-					});
-				}
-
-				// Reset position and detach from body on hide
-				if(!state) {
-					elem.queue(function(next) {
-						elem.css({ left: '', top: '' });
-						if(!$(MODALSELECTOR).length) { elem.detach(); }
-						next();
-					});
-				}
-
-				// Cache the state
-				prevState = state;
-
-				// If the tooltip is destroyed, set reference to null
-				if(current.destroyed) { current = NULL; }
-
-				return self;
-			}
-		});
-
-		self.init();
-	};
-	OVERLAY = new OVERLAY();
-
-	function Modal(api, options) {
-		this.options = options;
-		this._ns = '-modal';
-
-		this.qtip = api;
-		this.init(api);
-	}
-
-	$.extend(Modal.prototype, {
-		init: function(qtip) {
-			var tooltip = qtip.tooltip;
-
-			// If modal is disabled... return
-			if(!this.options.on) { return this; }
-
-			// Set overlay reference
-			qtip.elements.overlay = OVERLAY.elem;
-
-			// Add unique attribute so we can grab modal tooltips easily via a SELECTOR, and set z-index
-			tooltip.addClass(MODALCLASS).css('z-index', QTIP.modal_zindex + $(MODALSELECTOR).length);
-
-			// Apply our show/hide/focus modal events
-			qtip._bind(tooltip, ['tooltipshow', 'tooltiphide'], function(event, api, duration) {
-				var oEvent = event.originalEvent;
-
-				// Make sure mouseout doesn't trigger a hide when showing the modal and mousing onto backdrop
-				if(event.target === tooltip[0]) {
-					if(oEvent && event.type === 'tooltiphide' && /mouse(leave|enter)/.test(oEvent.type) && $(oEvent.relatedTarget).closest(OVERLAY.elem[0]).length) {
-						/* eslint-disable no-empty */
-						try { event.preventDefault(); }
-						catch(e) {}
-						/* eslint-enable no-empty */
-					}
-					else if(!oEvent || oEvent && oEvent.type !== 'tooltipsolo') {
-						this.toggle(event, event.type === 'tooltipshow', duration);
-					}
-				}
-			}, this._ns, this);
-
-			// Adjust modal z-index on tooltip focus
-			qtip._bind(tooltip, 'tooltipfocus', function(event, api) {
-				// If focus was cancelled before it reached us, don't do anything
-				if(event.isDefaultPrevented() || event.target !== tooltip[0]) { return; }
-
-				var qtips = $(MODALSELECTOR),
-
-				// Keep the modal's lower than other, regular qtips
-				newIndex = QTIP.modal_zindex + qtips.length,
-				curIndex = parseInt(tooltip[0].style.zIndex, 10);
-
-				// Set overlay z-index
-				OVERLAY.elem[0].style.zIndex = newIndex - 1;
-
-				// Reduce modal z-index's and keep them properly ordered
-				qtips.each(function() {
-					if(this.style.zIndex > curIndex) {
-						this.style.zIndex -= 1;
-					}
-				});
-
-				// Fire blur event for focused tooltip
-				qtips.filter('.' + CLASS_FOCUS).qtip('blur', event.originalEvent);
-
-				// Set the new z-index
-				tooltip.addClass(CLASS_FOCUS)[0].style.zIndex = newIndex;
-
-				// Set current
-				OVERLAY.update(api);
-
-				// Prevent default handling
-				/* eslint-disable no-empty */
-				try { event.preventDefault(); }
-				catch(e) {}
-				/* eslint-enable no-empty */
-			}, this._ns, this);
-
-			// Focus any other visible modals when this one hides
-			qtip._bind(tooltip, 'tooltiphide', function(event) {
-				if(event.target === tooltip[0]) {
-					$(MODALSELECTOR).filter(':visible').not(tooltip).last().qtip('focus', event);
-				}
-			}, this._ns, this);
-		},
-
-		toggle: function(event, state, duration) {
-			// Make sure default event hasn't been prevented
-			if(event && event.isDefaultPrevented()) { return this; }
-
-			// Toggle it
-			OVERLAY.toggle(this.qtip, !!state, duration);
-		},
-
-		destroy: function() {
-			// Remove modal class
-			this.qtip.tooltip.removeClass(MODALCLASS);
-
-			// Remove bound events
-			this.qtip._unbind(this.qtip.tooltip, this._ns);
-
-			// Delete element reference
-			OVERLAY.toggle(this.qtip, FALSE);
-			delete this.qtip.elements.overlay;
-		}
-	});
-
-
-	MODAL = PLUGINS.modal = function(api) {
-		return new Modal(api, api.options.show.modal);
-	};
-
-	// Setup sanitiztion rules
-	MODAL.sanitize = function(opts) {
-		if(opts.show) {
-			if(typeof opts.show.modal !== 'object') { opts.show.modal = { on: !!opts.show.modal }; }
-			else if(typeof opts.show.modal.on === 'undefined') { opts.show.modal.on = TRUE; }
-		}
-	};
-
-	// Base z-index for all modal tooltips (use qTip core z-index as a base)
-	/* eslint-disable camelcase */
-	QTIP.modal_zindex = QTIP.zindex - 200;
-	/* eslint-enable camelcase */
-
-	// Plugin needs to be initialized on render
-	MODAL.initialize = 'render';
-
-	// Setup option set checks
-	CHECKS.modal = {
-		'^show.modal.(on|blur)$': function() {
-			// Initialise
-			this.destroy();
-			this.init();
-
-			// Show the modal if not visible already and tooltip is visible
-			this.qtip.elems.overlay.toggle(
-				this.qtip.tooltip[0].offsetWidth > 0
-			);
-		}
-	};
-
-	// Extend original api defaults
-	$.extend(TRUE, QTIP.defaults, {
-		show: {
-			modal: {
-				on: FALSE,
-				effect: TRUE,
-				blur: TRUE,
-				stealfocus: TRUE,
-				escape: TRUE
-			}
-		}
-	});
-	;PLUGINS.viewport = function(api, position, posOptions, targetWidth, targetHeight, elemWidth, elemHeight)
-	{
-		var target = posOptions.target,
-			tooltip = api.elements.tooltip,
-			my = posOptions.my,
-			at = posOptions.at,
-			adjust = posOptions.adjust,
-			method = adjust.method.split(' '),
-			methodX = method[0],
-			methodY = method[1] || method[0],
-			viewport = posOptions.viewport,
-			container = posOptions.container,
-			adjusted = { left: 0, top: 0 },
-			fixed, newMy, containerOffset, containerStatic,
-			viewportWidth, viewportHeight, viewportScroll, viewportOffset;
-
-		// If viewport is not a jQuery element, or it's the window/document, or no adjustment method is used... return
-		if(!viewport.jquery || target[0] === window || target[0] === document.body || adjust.method === 'none') {
-			return adjusted;
-		}
-
-		// Cach container details
-		containerOffset = container.offset() || adjusted;
-		containerStatic = container.css('position') === 'static';
-
-		// Cache our viewport details
-		fixed = tooltip.css('position') === 'fixed';
-		viewportWidth = viewport[0] === window ? viewport.width() : viewport.outerWidth(FALSE);
-		viewportHeight = viewport[0] === window ? viewport.height() : viewport.outerHeight(FALSE);
-		viewportScroll = { left: fixed ? 0 : viewport.scrollLeft(), top: fixed ? 0 : viewport.scrollTop() };
-		viewportOffset = viewport.offset() || adjusted;
-
-		// Generic calculation method
-		function calculate(side, otherSide, type, adjustment, side1, side2, lengthName, targetLength, elemLength) {
-			var initialPos = position[side1],
-				mySide = my[side],
-				atSide = at[side],
-				isShift = type === SHIFT,
-				myLength = mySide === side1 ? elemLength : mySide === side2 ? -elemLength : -elemLength / 2,
-				atLength = atSide === side1 ? targetLength : atSide === side2 ? -targetLength : -targetLength / 2,
-				sideOffset = viewportScroll[side1] + viewportOffset[side1] - (containerStatic ? 0 : containerOffset[side1]),
-				overflow1 = sideOffset - initialPos,
-				overflow2 = initialPos + elemLength - (lengthName === WIDTH ? viewportWidth : viewportHeight) - sideOffset,
-				offset = myLength - (my.precedance === side || mySide === my[otherSide] ? atLength : 0) - (atSide === CENTER ? targetLength / 2 : 0);
-
-			// shift
-			if(isShift) {
-				offset = (mySide === side1 ? 1 : -1) * myLength;
-
-				// Adjust position but keep it within viewport dimensions
-				position[side1] += overflow1 > 0 ? overflow1 : overflow2 > 0 ? -overflow2 : 0;
-				position[side1] = Math.max(
-					-containerOffset[side1] + viewportOffset[side1],
-					initialPos - offset,
-					Math.min(
-						Math.max(
-							-containerOffset[side1] + viewportOffset[side1] + (lengthName === WIDTH ? viewportWidth : viewportHeight),
-							initialPos + offset
-						),
-						position[side1],
-
-						// Make sure we don't adjust complete off the element when using 'center'
-						mySide === 'center' ? initialPos - myLength : 1E9
-					)
-				);
-
-			}
-
-			// flip/flipinvert
-			else {
-				// Update adjustment amount depending on if using flipinvert or flip
-				adjustment *= type === FLIPINVERT ? 2 : 0;
-
-				// Check for overflow on the left/top
-				if(overflow1 > 0 && (mySide !== side1 || overflow2 > 0)) {
-					position[side1] -= offset + adjustment;
-					newMy.invert(side, side1);
-				}
-
-				// Check for overflow on the bottom/right
-				else if(overflow2 > 0 && (mySide !== side2 || overflow1 > 0)  ) {
-					position[side1] -= (mySide === CENTER ? -offset : offset) + adjustment;
-					newMy.invert(side, side2);
-				}
-
-				// Make sure we haven't made things worse with the adjustment and reset if so
-				if(position[side1] < viewportScroll[side1] && -position[side1] > overflow2) {
-					position[side1] = initialPos; newMy = my.clone();
-				}
-			}
-
-			return position[side1] - initialPos;
-		}
-
-		// Set newMy if using flip or flipinvert methods
-		if(methodX !== 'shift' || methodY !== 'shift') { newMy = my.clone(); }
-
-		// Adjust position based onviewport and adjustment options
-		adjusted = {
-			left: methodX !== 'none' ? calculate( X, Y, methodX, adjust.x, LEFT, RIGHT, WIDTH, targetWidth, elemWidth ) : 0,
-			top: methodY !== 'none' ? calculate( Y, X, methodY, adjust.y, TOP, BOTTOM, HEIGHT, targetHeight, elemHeight ) : 0,
-			my: newMy
-		};
-
-		return adjusted;
-	};
-	;PLUGINS.polys = {
-		// POLY area coordinate calculator
-		//	Special thanks to Ed Cradock for helping out with this.
-		//	Uses a binary search algorithm to find suitable coordinates.
-		polygon: function(baseCoords, corner) {
-			var result = {
-				width: 0, height: 0,
-				position: {
-					top: 1e10, right: 0,
-					bottom: 0, left: 1e10
-				},
-				adjustable: FALSE
-			},
-			i = 0, next,
-			coords = [],
-			compareX = 1, compareY = 1,
-			realX = 0, realY = 0,
-			newWidth, newHeight;
-
-			// First pass, sanitize coords and determine outer edges
-			i = baseCoords.length; 
-			while(i--) {
-				next = [ parseInt(baseCoords[--i], 10), parseInt(baseCoords[i+1], 10) ];
-
-				if(next[0] > result.position.right){ result.position.right = next[0]; }
-				if(next[0] < result.position.left){ result.position.left = next[0]; }
-				if(next[1] > result.position.bottom){ result.position.bottom = next[1]; }
-				if(next[1] < result.position.top){ result.position.top = next[1]; }
-
-				coords.push(next);
-			}
-
-			// Calculate height and width from outer edges
-			newWidth = result.width = Math.abs(result.position.right - result.position.left);
-			newHeight = result.height = Math.abs(result.position.bottom - result.position.top);
-
-			// If it's the center corner...
-			if(corner.abbrev() === 'c') {
-				result.position = {
-					left: result.position.left + result.width / 2,
-					top: result.position.top + result.height / 2
-				};
-			}
-			else {
-				// Second pass, use a binary search algorithm to locate most suitable coordinate
-				while(newWidth > 0 && newHeight > 0 && compareX > 0 && compareY > 0)
-				{
-					newWidth = Math.floor(newWidth / 2);
-					newHeight = Math.floor(newHeight / 2);
-
-					if(corner.x === LEFT){ compareX = newWidth; }
-					else if(corner.x === RIGHT){ compareX = result.width - newWidth; }
-					else{ compareX += Math.floor(newWidth / 2); }
-
-					if(corner.y === TOP){ compareY = newHeight; }
-					else if(corner.y === BOTTOM){ compareY = result.height - newHeight; }
-					else{ compareY += Math.floor(newHeight / 2); }
-
-					i = coords.length;
-					while(i--)
-					{
-						if(coords.length < 2){ break; }
-
-						realX = coords[i][0] - result.position.left;
-						realY = coords[i][1] - result.position.top;
-
-						if(
-							corner.x === LEFT && realX >= compareX ||
-							corner.x === RIGHT && realX <= compareX ||
-							corner.x === CENTER && (realX < compareX || realX > result.width - compareX) ||
-							corner.y === TOP && realY >= compareY ||
-							corner.y === BOTTOM && realY <= compareY ||
-							corner.y === CENTER && (realY < compareY || realY > result.height - compareY)) {
-							coords.splice(i, 1);
-						}
-					}
-				}
-				result.position = { left: coords[0][0], top: coords[0][1] };
-			}
-
-			return result;
-		},
-
-		rect: function(ax, ay, bx, by) {
-			return {
-				width: Math.abs(bx - ax),
-				height: Math.abs(by - ay),
-				position: {
-					left: Math.min(ax, bx),
-					top: Math.min(ay, by)
-				}
-			};
-		},
-
-		_angles: {
-			tc: 3 / 2, tr: 7 / 4, tl: 5 / 4,
-			bc: 1 / 2, br: 1 / 4, bl: 3 / 4,
-			rc: 2, lc: 1, c: 0
-		},
-		ellipse: function(cx, cy, rx, ry, corner) {
-			var c = PLUGINS.polys._angles[ corner.abbrev() ],
-				rxc = c === 0 ? 0 : rx * Math.cos( c * Math.PI ),
-				rys = ry * Math.sin( c * Math.PI );
-
-			return {
-				width: rx * 2 - Math.abs(rxc),
-				height: ry * 2 - Math.abs(rys),
-				position: {
-					left: cx + rxc,
-					top: cy + rys
-				},
-				adjustable: FALSE
-			};
-		},
-		circle: function(cx, cy, r, corner) {
-			return PLUGINS.polys.ellipse(cx, cy, r, r, corner);
-		}
-	};
-	;PLUGINS.svg = function(api, svg, corner)
-	{
-		var elem = svg[0],
-			root = $(elem.ownerSVGElement),
-			ownerDocument = elem.ownerDocument,
-			strokeWidth2 = (parseInt(svg.css('stroke-width'), 10) || 0) / 2,
-			frameOffset, mtx, transformed,
-			len, next, i, points,
-			result, position;
-
-		// Ascend the parentNode chain until we find an element with getBBox()
-		while(!elem.getBBox) { elem = elem.parentNode; }
-		if(!elem.getBBox || !elem.parentNode) { return FALSE; }
-
-		// Determine which shape calculation to use
-		switch(elem.nodeName) {
-			case 'ellipse':
-			case 'circle':
-				result = PLUGINS.polys.ellipse(
-					elem.cx.baseVal.value,
-					elem.cy.baseVal.value,
-					(elem.rx || elem.r).baseVal.value + strokeWidth2,
-					(elem.ry || elem.r).baseVal.value + strokeWidth2,
-					corner
-				);
-			break;
-
-			case 'line':
-			case 'polygon':
-			case 'polyline':
-				// Determine points object (line has none, so mimic using array)
-				points = elem.points || [
-					{ x: elem.x1.baseVal.value, y: elem.y1.baseVal.value },
-					{ x: elem.x2.baseVal.value, y: elem.y2.baseVal.value }
-				];
-
-				for(result = [], i = -1, len = points.numberOfItems || points.length; ++i < len;) {
-					next = points.getItem ? points.getItem(i) : points[i];
-					result.push.apply(result, [next.x, next.y]);
-				}
-
-				result = PLUGINS.polys.polygon(result, corner);
-			break;
-
-			// Unknown shape or rectangle? Use bounding box
-			default:
-				result = elem.getBBox();
-				result = {
-					width: result.width,
-					height: result.height,
-					position: {
-						left: result.x,
-						top: result.y
-					}
-				};
-			break;
-		}
-
-		// Shortcut assignments
-		position = result.position;
-		root = root[0];
-
-		// Convert position into a pixel value
-		if(root.createSVGPoint) {
-			mtx = elem.getScreenCTM();
-			points = root.createSVGPoint();
-
-			points.x = position.left;
-			points.y = position.top;
-			transformed = points.matrixTransform( mtx );
-			position.left = transformed.x;
-			position.top = transformed.y;
-		}
-
-		// Check the element is not in a child document, and if so, adjust for frame elements offset
-		if(ownerDocument !== document && api.position.target !== 'mouse') {
-			frameOffset = $((ownerDocument.defaultView || ownerDocument.parentWindow).frameElement).offset();
-			if(frameOffset) {
-				position.left += frameOffset.left;
-				position.top += frameOffset.top;
-			}
-		}
-
-		// Adjust by scroll offset of owner document
-		ownerDocument = $(ownerDocument);
-		position.left += ownerDocument.scrollLeft();
-		position.top += ownerDocument.scrollTop();
-
-		return result;
-	};
-	;PLUGINS.imagemap = function(api, area, corner)
-	{
-		if(!area.jquery) { area = $(area); }
-
-		var shape = (area.attr('shape') || 'rect').toLowerCase().replace('poly', 'polygon'),
-			image = $('img[usemap="#'+area.parent('map').attr('name')+'"]'),
-			coordsString = $.trim(area.attr('coords')),
-			coordsArray = coordsString.replace(/,$/, '').split(','),
-			imageOffset, coords, i, result, len;
-
-		// If we can't find the image using the map...
-		if(!image.length) { return FALSE; }
-
-		// Pass coordinates string if polygon
-		if(shape === 'polygon') {
-			result = PLUGINS.polys.polygon(coordsArray, corner);
-		}
-
-		// Otherwise parse the coordinates and pass them as arguments
-		else if(PLUGINS.polys[shape]) {
-			for(i = -1, len = coordsArray.length, coords = []; ++i < len;) {
-				coords.push( parseInt(coordsArray[i], 10) );
-			}
-
-			result = PLUGINS.polys[shape].apply(
-				this, coords.concat(corner)
-			);
-		}
-
-		// If no shapre calculation method was found, return false
-		else { return FALSE; }
-
-		// Make sure we account for padding and borders on the image
-		imageOffset = image.offset();
-		imageOffset.left += Math.ceil((image.outerWidth(FALSE) - image.width()) / 2);
-		imageOffset.top += Math.ceil((image.outerHeight(FALSE) - image.height()) / 2);
-
-		// Add image position to offset coordinates
-		result.position.left += imageOffset.left;
-		result.position.top += imageOffset.top;
-
-		return result;
-	};
-	;var IE6,
-
-	/*
-	 * BGIFrame adaption (http://plugins.jquery.com/project/bgiframe)
-	 * Special thanks to Brandon Aaron
-	 */
-	BGIFRAME = '<iframe class="qtip-bgiframe" frameborder="0" tabindex="-1" src="javascript:\'\';" ' +
-		' style="display:block; position:absolute; z-index:-1; filter:alpha(opacity=0); ' +
-			'-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";"></iframe>';
-
-	function Ie6(api) {
-		this._ns = 'ie6';
-
-		this.qtip = api;
-		this.init(api);
-	}
-
-	$.extend(Ie6.prototype, {
-		_scroll : function() {
-			var overlay = this.qtip.elements.overlay;
-			overlay && (overlay[0].style.top = $(window).scrollTop() + 'px');
-		},
-
-		init: function(qtip) {
-			var tooltip = qtip.tooltip;
-
-			// Create the BGIFrame element if needed
-			if($('select, object').length < 1) {
-				this.bgiframe = qtip.elements.bgiframe = $(BGIFRAME).appendTo(tooltip);
-
-				// Update BGIFrame on tooltip move
-				qtip._bind(tooltip, 'tooltipmove', this.adjustBGIFrame, this._ns, this);
-			}
-
-			// redraw() container for width/height calculations
-			this.redrawContainer = $('<div/>', { id: NAMESPACE+'-rcontainer' })
-				.appendTo(document.body);
-
-			// Fixup modal plugin if present too
-			if( qtip.elements.overlay && qtip.elements.overlay.addClass('qtipmodal-ie6fix') ) {
-				qtip._bind(window, ['scroll', 'resize'], this._scroll, this._ns, this);
-				qtip._bind(tooltip, ['tooltipshow'], this._scroll, this._ns, this);
-			}
-
-			// Set dimensions
-			this.redraw();
-		},
-
-		adjustBGIFrame: function() {
-			var tooltip = this.qtip.tooltip,
-				dimensions = {
-					height: tooltip.outerHeight(FALSE),
-					width: tooltip.outerWidth(FALSE)
-				},
-				plugin = this.qtip.plugins.tip,
-				tip = this.qtip.elements.tip,
-				tipAdjust, offset;
-
-			// Adjust border offset
-			offset = parseInt(tooltip.css('borderLeftWidth'), 10) || 0;
-			offset = { left: -offset, top: -offset };
-
-			// Adjust for tips plugin
-			if(plugin && tip) {
-				tipAdjust = plugin.corner.precedance === 'x' ? [WIDTH, LEFT] : [HEIGHT, TOP];
-				offset[ tipAdjust[1] ] -= tip[ tipAdjust[0] ]();
-			}
-
-			// Update bgiframe
-			this.bgiframe.css(offset).css(dimensions);
-		},
-
-		// Max/min width simulator function
-		redraw: function() {
-			if(this.qtip.rendered < 1 || this.drawing) { return this; }
-
-			var tooltip = this.qtip.tooltip,
-				style = this.qtip.options.style,
-				container = this.qtip.options.position.container,
-				perc, width, max, min;
-
-			// Set drawing flag
-			this.qtip.drawing = 1;
-
-			// If tooltip has a set height/width, just set it... like a boss!
-			if(style.height) { tooltip.css(HEIGHT, style.height); }
-			if(style.width) { tooltip.css(WIDTH, style.width); }
-
-			// Simulate max/min width if not set width present...
-			else {
-				// Reset width and add fluid class
-				tooltip.css(WIDTH, '').appendTo(this.redrawContainer);
-
-				// Grab our tooltip width (add 1 if odd so we don't get wrapping problems.. huzzah!)
-				width = tooltip.width();
-				if(width % 2 < 1) { width += 1; }
-
-				// Grab our max/min properties
-				max = tooltip.css('maxWidth') || '';
-				min = tooltip.css('minWidth') || '';
-
-				// Parse into proper pixel values
-				perc = (max + min).indexOf('%') > -1 ? container.width() / 100 : 0;
-				max = (max.indexOf('%') > -1 ? perc : 1 * parseInt(max, 10)) || width;
-				min = (min.indexOf('%') > -1 ? perc : 1 * parseInt(min, 10)) || 0;
-
-				// Determine new dimension size based on max/min/current values
-				width = max + min ? Math.min(Math.max(width, min), max) : width;
-
-				// Set the newly calculated width and remvoe fluid class
-				tooltip.css(WIDTH, Math.round(width)).appendTo(container);
-			}
-
-			// Set drawing flag
-			this.drawing = 0;
-
-			return this;
-		},
-
-		destroy: function() {
-			// Remove iframe
-			this.bgiframe && this.bgiframe.remove();
-
-			// Remove bound events
-			this.qtip._unbind([window, this.qtip.tooltip], this._ns);
-		}
-	});
-
-	IE6 = PLUGINS.ie6 = function(api) {
-		// Proceed only if the browser is IE6
-		return BROWSER.ie === 6 ? new Ie6(api) : FALSE;
-	};
-
-	IE6.initialize = 'render';
-
-	CHECKS.ie6 = {
-		'^content|style$': function() {
-			this.redraw();
-		}
-	};
-	;}));
-	}( window, document ));
-
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 168 */
@@ -34390,2366 +32787,117 @@
 /* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {/*!
-	* Parsley.js
-	* Version 2.3.11 - built Fri, Apr 15th 2016, 9:21 am
-	* http://parsleyjs.org
-	* Guillaume Potier - <guillaume@wisembly.com>
-	* Marc-Andre Lafortune - <petroselinum@marc-andre.ca>
-	* MIT Licensed
-	*/
+	'use strict';
 
-	// The source code below is generated by babel as
-	// Parsley is written in ECMAScript 6
-	//
-	var _slice = Array.prototype.slice;
-
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
-
-	(function (global, factory) {
-	   true ? module.exports = factory(__webpack_require__(168)) : typeof define === 'function' && define.amd ? define(['jquery'], factory) : global.parsley = factory(global.jQuery);
-	})(this, function ($) {
-	  'use strict';
-
-	  var globalID = 1;
-	  var pastWarnings = {};
-
-	  var ParsleyUtils__ParsleyUtils = {
-	    // Parsley DOM-API
-	    // returns object from dom attributes and values
-	    attr: function attr($element, namespace, obj) {
-	      var i;
-	      var attribute;
-	      var attributes;
-	      var regex = new RegExp('^' + namespace, 'i');
-
-	      if ('undefined' === typeof obj) obj = {};else {
-	        // Clear all own properties. This won't affect prototype's values
-	        for (i in obj) {
-	          if (obj.hasOwnProperty(i)) delete obj[i];
-	        }
-	      }
-
-	      if ('undefined' === typeof $element || 'undefined' === typeof $element[0]) return obj;
-
-	      attributes = $element[0].attributes;
-	      for (i = attributes.length; i--;) {
-	        attribute = attributes[i];
-
-	        if (attribute && attribute.specified && regex.test(attribute.name)) {
-	          obj[this.camelize(attribute.name.slice(namespace.length))] = this.deserializeValue(attribute.value);
-	        }
-	      }
-
-	      return obj;
-	    },
-
-	    checkAttr: function checkAttr($element, namespace, _checkAttr) {
-	      return $element.is('[' + namespace + _checkAttr + ']');
-	    },
-
-	    setAttr: function setAttr($element, namespace, attr, value) {
-	      $element[0].setAttribute(this.dasherize(namespace + attr), String(value));
-	    },
-
-	    generateID: function generateID() {
-	      return '' + globalID++;
-	    },
-
-	    /** Third party functions **/
-	    // Zepto deserialize function
-	    deserializeValue: function deserializeValue(value) {
-	      var num;
-
-	      try {
-	        return value ? value == "true" || (value == "false" ? false : value == "null" ? null : !isNaN(num = Number(value)) ? num : /^[\[\{]/.test(value) ? $.parseJSON(value) : value) : value;
-	      } catch (e) {
-	        return value;
-	      }
-	    },
-
-	    // Zepto camelize function
-	    camelize: function camelize(str) {
-	      return str.replace(/-+(.)?/g, function (match, chr) {
-	        return chr ? chr.toUpperCase() : '';
-	      });
-	    },
-
-	    // Zepto dasherize function
-	    dasherize: function dasherize(str) {
-	      return str.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2').replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/_/g, '-').toLowerCase();
-	    },
-
-	    warn: function warn() {
-	      var _window$console;
-
-	      if (window.console && 'function' === typeof window.console.warn) (_window$console = window.console).warn.apply(_window$console, arguments);
-	    },
-
-	    warnOnce: function warnOnce(msg) {
-	      if (!pastWarnings[msg]) {
-	        pastWarnings[msg] = true;
-	        this.warn.apply(this, arguments);
-	      }
-	    },
-
-	    _resetWarnings: function _resetWarnings() {
-	      pastWarnings = {};
-	    },
-
-	    trimString: function trimString(string) {
-	      return string.replace(/^\s+|\s+$/g, '');
-	    },
-
-	    namespaceEvents: function namespaceEvents(events, namespace) {
-	      events = this.trimString(events || '').split(/\s+/);
-	      if (!events[0]) return '';
-	      return $.map(events, function (evt) {
-	        return evt + '.' + namespace;
-	      }).join(' ');
-	    },
-
-	    // Object.create polyfill, see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create#Polyfill
-	    objectCreate: Object.create || (function () {
-	      var Object = function Object() {};
-	      return function (prototype) {
-	        if (arguments.length > 1) {
-	          throw Error('Second argument not supported');
-	        }
-	        if (typeof prototype != 'object') {
-	          throw TypeError('Argument must be an object');
-	        }
-	        Object.prototype = prototype;
-	        var result = new Object();
-	        Object.prototype = null;
-	        return result;
-	      };
-	    })()
-	  };
-
-	  var ParsleyUtils__default = ParsleyUtils__ParsleyUtils;
-
-	  // All these options could be overriden and specified directly in DOM using
-	  // `data-parsley-` default DOM-API
-	  // eg: `inputs` can be set in DOM using `data-parsley-inputs="input, textarea"`
-	  // eg: `data-parsley-stop-on-first-failing-constraint="false"`
-
-	  var ParsleyDefaults = {
-	    // ### General
-
-	    // Default data-namespace for DOM API
-	    namespace: 'data-parsley-',
-
-	    // Supported inputs by default
-	    inputs: 'input, textarea, select',
-
-	    // Excluded inputs by default
-	    excluded: 'input[type=button], input[type=submit], input[type=reset], input[type=hidden]',
-
-	    // Stop validating field on highest priority failing constraint
-	    priorityEnabled: true,
-
-	    // ### Field only
-
-	    // identifier used to group together inputs (e.g. radio buttons...)
-	    multiple: null,
-
-	    // identifier (or array of identifiers) used to validate only a select group of inputs
-	    group: null,
-
-	    // ### UI
-	    // Enable\Disable error messages
-	    uiEnabled: true,
-
-	    // Key events threshold before validation
-	    validationThreshold: 3,
-
-	    // Focused field on form validation error. 'first'|'last'|'none'
-	    focus: 'first',
-
-	    // event(s) that will trigger validation before first failure. eg: `input`...
-	    trigger: false,
-
-	    // event(s) that will trigger validation after first failure.
-	    triggerAfterFailure: 'input',
-
-	    // Class that would be added on every failing validation Parsley field
-	    errorClass: 'parsley-error',
-
-	    // Same for success validation
-	    successClass: 'parsley-success',
-
-	    // Return the `$element` that will receive these above success or error classes
-	    // Could also be (and given directly from DOM) a valid selector like `'#div'`
-	    classHandler: function classHandler(ParsleyField) {},
-
-	    // Return the `$element` where errors will be appended
-	    // Could also be (and given directly from DOM) a valid selector like `'#div'`
-	    errorsContainer: function errorsContainer(ParsleyField) {},
-
-	    // ul elem that would receive errors' list
-	    errorsWrapper: '<ul class="parsley-errors-list"></ul>',
-
-	    // li elem that would receive error message
-	    errorTemplate: '<li></li>'
-	  };
-
-	  var ParsleyAbstract = function ParsleyAbstract() {
-	    this.__id__ = ParsleyUtils__default.generateID();
-	  };
-
-	  ParsleyAbstract.prototype = {
-	    asyncSupport: true, // Deprecated
-
-	    _pipeAccordingToValidationResult: function _pipeAccordingToValidationResult() {
-	      var _this = this;
-
-	      var pipe = function pipe() {
-	        var r = $.Deferred();
-	        if (true !== _this.validationResult) r.reject();
-	        return r.resolve().promise();
-	      };
-	      return [pipe, pipe];
-	    },
-
-	    actualizeOptions: function actualizeOptions() {
-	      ParsleyUtils__default.attr(this.$element, this.options.namespace, this.domOptions);
-	      if (this.parent && this.parent.actualizeOptions) this.parent.actualizeOptions();
-	      return this;
-	    },
-
-	    _resetOptions: function _resetOptions(initOptions) {
-	      this.domOptions = ParsleyUtils__default.objectCreate(this.parent.options);
-	      this.options = ParsleyUtils__default.objectCreate(this.domOptions);
-	      // Shallow copy of ownProperties of initOptions:
-	      for (var i in initOptions) {
-	        if (initOptions.hasOwnProperty(i)) this.options[i] = initOptions[i];
-	      }
-	      this.actualizeOptions();
-	    },
-
-	    _listeners: null,
-
-	    // Register a callback for the given event name
-	    // Callback is called with context as the first argument and the `this`
-	    // The context is the current parsley instance, or window.Parsley if global
-	    // A return value of `false` will interrupt the calls
-	    on: function on(name, fn) {
-	      this._listeners = this._listeners || {};
-	      var queue = this._listeners[name] = this._listeners[name] || [];
-	      queue.push(fn);
-
-	      return this;
-	    },
-
-	    // Deprecated. Use `on` instead
-	    subscribe: function subscribe(name, fn) {
-	      $.listenTo(this, name.toLowerCase(), fn);
-	    },
-
-	    // Unregister a callback (or all if none is given) for the given event name
-	    off: function off(name, fn) {
-	      var queue = this._listeners && this._listeners[name];
-	      if (queue) {
-	        if (!fn) {
-	          delete this._listeners[name];
-	        } else {
-	          for (var i = queue.length; i--;) if (queue[i] === fn) queue.splice(i, 1);
-	        }
-	      }
-	      return this;
-	    },
-
-	    // Deprecated. Use `off`
-	    unsubscribe: function unsubscribe(name, fn) {
-	      $.unsubscribeTo(this, name.toLowerCase());
-	    },
-
-	    // Trigger an event of the given name
-	    // A return value of `false` interrupts the callback chain
-	    // Returns false if execution was interrupted
-	    trigger: function trigger(name, target, extraArg) {
-	      target = target || this;
-	      var queue = this._listeners && this._listeners[name];
-	      var result;
-	      var parentResult;
-	      if (queue) {
-	        for (var i = queue.length; i--;) {
-	          result = queue[i].call(target, target, extraArg);
-	          if (result === false) return result;
-	        }
-	      }
-	      if (this.parent) {
-	        return this.parent.trigger(name, target, extraArg);
-	      }
-	      return true;
-	    },
-
-	    // Reset UI
-	    reset: function reset() {
-	      // Field case: just emit a reset event for UI
-	      if ('ParsleyForm' !== this.__class__) {
-	        this._resetUI();
-	        return this._trigger('reset');
-	      }
-
-	      // Form case: emit a reset event for each field
-	      for (var i = 0; i < this.fields.length; i++) this.fields[i].reset();
-
-	      this._trigger('reset');
-	    },
-
-	    // Destroy Parsley instance (+ UI)
-	    destroy: function destroy() {
-	      // Field case: emit destroy event to clean UI and then destroy stored instance
-	      this._destroyUI();
-	      if ('ParsleyForm' !== this.__class__) {
-	        this.$element.removeData('Parsley');
-	        this.$element.removeData('ParsleyFieldMultiple');
-	        this._trigger('destroy');
-
-	        return;
-	      }
-
-	      // Form case: destroy all its fields and then destroy stored instance
-	      for (var i = 0; i < this.fields.length; i++) this.fields[i].destroy();
-
-	      this.$element.removeData('Parsley');
-	      this._trigger('destroy');
-	    },
-
-	    asyncIsValid: function asyncIsValid(group, force) {
-	      ParsleyUtils__default.warnOnce("asyncIsValid is deprecated; please use whenValid instead");
-	      return this.whenValid({ group: group, force: force });
-	    },
-
-	    _findRelated: function _findRelated() {
-	      return this.options.multiple ? this.parent.$element.find('[' + this.options.namespace + 'multiple="' + this.options.multiple + '"]') : this.$element;
-	    }
-	  };
-
-	  var requirementConverters = {
-	    string: function string(_string) {
-	      return _string;
-	    },
-	    integer: function integer(string) {
-	      if (isNaN(string)) throw 'Requirement is not an integer: "' + string + '"';
-	      return parseInt(string, 10);
-	    },
-	    number: function number(string) {
-	      if (isNaN(string)) throw 'Requirement is not a number: "' + string + '"';
-	      return parseFloat(string);
-	    },
-	    reference: function reference(string) {
-	      // Unused for now
-	      var result = $(string);
-	      if (result.length === 0) throw 'No such reference: "' + string + '"';
-	      return result;
-	    },
-	    boolean: function boolean(string) {
-	      return string !== 'false';
-	    },
-	    object: function object(string) {
-	      return ParsleyUtils__default.deserializeValue(string);
-	    },
-	    regexp: function regexp(_regexp) {
-	      var flags = '';
-
-	      // Test if RegExp is literal, if not, nothing to be done, otherwise, we need to isolate flags and pattern
-	      if (/^\/.*\/(?:[gimy]*)$/.test(_regexp)) {
-	        // Replace the regexp literal string with the first match group: ([gimy]*)
-	        // If no flag is present, this will be a blank string
-	        flags = _regexp.replace(/.*\/([gimy]*)$/, '$1');
-	        // Again, replace the regexp literal string with the first match group:
-	        // everything excluding the opening and closing slashes and the flags
-	        _regexp = _regexp.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
-	      } else {
-	        // Anchor regexp:
-	        _regexp = '^' + _regexp + '$';
-	      }
-	      return new RegExp(_regexp, flags);
-	    }
-	  };
-
-	  var convertArrayRequirement = function convertArrayRequirement(string, length) {
-	    var m = string.match(/^\s*\[(.*)\]\s*$/);
-	    if (!m) throw 'Requirement is not an array: "' + string + '"';
-	    var values = m[1].split(',').map(ParsleyUtils__default.trimString);
-	    if (values.length !== length) throw 'Requirement has ' + values.length + ' values when ' + length + ' are needed';
-	    return values;
-	  };
-
-	  var convertRequirement = function convertRequirement(requirementType, string) {
-	    var converter = requirementConverters[requirementType || 'string'];
-	    if (!converter) throw 'Unknown requirement specification: "' + requirementType + '"';
-	    return converter(string);
-	  };
-
-	  var convertExtraOptionRequirement = function convertExtraOptionRequirement(requirementSpec, string, extraOptionReader) {
-	    var main = null;
-	    var extra = {};
-	    for (var key in requirementSpec) {
-	      if (key) {
-	        var value = extraOptionReader(key);
-	        if ('string' === typeof value) value = convertRequirement(requirementSpec[key], value);
-	        extra[key] = value;
-	      } else {
-	        main = convertRequirement(requirementSpec[key], string);
-	      }
-	    }
-	    return [main, extra];
-	  };
-
-	  // A Validator needs to implement the methods `validate` and `parseRequirements`
-
-	  var ParsleyValidator = function ParsleyValidator(spec) {
-	    $.extend(true, this, spec);
-	  };
-
-	  ParsleyValidator.prototype = {
-	    // Returns `true` iff the given `value` is valid according the given requirements.
-	    validate: function validate(value, requirementFirstArg) {
-	      if (this.fn) {
-	        // Legacy style validator
-
-	        if (arguments.length > 3) // If more args then value, requirement, instance...
-	          requirementFirstArg = [].slice.call(arguments, 1, -1); // Skip first arg (value) and last (instance), combining the rest
-	        return this.fn.call(this, value, requirementFirstArg);
-	      }
-
-	      if ($.isArray(value)) {
-	        if (!this.validateMultiple) throw 'Validator `' + this.name + '` does not handle multiple values';
-	        return this.validateMultiple.apply(this, arguments);
-	      } else {
-	        if (this.validateNumber) {
-	          if (isNaN(value)) return false;
-	          arguments[0] = parseFloat(arguments[0]);
-	          return this.validateNumber.apply(this, arguments);
-	        }
-	        if (this.validateString) {
-	          return this.validateString.apply(this, arguments);
-	        }
-	        throw 'Validator `' + this.name + '` only handles multiple values';
-	      }
-	    },
-
-	    // Parses `requirements` into an array of arguments,
-	    // according to `this.requirementType`
-	    parseRequirements: function parseRequirements(requirements, extraOptionReader) {
-	      if ('string' !== typeof requirements) {
-	        // Assume requirement already parsed
-	        // but make sure we return an array
-	        return $.isArray(requirements) ? requirements : [requirements];
-	      }
-	      var type = this.requirementType;
-	      if ($.isArray(type)) {
-	        var values = convertArrayRequirement(requirements, type.length);
-	        for (var i = 0; i < values.length; i++) values[i] = convertRequirement(type[i], values[i]);
-	        return values;
-	      } else if ($.isPlainObject(type)) {
-	        return convertExtraOptionRequirement(type, requirements, extraOptionReader);
-	      } else {
-	        return [convertRequirement(type, requirements)];
-	      }
-	    },
-	    // Defaults:
-	    requirementType: 'string',
-
-	    priority: 2
-
-	  };
-
-	  var ParsleyValidatorRegistry = function ParsleyValidatorRegistry(validators, catalog) {
-	    this.__class__ = 'ParsleyValidatorRegistry';
-
-	    // Default Parsley locale is en
-	    this.locale = 'en';
-
-	    this.init(validators || {}, catalog || {});
-	  };
-
-	  var typeRegexes = {
-	    email: /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
-
-	    // Follow https://www.w3.org/TR/html5/infrastructure.html#floating-point-numbers
-	    number: /^-?(\d*\.)?\d+(e[-+]?\d+)?$/i,
-
-	    integer: /^-?\d+$/,
-
-	    digits: /^\d+$/,
-
-	    alphanum: /^\w+$/i,
-
-	    url: new RegExp("^" +
-	    // protocol identifier
-	    "(?:(?:https?|ftp)://)?" + // ** mod: make scheme optional
-	    // user:pass authentication
-	    "(?:\\S+(?::\\S*)?@)?" + "(?:" +
-	    // IP address exclusion
-	    // private & local networks
-	    // "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +   // ** mod: allow local networks
-	    // "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
-	    // "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +  // ** mod: allow local networks
-	    // IP address dotted notation octets
-	    // excludes loopback network 0.0.0.0
-	    // excludes reserved space >= 224.0.0.0
-	    // excludes network & broacast addresses
-	    // (first & last IP address of each class)
-	    "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" + "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" + "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" + "|" +
-	    // host name
-	    '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
-	    // domain name
-	    '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
-	    // TLD identifier
-	    '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' + ")" +
-	    // port number
-	    "(?::\\d{2,5})?" +
-	    // resource path
-	    "(?:/\\S*)?" + "$", 'i')
-	  };
-	  typeRegexes.range = typeRegexes.number;
-
-	  // See http://stackoverflow.com/a/10454560/8279
-	  var decimalPlaces = function decimalPlaces(num) {
-	    var match = ('' + num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
-	    if (!match) {
-	      return 0;
-	    }
-	    return Math.max(0,
-	    // Number of digits right of decimal point.
-	    (match[1] ? match[1].length : 0) - (
-	    // Adjust for scientific notation.
-	    match[2] ? +match[2] : 0));
-	  };
-
-	  ParsleyValidatorRegistry.prototype = {
-	    init: function init(validators, catalog) {
-	      this.catalog = catalog;
-	      // Copy prototype's validators:
-	      this.validators = $.extend({}, this.validators);
-
-	      for (var name in validators) this.addValidator(name, validators[name].fn, validators[name].priority);
-
-	      window.Parsley.trigger('parsley:validator:init');
-	    },
-
-	    // Set new messages locale if we have dictionary loaded in ParsleyConfig.i18n
-	    setLocale: function setLocale(locale) {
-	      if ('undefined' === typeof this.catalog[locale]) throw new Error(locale + ' is not available in the catalog');
-
-	      this.locale = locale;
-
-	      return this;
-	    },
-
-	    // Add a new messages catalog for a given locale. Set locale for this catalog if set === `true`
-	    addCatalog: function addCatalog(locale, messages, set) {
-	      if ('object' === typeof messages) this.catalog[locale] = messages;
-
-	      if (true === set) return this.setLocale(locale);
-
-	      return this;
-	    },
-
-	    // Add a specific message for a given constraint in a given locale
-	    addMessage: function addMessage(locale, name, message) {
-	      if ('undefined' === typeof this.catalog[locale]) this.catalog[locale] = {};
-
-	      this.catalog[locale][name] = message;
-
-	      return this;
-	    },
-
-	    // Add messages for a given locale
-	    addMessages: function addMessages(locale, nameMessageObject) {
-	      for (var name in nameMessageObject) this.addMessage(locale, name, nameMessageObject[name]);
-
-	      return this;
-	    },
-
-	    // Add a new validator
-	    //
-	    //    addValidator('custom', {
-	    //        requirementType: ['integer', 'integer'],
-	    //        validateString: function(value, from, to) {},
-	    //        priority: 22,
-	    //        messages: {
-	    //          en: "Hey, that's no good",
-	    //          fr: "Aye aye, pas bon du tout",
-	    //        }
-	    //    })
-	    //
-	    // Old API was addValidator(name, function, priority)
-	    //
-	    addValidator: function addValidator(name, arg1, arg2) {
-	      if (this.validators[name]) ParsleyUtils__default.warn('Validator "' + name + '" is already defined.');else if (ParsleyDefaults.hasOwnProperty(name)) {
-	        ParsleyUtils__default.warn('"' + name + '" is a restricted keyword and is not a valid validator name.');
-	        return;
-	      }
-	      return this._setValidator.apply(this, arguments);
-	    },
-
-	    updateValidator: function updateValidator(name, arg1, arg2) {
-	      if (!this.validators[name]) {
-	        ParsleyUtils__default.warn('Validator "' + name + '" is not already defined.');
-	        return this.addValidator.apply(this, arguments);
-	      }
-	      return this._setValidator.apply(this, arguments);
-	    },
-
-	    removeValidator: function removeValidator(name) {
-	      if (!this.validators[name]) ParsleyUtils__default.warn('Validator "' + name + '" is not defined.');
-
-	      delete this.validators[name];
-
-	      return this;
-	    },
-
-	    _setValidator: function _setValidator(name, validator, priority) {
-	      if ('object' !== typeof validator) {
-	        // Old style validator, with `fn` and `priority`
-	        validator = {
-	          fn: validator,
-	          priority: priority
-	        };
-	      }
-	      if (!validator.validate) {
-	        validator = new ParsleyValidator(validator);
-	      }
-	      this.validators[name] = validator;
-
-	      for (var locale in validator.messages || {}) this.addMessage(locale, name, validator.messages[locale]);
-
-	      return this;
-	    },
-
-	    getErrorMessage: function getErrorMessage(constraint) {
-	      var message;
-
-	      // Type constraints are a bit different, we have to match their requirements too to find right error message
-	      if ('type' === constraint.name) {
-	        var typeMessages = this.catalog[this.locale][constraint.name] || {};
-	        message = typeMessages[constraint.requirements];
-	      } else message = this.formatMessage(this.catalog[this.locale][constraint.name], constraint.requirements);
-
-	      return message || this.catalog[this.locale].defaultMessage || this.catalog.en.defaultMessage;
-	    },
-
-	    // Kind of light `sprintf()` implementation
-	    formatMessage: function formatMessage(string, parameters) {
-	      if ('object' === typeof parameters) {
-	        for (var i in parameters) string = this.formatMessage(string, parameters[i]);
-
-	        return string;
-	      }
-
-	      return 'string' === typeof string ? string.replace(/%s/i, parameters) : '';
-	    },
-
-	    // Here is the Parsley default validators list.
-	    // A validator is an object with the following key values:
-	    //  - priority: an integer
-	    //  - requirement: 'string' (default), 'integer', 'number', 'regexp' or an Array of these
-	    //  - validateString, validateMultiple, validateNumber: functions returning `true`, `false` or a promise
-	    // Alternatively, a validator can be a function that returns such an object
-	    //
-	    validators: {
-	      notblank: {
-	        validateString: function validateString(value) {
-	          return (/\S/.test(value)
-	          );
-	        },
-	        priority: 2
-	      },
-	      required: {
-	        validateMultiple: function validateMultiple(values) {
-	          return values.length > 0;
-	        },
-	        validateString: function validateString(value) {
-	          return (/\S/.test(value)
-	          );
-	        },
-	        priority: 512
-	      },
-	      type: {
-	        validateString: function validateString(value, type) {
-	          var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-	          var _ref$step = _ref.step;
-	          var step = _ref$step === undefined ? '1' : _ref$step;
-	          var _ref$base = _ref.base;
-	          var base = _ref$base === undefined ? 0 : _ref$base;
-
-	          var regex = typeRegexes[type];
-	          if (!regex) {
-	            throw new Error('validator type `' + type + '` is not supported');
-	          }
-	          if (!regex.test(value)) return false;
-	          if ('number' === type) {
-	            if (!/^any$/i.test(step || '')) {
-	              var nb = Number(value);
-	              var decimals = Math.max(decimalPlaces(step), decimalPlaces(base));
-	              if (decimalPlaces(nb) > decimals) // Value can't have too many decimals
-	                return false;
-	              // Be careful of rounding errors by using integers.
-	              var toInt = function toInt(f) {
-	                return Math.round(f * Math.pow(10, decimals));
-	              };
-	              if ((toInt(nb) - toInt(base)) % toInt(step) != 0) return false;
-	            }
-	          }
-	          return true;
-	        },
-	        requirementType: {
-	          '': 'string',
-	          step: 'string',
-	          base: 'number'
-	        },
-	        priority: 256
-	      },
-	      pattern: {
-	        validateString: function validateString(value, regexp) {
-	          return regexp.test(value);
-	        },
-	        requirementType: 'regexp',
-	        priority: 64
-	      },
-	      minlength: {
-	        validateString: function validateString(value, requirement) {
-	          return value.length >= requirement;
-	        },
-	        requirementType: 'integer',
-	        priority: 30
-	      },
-	      maxlength: {
-	        validateString: function validateString(value, requirement) {
-	          return value.length <= requirement;
-	        },
-	        requirementType: 'integer',
-	        priority: 30
-	      },
-	      length: {
-	        validateString: function validateString(value, min, max) {
-	          return value.length >= min && value.length <= max;
-	        },
-	        requirementType: ['integer', 'integer'],
-	        priority: 30
-	      },
-	      mincheck: {
-	        validateMultiple: function validateMultiple(values, requirement) {
-	          return values.length >= requirement;
-	        },
-	        requirementType: 'integer',
-	        priority: 30
-	      },
-	      maxcheck: {
-	        validateMultiple: function validateMultiple(values, requirement) {
-	          return values.length <= requirement;
-	        },
-	        requirementType: 'integer',
-	        priority: 30
-	      },
-	      check: {
-	        validateMultiple: function validateMultiple(values, min, max) {
-	          return values.length >= min && values.length <= max;
-	        },
-	        requirementType: ['integer', 'integer'],
-	        priority: 30
-	      },
-	      min: {
-	        validateNumber: function validateNumber(value, requirement) {
-	          return value >= requirement;
-	        },
-	        requirementType: 'number',
-	        priority: 30
-	      },
-	      max: {
-	        validateNumber: function validateNumber(value, requirement) {
-	          return value <= requirement;
-	        },
-	        requirementType: 'number',
-	        priority: 30
-	      },
-	      range: {
-	        validateNumber: function validateNumber(value, min, max) {
-	          return value >= min && value <= max;
-	        },
-	        requirementType: ['number', 'number'],
-	        priority: 30
-	      },
-	      equalto: {
-	        validateString: function validateString(value, refOrValue) {
-	          var $reference = $(refOrValue);
-	          if ($reference.length) return value === $reference.val();else return value === refOrValue;
-	        },
-	        priority: 256
-	      }
-	    }
-	  };
-
-	  var ParsleyUI = {};
-
-	  var diffResults = function diffResults(newResult, oldResult, deep) {
-	    var added = [];
-	    var kept = [];
-
-	    for (var i = 0; i < newResult.length; i++) {
-	      var found = false;
-
-	      for (var j = 0; j < oldResult.length; j++) if (newResult[i].assert.name === oldResult[j].assert.name) {
-	        found = true;
-	        break;
-	      }
-
-	      if (found) kept.push(newResult[i]);else added.push(newResult[i]);
-	    }
-
-	    return {
-	      kept: kept,
-	      added: added,
-	      removed: !deep ? diffResults(oldResult, newResult, true).added : []
-	    };
-	  };
-
-	  ParsleyUI.Form = {
-
-	    _actualizeTriggers: function _actualizeTriggers() {
-	      var _this2 = this;
-
-	      this.$element.on('submit.Parsley', function (evt) {
-	        _this2.onSubmitValidate(evt);
-	      });
-	      this.$element.on('click.Parsley', 'input[type="submit"], button[type="submit"]', function (evt) {
-	        _this2.onSubmitButton(evt);
-	      });
-
-	      // UI could be disabled
-	      if (false === this.options.uiEnabled) return;
-
-	      this.$element.attr('novalidate', '');
-	    },
-
-	    focus: function focus() {
-	      this._focusedField = null;
-
-	      if (true === this.validationResult || 'none' === this.options.focus) return null;
-
-	      for (var i = 0; i < this.fields.length; i++) {
-	        var field = this.fields[i];
-	        if (true !== field.validationResult && field.validationResult.length > 0 && 'undefined' === typeof field.options.noFocus) {
-	          this._focusedField = field.$element;
-	          if ('first' === this.options.focus) break;
-	        }
-	      }
-
-	      if (null === this._focusedField) return null;
-
-	      return this._focusedField.focus();
-	    },
-
-	    _destroyUI: function _destroyUI() {
-	      // Reset all event listeners
-	      this.$element.off('.Parsley');
-	    }
-
-	  };
-
-	  ParsleyUI.Field = {
-
-	    _reflowUI: function _reflowUI() {
-	      this._buildUI();
-
-	      // If this field doesn't have an active UI don't bother doing something
-	      if (!this._ui) return;
-
-	      // Diff between two validation results
-	      var diff = diffResults(this.validationResult, this._ui.lastValidationResult);
-
-	      // Then store current validation result for next reflow
-	      this._ui.lastValidationResult = this.validationResult;
-
-	      // Handle valid / invalid / none field class
-	      this._manageStatusClass();
-
-	      // Add, remove, updated errors messages
-	      this._manageErrorsMessages(diff);
-
-	      // Triggers impl
-	      this._actualizeTriggers();
-
-	      // If field is not valid for the first time, bind keyup trigger to ease UX and quickly inform user
-	      if ((diff.kept.length || diff.added.length) && !this._failedOnce) {
-	        this._failedOnce = true;
-	        this._actualizeTriggers();
-	      }
-	    },
-
-	    // Returns an array of field's error message(s)
-	    getErrorsMessages: function getErrorsMessages() {
-	      // No error message, field is valid
-	      if (true === this.validationResult) return [];
-
-	      var messages = [];
-
-	      for (var i = 0; i < this.validationResult.length; i++) messages.push(this.validationResult[i].errorMessage || this._getErrorMessage(this.validationResult[i].assert));
-
-	      return messages;
-	    },
-
-	    // It's a goal of Parsley that this method is no longer required [#1073]
-	    addError: function addError(name) {
-	      var _ref2 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	      var message = _ref2.message;
-	      var assert = _ref2.assert;
-	      var _ref2$updateClass = _ref2.updateClass;
-	      var updateClass = _ref2$updateClass === undefined ? true : _ref2$updateClass;
-
-	      this._buildUI();
-	      this._addError(name, { message: message, assert: assert });
-
-	      if (updateClass) this._errorClass();
-	    },
-
-	    // It's a goal of Parsley that this method is no longer required [#1073]
-	    updateError: function updateError(name) {
-	      var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	      var message = _ref3.message;
-	      var assert = _ref3.assert;
-	      var _ref3$updateClass = _ref3.updateClass;
-	      var updateClass = _ref3$updateClass === undefined ? true : _ref3$updateClass;
-
-	      this._buildUI();
-	      this._updateError(name, { message: message, assert: assert });
-
-	      if (updateClass) this._errorClass();
-	    },
-
-	    // It's a goal of Parsley that this method is no longer required [#1073]
-	    removeError: function removeError(name) {
-	      var _ref4 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-	      var _ref4$updateClass = _ref4.updateClass;
-	      var updateClass = _ref4$updateClass === undefined ? true : _ref4$updateClass;
-
-	      this._buildUI();
-	      this._removeError(name);
-
-	      // edge case possible here: remove a standard Parsley error that is still failing in this.validationResult
-	      // but highly improbable cuz' manually removing a well Parsley handled error makes no sense.
-	      if (updateClass) this._manageStatusClass();
-	    },
-
-	    _manageStatusClass: function _manageStatusClass() {
-	      if (this.hasConstraints() && this.needsValidation() && true === this.validationResult) this._successClass();else if (this.validationResult.length > 0) this._errorClass();else this._resetClass();
-	    },
-
-	    _manageErrorsMessages: function _manageErrorsMessages(diff) {
-	      if ('undefined' !== typeof this.options.errorsMessagesDisabled) return;
-
-	      // Case where we have errorMessage option that configure an unique field error message, regardless failing validators
-	      if ('undefined' !== typeof this.options.errorMessage) {
-	        if (diff.added.length || diff.kept.length) {
-	          this._insertErrorWrapper();
-
-	          if (0 === this._ui.$errorsWrapper.find('.parsley-custom-error-message').length) this._ui.$errorsWrapper.append($(this.options.errorTemplate).addClass('parsley-custom-error-message'));
-
-	          return this._ui.$errorsWrapper.addClass('filled').find('.parsley-custom-error-message').html(this.options.errorMessage);
-	        }
-
-	        return this._ui.$errorsWrapper.removeClass('filled').find('.parsley-custom-error-message').remove();
-	      }
-
-	      // Show, hide, update failing constraints messages
-	      for (var i = 0; i < diff.removed.length; i++) this._removeError(diff.removed[i].assert.name);
-
-	      for (i = 0; i < diff.added.length; i++) this._addError(diff.added[i].assert.name, { message: diff.added[i].errorMessage, assert: diff.added[i].assert });
-
-	      for (i = 0; i < diff.kept.length; i++) this._updateError(diff.kept[i].assert.name, { message: diff.kept[i].errorMessage, assert: diff.kept[i].assert });
-	    },
-
-	    _addError: function _addError(name, _ref5) {
-	      var message = _ref5.message;
-	      var assert = _ref5.assert;
-
-	      this._insertErrorWrapper();
-	      this._ui.$errorsWrapper.addClass('filled').append($(this.options.errorTemplate).addClass('parsley-' + name).html(message || this._getErrorMessage(assert)));
-	    },
-
-	    _updateError: function _updateError(name, _ref6) {
-	      var message = _ref6.message;
-	      var assert = _ref6.assert;
-
-	      this._ui.$errorsWrapper.addClass('filled').find('.parsley-' + name).html(message || this._getErrorMessage(assert));
-	    },
-
-	    _removeError: function _removeError(name) {
-	      this._ui.$errorsWrapper.removeClass('filled').find('.parsley-' + name).remove();
-	    },
-
-	    _getErrorMessage: function _getErrorMessage(constraint) {
-	      var customConstraintErrorMessage = constraint.name + 'Message';
-
-	      if ('undefined' !== typeof this.options[customConstraintErrorMessage]) return window.Parsley.formatMessage(this.options[customConstraintErrorMessage], constraint.requirements);
-
-	      return window.Parsley.getErrorMessage(constraint);
-	    },
-
-	    _buildUI: function _buildUI() {
-	      // UI could be already built or disabled
-	      if (this._ui || false === this.options.uiEnabled) return;
-
-	      var _ui = {};
-
-	      // Give field its Parsley id in DOM
-	      this.$element.attr(this.options.namespace + 'id', this.__id__);
-
-	      /** Generate important UI elements and store them in this **/
-	      // $errorClassHandler is the $element that woul have parsley-error and parsley-success classes
-	      _ui.$errorClassHandler = this._manageClassHandler();
-
-	      // $errorsWrapper is a div that would contain the various field errors, it will be appended into $errorsContainer
-	      _ui.errorsWrapperId = 'parsley-id-' + (this.options.multiple ? 'multiple-' + this.options.multiple : this.__id__);
-	      _ui.$errorsWrapper = $(this.options.errorsWrapper).attr('id', _ui.errorsWrapperId);
-
-	      // ValidationResult UI storage to detect what have changed bwt two validations, and update DOM accordingly
-	      _ui.lastValidationResult = [];
-	      _ui.validationInformationVisible = false;
-
-	      // Store it in this for later
-	      this._ui = _ui;
-	    },
-
-	    // Determine which element will have `parsley-error` and `parsley-success` classes
-	    _manageClassHandler: function _manageClassHandler() {
-	      // An element selector could be passed through DOM with `data-parsley-class-handler=#foo`
-	      if ('string' === typeof this.options.classHandler && $(this.options.classHandler).length) return $(this.options.classHandler);
-
-	      // Class handled could also be determined by function given in Parsley options
-	      var $handler = this.options.classHandler.call(this, this);
-
-	      // If this function returned a valid existing DOM element, go for it
-	      if ('undefined' !== typeof $handler && $handler.length) return $handler;
-
-	      // Otherwise, if simple element (input, texatrea, select...) it will perfectly host the classes
-	      if (!this.options.multiple || this.$element.is('select')) return this.$element;
-
-	      // But if multiple element (radio, checkbox), that would be their parent
-	      return this.$element.parent();
-	    },
-
-	    _insertErrorWrapper: function _insertErrorWrapper() {
-	      var $errorsContainer;
-
-	      // Nothing to do if already inserted
-	      if (0 !== this._ui.$errorsWrapper.parent().length) return this._ui.$errorsWrapper.parent();
-
-	      if ('string' === typeof this.options.errorsContainer) {
-	        if ($(this.options.errorsContainer).length) return $(this.options.errorsContainer).append(this._ui.$errorsWrapper);else ParsleyUtils__default.warn('The errors container `' + this.options.errorsContainer + '` does not exist in DOM');
-	      } else if ('function' === typeof this.options.errorsContainer) $errorsContainer = this.options.errorsContainer.call(this, this);
-
-	      if ('undefined' !== typeof $errorsContainer && $errorsContainer.length) return $errorsContainer.append(this._ui.$errorsWrapper);
-
-	      var $from = this.$element;
-	      if (this.options.multiple) $from = $from.parent();
-	      return $from.after(this._ui.$errorsWrapper);
-	    },
-
-	    _actualizeTriggers: function _actualizeTriggers() {
-	      var _this3 = this;
-
-	      var $toBind = this._findRelated();
-	      var trigger;
-
-	      // Remove Parsley events already bound on this field
-	      $toBind.off('.Parsley');
-	      if (this._failedOnce) $toBind.on(ParsleyUtils__default.namespaceEvents(this.options.triggerAfterFailure, 'Parsley'), function () {
-	        _this3.validate();
-	      });else if (trigger = ParsleyUtils__default.namespaceEvents(this.options.trigger, 'Parsley')) {
-	        $toBind.on(trigger, function (event) {
-	          _this3._eventValidate(event);
-	        });
-	      }
-	    },
-
-	    _eventValidate: function _eventValidate(event) {
-	      // For keyup, keypress, keydown, input... events that could be a little bit obstrusive
-	      // do not validate if val length < min threshold on first validation. Once field have been validated once and info
-	      // about success or failure have been displayed, always validate with this trigger to reflect every yalidation change.
-	      if (/key|input/.test(event.type)) if (!(this._ui && this._ui.validationInformationVisible) && this.getValue().length <= this.options.validationThreshold) return;
-
-	      this.validate();
-	    },
-
-	    _resetUI: function _resetUI() {
-	      // Reset all event listeners
-	      this._failedOnce = false;
-	      this._actualizeTriggers();
-
-	      // Nothing to do if UI never initialized for this field
-	      if ('undefined' === typeof this._ui) return;
-
-	      // Reset all errors' li
-	      this._ui.$errorsWrapper.removeClass('filled').children().remove();
-
-	      // Reset validation class
-	      this._resetClass();
-
-	      // Reset validation flags and last validation result
-	      this._ui.lastValidationResult = [];
-	      this._ui.validationInformationVisible = false;
-	    },
-
-	    _destroyUI: function _destroyUI() {
-	      this._resetUI();
-
-	      if ('undefined' !== typeof this._ui) this._ui.$errorsWrapper.remove();
-
-	      delete this._ui;
-	    },
-
-	    _successClass: function _successClass() {
-	      this._ui.validationInformationVisible = true;
-	      this._ui.$errorClassHandler.removeClass(this.options.errorClass).addClass(this.options.successClass);
-	    },
-	    _errorClass: function _errorClass() {
-	      this._ui.validationInformationVisible = true;
-	      this._ui.$errorClassHandler.removeClass(this.options.successClass).addClass(this.options.errorClass);
-	    },
-	    _resetClass: function _resetClass() {
-	      this._ui.$errorClassHandler.removeClass(this.options.successClass).removeClass(this.options.errorClass);
-	    }
-	  };
-
-	  var ParsleyForm = function ParsleyForm(element, domOptions, options) {
-	    this.__class__ = 'ParsleyForm';
-
-	    this.$element = $(element);
-	    this.domOptions = domOptions;
-	    this.options = options;
-	    this.parent = window.Parsley;
-
-	    this.fields = [];
-	    this.validationResult = null;
-	  };
-
-	  var ParsleyForm__statusMapping = { pending: null, resolved: true, rejected: false };
-
-	  ParsleyForm.prototype = {
-	    onSubmitValidate: function onSubmitValidate(event) {
-	      var _this4 = this;
-
-	      // This is a Parsley generated submit event, do not validate, do not prevent, simply exit and keep normal behavior
-	      if (true === event.parsley) return;
-
-	      // If we didn't come here through a submit button, use the first one in the form
-	      var $submitSource = this._$submitSource || this.$element.find('input[type="submit"], button[type="submit"]').first();
-	      this._$submitSource = null;
-	      this.$element.find('.parsley-synthetic-submit-button').prop('disabled', true);
-	      if ($submitSource.is('[formnovalidate]')) return;
-
-	      var promise = this.whenValidate({ event: event });
-
-	      if ('resolved' === promise.state() && false !== this._trigger('submit')) {
-	        // All good, let event go through. We make this distinction because browsers
-	        // differ in their handling of `submit` being called from inside a submit event [#1047]
-	      } else {
-	          // Rejected or pending: cancel this submit
-	          event.stopImmediatePropagation();
-	          event.preventDefault();
-	          if ('pending' === promise.state()) promise.done(function () {
-	            _this4._submit($submitSource);
-	          });
-	        }
-	    },
-
-	    onSubmitButton: function onSubmitButton(event) {
-	      this._$submitSource = $(event.target);
-	    },
-	    // internal
-	    // _submit submits the form, this time without going through the validations.
-	    // Care must be taken to "fake" the actual submit button being clicked.
-	    _submit: function _submit($submitSource) {
-	      if (false === this._trigger('submit')) return;
-	      // Add submit button's data
-	      if ($submitSource) {
-	        var $synthetic = this.$element.find('.parsley-synthetic-submit-button').prop('disabled', false);
-	        if (0 === $synthetic.length) $synthetic = $('<input class="parsley-synthetic-submit-button" type="hidden">').appendTo(this.$element);
-	        $synthetic.attr({
-	          name: $submitSource.attr('name'),
-	          value: $submitSource.attr('value')
-	        });
-	      }
-
-	      this.$element.trigger($.extend($.Event('submit'), { parsley: true }));
-	    },
-
-	    // Performs validation on fields while triggering events.
-	    // @returns `true` if all validations succeeds, `false`
-	    // if a failure is immediately detected, or `null`
-	    // if dependant on a promise.
-	    // Consider using `whenValidate` instead.
-	    validate: function validate(options) {
-	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
-	        ParsleyUtils__default.warnOnce('Calling validate on a parsley form without passing arguments as an object is deprecated.');
-
-	        var _arguments = _slice.call(arguments);
-
-	        var group = _arguments[0];
-	        var force = _arguments[1];
-	        var event = _arguments[2];
-
-	        options = { group: group, force: force, event: event };
-	      }
-	      return ParsleyForm__statusMapping[this.whenValidate(options).state()];
-	    },
-
-	    whenValidate: function whenValidate() {
-	      var _$$when$done$fail$always,
-	          _this5 = this;
-
-	      var _ref7 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var group = _ref7.group;
-	      var force = _ref7.force;
-	      var event = _ref7.event;
-
-	      this.submitEvent = event;
-	      if (event) {
-	        this.submitEvent = $.extend({}, event, { preventDefault: function preventDefault() {
-	            ParsleyUtils__default.warnOnce("Using `this.submitEvent.preventDefault()` is deprecated; instead, call `this.validationResult = false`");
-	            _this5.validationResult = false;
-	          } });
-	      }
-	      this.validationResult = true;
-
-	      // fire validate event to eventually modify things before very validation
-	      this._trigger('validate');
-
-	      // Refresh form DOM options and form's fields that could have changed
-	      this._refreshFields();
-
-	      var promises = this._withoutReactualizingFormOptions(function () {
-	        return $.map(_this5.fields, function (field) {
-	          return field.whenValidate({ force: force, group: group });
-	        });
-	      });
-
-	      return (_$$when$done$fail$always = $.when.apply($, _toConsumableArray(promises)).done(function () {
-	        _this5._trigger('success');
-	      }).fail(function () {
-	        _this5.validationResult = false;
-	        _this5.focus();
-	        _this5._trigger('error');
-	      }).always(function () {
-	        _this5._trigger('validated');
-	      })).pipe.apply(_$$when$done$fail$always, _toConsumableArray(this._pipeAccordingToValidationResult()));
-	    },
-
-	    // Iterate over refreshed fields, and stop on first failure.
-	    // Returns `true` if all fields are valid, `false` if a failure is detected
-	    // or `null` if the result depends on an unresolved promise.
-	    // Prefer using `whenValid` instead.
-	    isValid: function isValid(options) {
-	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
-	        ParsleyUtils__default.warnOnce('Calling isValid on a parsley form without passing arguments as an object is deprecated.');
-
-	        var _arguments2 = _slice.call(arguments);
-
-	        var group = _arguments2[0];
-	        var force = _arguments2[1];
-
-	        options = { group: group, force: force };
-	      }
-	      return ParsleyForm__statusMapping[this.whenValid(options).state()];
-	    },
-
-	    // Iterate over refreshed fields and validate them.
-	    // Returns a promise.
-	    // A validation that immediately fails will interrupt the validations.
-	    whenValid: function whenValid() {
-	      var _this6 = this;
-
-	      var _ref8 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var group = _ref8.group;
-	      var force = _ref8.force;
-
-	      this._refreshFields();
-
-	      var promises = this._withoutReactualizingFormOptions(function () {
-	        return $.map(_this6.fields, function (field) {
-	          return field.whenValid({ group: group, force: force });
-	        });
-	      });
-	      return $.when.apply($, _toConsumableArray(promises));
-	    },
-
-	    _refreshFields: function _refreshFields() {
-	      return this.actualizeOptions()._bindFields();
-	    },
-
-	    _bindFields: function _bindFields() {
-	      var _this7 = this;
-
-	      var oldFields = this.fields;
-
-	      this.fields = [];
-	      this.fieldsMappedById = {};
-
-	      this._withoutReactualizingFormOptions(function () {
-	        _this7.$element.find(_this7.options.inputs).not(_this7.options.excluded).each(function (_, element) {
-	          var fieldInstance = new window.Parsley.Factory(element, {}, _this7);
-
-	          // Only add valid and not excluded `ParsleyField` and `ParsleyFieldMultiple` children
-	          if (('ParsleyField' === fieldInstance.__class__ || 'ParsleyFieldMultiple' === fieldInstance.__class__) && true !== fieldInstance.options.excluded) if ('undefined' === typeof _this7.fieldsMappedById[fieldInstance.__class__ + '-' + fieldInstance.__id__]) {
-	            _this7.fieldsMappedById[fieldInstance.__class__ + '-' + fieldInstance.__id__] = fieldInstance;
-	            _this7.fields.push(fieldInstance);
-	          }
-	        });
-
-	        $(oldFields).not(_this7.fields).each(function (_, field) {
-	          field._trigger('reset');
-	        });
-	      });
-	      return this;
-	    },
-
-	    // Internal only.
-	    // Looping on a form's fields to do validation or similar
-	    // will trigger reactualizing options on all of them, which
-	    // in turn will reactualize the form's options.
-	    // To avoid calling actualizeOptions so many times on the form
-	    // for nothing, _withoutReactualizingFormOptions temporarily disables
-	    // the method actualizeOptions on this form while `fn` is called.
-	    _withoutReactualizingFormOptions: function _withoutReactualizingFormOptions(fn) {
-	      var oldActualizeOptions = this.actualizeOptions;
-	      this.actualizeOptions = function () {
-	        return this;
-	      };
-	      var result = fn();
-	      this.actualizeOptions = oldActualizeOptions;
-	      return result;
-	    },
-
-	    // Internal only.
-	    // Shortcut to trigger an event
-	    // Returns true iff event is not interrupted and default not prevented.
-	    _trigger: function _trigger(eventName) {
-	      return this.trigger('form:' + eventName);
-	    }
-
-	  };
-
-	  var ConstraintFactory = function ConstraintFactory(parsleyField, name, requirements, priority, isDomConstraint) {
-	    if (!/ParsleyField/.test(parsleyField.__class__)) throw new Error('ParsleyField or ParsleyFieldMultiple instance expected');
-
-	    var validatorSpec = window.Parsley._validatorRegistry.validators[name];
-	    var validator = new ParsleyValidator(validatorSpec);
-
-	    $.extend(this, {
-	      validator: validator,
-	      name: name,
-	      requirements: requirements,
-	      priority: priority || parsleyField.options[name + 'Priority'] || validator.priority,
-	      isDomConstraint: true === isDomConstraint
-	    });
-	    this._parseRequirements(parsleyField.options);
-	  };
-
-	  var capitalize = function capitalize(str) {
-	    var cap = str[0].toUpperCase();
-	    return cap + str.slice(1);
-	  };
-
-	  ConstraintFactory.prototype = {
-	    validate: function validate(value, instance) {
-	      var args = this.requirementList.slice(0); // Make copy
-	      args.unshift(value);
-	      args.push(instance);
-	      return this.validator.validate.apply(this.validator, args);
-	    },
-
-	    _parseRequirements: function _parseRequirements(options) {
-	      var _this8 = this;
-
-	      this.requirementList = this.validator.parseRequirements(this.requirements, function (key) {
-	        return options[_this8.name + capitalize(key)];
-	      });
-	    }
-	  };
-
-	  var ParsleyField = function ParsleyField(field, domOptions, options, parsleyFormInstance) {
-	    this.__class__ = 'ParsleyField';
-
-	    this.$element = $(field);
-
-	    // Set parent if we have one
-	    if ('undefined' !== typeof parsleyFormInstance) {
-	      this.parent = parsleyFormInstance;
-	    }
-
-	    this.options = options;
-	    this.domOptions = domOptions;
-
-	    // Initialize some properties
-	    this.constraints = [];
-	    this.constraintsByName = {};
-	    this.validationResult = true;
-
-	    // Bind constraints
-	    this._bindConstraints();
-	  };
-
-	  var parsley_field__statusMapping = { pending: null, resolved: true, rejected: false };
-
-	  ParsleyField.prototype = {
-	    // # Public API
-	    // Validate field and trigger some events for mainly `ParsleyUI`
-	    // @returns `true`, an array of the validators that failed, or
-	    // `null` if validation is not finished. Prefer using whenValidate
-	    validate: function validate(options) {
-	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
-	        ParsleyUtils__default.warnOnce('Calling validate on a parsley field without passing arguments as an object is deprecated.');
-	        options = { options: options };
-	      }
-	      var promise = this.whenValidate(options);
-	      if (!promise) // If excluded with `group` option
-	        return true;
-	      switch (promise.state()) {
-	        case 'pending':
-	          return null;
-	        case 'resolved':
-	          return true;
-	        case 'rejected':
-	          return this.validationResult;
-	      }
-	    },
-
-	    // Validate field and trigger some events for mainly `ParsleyUI`
-	    // @returns a promise that succeeds only when all validations do
-	    // or `undefined` if field is not in the given `group`.
-	    whenValidate: function whenValidate() {
-	      var _whenValid$always$done$fail$always,
-	          _this9 = this;
-
-	      var _ref9 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var force = _ref9.force;
-	      var group = _ref9.group;
-
-	      // do not validate a field if not the same as given validation group
-	      this.refreshConstraints();
-	      if (group && !this._isInGroup(group)) return;
-
-	      this.value = this.getValue();
-
-	      // Field Validate event. `this.value` could be altered for custom needs
-	      this._trigger('validate');
-
-	      return (_whenValid$always$done$fail$always = this.whenValid({ force: force, value: this.value, _refreshed: true }).always(function () {
-	        _this9._reflowUI();
-	      }).done(function () {
-	        _this9._trigger('success');
-	      }).fail(function () {
-	        _this9._trigger('error');
-	      }).always(function () {
-	        _this9._trigger('validated');
-	      })).pipe.apply(_whenValid$always$done$fail$always, _toConsumableArray(this._pipeAccordingToValidationResult()));
-	    },
-
-	    hasConstraints: function hasConstraints() {
-	      return 0 !== this.constraints.length;
-	    },
-
-	    // An empty optional field does not need validation
-	    needsValidation: function needsValidation(value) {
-	      if ('undefined' === typeof value) value = this.getValue();
-
-	      // If a field is empty and not required, it is valid
-	      // Except if `data-parsley-validate-if-empty` explicitely added, useful for some custom validators
-	      if (!value.length && !this._isRequired() && 'undefined' === typeof this.options.validateIfEmpty) return false;
-
-	      return true;
-	    },
-
-	    _isInGroup: function _isInGroup(group) {
-	      if ($.isArray(this.options.group)) return -1 !== $.inArray(group, this.options.group);
-	      return this.options.group === group;
-	    },
-
-	    // Just validate field. Do not trigger any event.
-	    // Returns `true` iff all constraints pass, `false` if there are failures,
-	    // or `null` if the result can not be determined yet (depends on a promise)
-	    // See also `whenValid`.
-	    isValid: function isValid(options) {
-	      if (arguments.length >= 1 && !$.isPlainObject(options)) {
-	        ParsleyUtils__default.warnOnce('Calling isValid on a parsley field without passing arguments as an object is deprecated.');
-
-	        var _arguments3 = _slice.call(arguments);
-
-	        var force = _arguments3[0];
-	        var value = _arguments3[1];
-
-	        options = { force: force, value: value };
-	      }
-	      var promise = this.whenValid(options);
-	      if (!promise) // Excluded via `group`
-	        return true;
-	      return parsley_field__statusMapping[promise.state()];
-	    },
-
-	    // Just validate field. Do not trigger any event.
-	    // @returns a promise that succeeds only when all validations do
-	    // or `undefined` if the field is not in the given `group`.
-	    // The argument `force` will force validation of empty fields.
-	    // If a `value` is given, it will be validated instead of the value of the input.
-	    whenValid: function whenValid() {
-	      var _this10 = this;
-
-	      var _ref10 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-	      var _ref10$force = _ref10.force;
-	      var force = _ref10$force === undefined ? false : _ref10$force;
-	      var value = _ref10.value;
-	      var group = _ref10.group;
-	      var _refreshed = _ref10._refreshed;
-
-	      // Recompute options and rebind constraints to have latest changes
-	      if (!_refreshed) this.refreshConstraints();
-	      // do not validate a field if not the same as given validation group
-	      if (group && !this._isInGroup(group)) return;
-
-	      this.validationResult = true;
-
-	      // A field without constraint is valid
-	      if (!this.hasConstraints()) return $.when();
-
-	      // Value could be passed as argument, needed to add more power to 'field:validate'
-	      if ('undefined' === typeof value || null === value) value = this.getValue();
-
-	      if (!this.needsValidation(value) && true !== force) return $.when();
-
-	      var groupedConstraints = this._getGroupedConstraints();
-	      var promises = [];
-	      $.each(groupedConstraints, function (_, constraints) {
-	        // Process one group of constraints at a time, we validate the constraints
-	        // and combine the promises together.
-	        var promise = $.when.apply($, _toConsumableArray($.map(constraints, function (constraint) {
-	          return _this10._validateConstraint(value, constraint);
-	        })));
-	        promises.push(promise);
-	        if (promise.state() === 'rejected') return false; // Interrupt processing if a group has already failed
-	      });
-	      return $.when.apply($, promises);
-	    },
-
-	    // @returns a promise
-	    _validateConstraint: function _validateConstraint(value, constraint) {
-	      var _this11 = this;
-
-	      var result = constraint.validate(value, this);
-	      // Map false to a failed promise
-	      if (false === result) result = $.Deferred().reject();
-	      // Make sure we return a promise and that we record failures
-	      return $.when(result).fail(function (errorMessage) {
-	        if (!(_this11.validationResult instanceof Array)) _this11.validationResult = [];
-	        _this11.validationResult.push({
-	          assert: constraint,
-	          errorMessage: 'string' === typeof errorMessage && errorMessage
-	        });
-	      });
-	    },
-
-	    // @returns Parsley field computed value that could be overrided or configured in DOM
-	    getValue: function getValue() {
-	      var value;
-
-	      // Value could be overriden in DOM or with explicit options
-	      if ('function' === typeof this.options.value) value = this.options.value(this);else if ('undefined' !== typeof this.options.value) value = this.options.value;else value = this.$element.val();
-
-	      // Handle wrong DOM or configurations
-	      if ('undefined' === typeof value || null === value) return '';
-
-	      return this._handleWhitespace(value);
-	    },
-
-	    // Actualize options that could have change since previous validation
-	    // Re-bind accordingly constraints (could be some new, removed or updated)
-	    refreshConstraints: function refreshConstraints() {
-	      return this.actualizeOptions()._bindConstraints();
-	    },
-
-	    /**
-	    * Add a new constraint to a field
-	    *
-	    * @param {String}   name
-	    * @param {Mixed}    requirements      optional
-	    * @param {Number}   priority          optional
-	    * @param {Boolean}  isDomConstraint   optional
-	    */
-	    addConstraint: function addConstraint(name, requirements, priority, isDomConstraint) {
-
-	      if (window.Parsley._validatorRegistry.validators[name]) {
-	        var constraint = new ConstraintFactory(this, name, requirements, priority, isDomConstraint);
-
-	        // if constraint already exist, delete it and push new version
-	        if ('undefined' !== this.constraintsByName[constraint.name]) this.removeConstraint(constraint.name);
-
-	        this.constraints.push(constraint);
-	        this.constraintsByName[constraint.name] = constraint;
-	      }
-
-	      return this;
-	    },
-
-	    // Remove a constraint
-	    removeConstraint: function removeConstraint(name) {
-	      for (var i = 0; i < this.constraints.length; i++) if (name === this.constraints[i].name) {
-	        this.constraints.splice(i, 1);
-	        break;
-	      }
-	      delete this.constraintsByName[name];
-	      return this;
-	    },
-
-	    // Update a constraint (Remove + re-add)
-	    updateConstraint: function updateConstraint(name, parameters, priority) {
-	      return this.removeConstraint(name).addConstraint(name, parameters, priority);
-	    },
-
-	    // # Internals
-
-	    // Internal only.
-	    // Bind constraints from config + options + DOM
-	    _bindConstraints: function _bindConstraints() {
-	      var constraints = [];
-	      var constraintsByName = {};
-
-	      // clean all existing DOM constraints to only keep javascript user constraints
-	      for (var i = 0; i < this.constraints.length; i++) if (false === this.constraints[i].isDomConstraint) {
-	        constraints.push(this.constraints[i]);
-	        constraintsByName[this.constraints[i].name] = this.constraints[i];
-	      }
-
-	      this.constraints = constraints;
-	      this.constraintsByName = constraintsByName;
-
-	      // then re-add Parsley DOM-API constraints
-	      for (var name in this.options) this.addConstraint(name, this.options[name], undefined, true);
-
-	      // finally, bind special HTML5 constraints
-	      return this._bindHtml5Constraints();
-	    },
-
-	    // Internal only.
-	    // Bind specific HTML5 constraints to be HTML5 compliant
-	    _bindHtml5Constraints: function _bindHtml5Constraints() {
-	      // html5 required
-	      if (this.$element.hasClass('required') || this.$element.attr('required')) this.addConstraint('required', true, undefined, true);
-
-	      // html5 pattern
-	      if ('string' === typeof this.$element.attr('pattern')) this.addConstraint('pattern', this.$element.attr('pattern'), undefined, true);
-
-	      // range
-	      if ('undefined' !== typeof this.$element.attr('min') && 'undefined' !== typeof this.$element.attr('max')) this.addConstraint('range', [this.$element.attr('min'), this.$element.attr('max')], undefined, true);
-
-	      // HTML5 min
-	      else if ('undefined' !== typeof this.$element.attr('min')) this.addConstraint('min', this.$element.attr('min'), undefined, true);
-
-	        // HTML5 max
-	        else if ('undefined' !== typeof this.$element.attr('max')) this.addConstraint('max', this.$element.attr('max'), undefined, true);
-
-	      // length
-	      if ('undefined' !== typeof this.$element.attr('minlength') && 'undefined' !== typeof this.$element.attr('maxlength')) this.addConstraint('length', [this.$element.attr('minlength'), this.$element.attr('maxlength')], undefined, true);
-
-	      // HTML5 minlength
-	      else if ('undefined' !== typeof this.$element.attr('minlength')) this.addConstraint('minlength', this.$element.attr('minlength'), undefined, true);
-
-	        // HTML5 maxlength
-	        else if ('undefined' !== typeof this.$element.attr('maxlength')) this.addConstraint('maxlength', this.$element.attr('maxlength'), undefined, true);
-
-	      // html5 types
-	      var type = this.$element.attr('type');
-
-	      if ('undefined' === typeof type) return this;
-
-	      // Small special case here for HTML5 number: integer validator if step attribute is undefined or an integer value, number otherwise
-	      if ('number' === type) {
-	        return this.addConstraint('type', ['number', {
-	          step: this.$element.attr('step'),
-	          base: this.$element.attr('min') || this.$element.attr('value')
-	        }], undefined, true);
-	        // Regular other HTML5 supported types
-	      } else if (/^(email|url|range)$/i.test(type)) {
-	          return this.addConstraint('type', type, undefined, true);
-	        }
-	      return this;
-	    },
-
-	    // Internal only.
-	    // Field is required if have required constraint without `false` value
-	    _isRequired: function _isRequired() {
-	      if ('undefined' === typeof this.constraintsByName.required) return false;
-
-	      return false !== this.constraintsByName.required.requirements;
-	    },
-
-	    // Internal only.
-	    // Shortcut to trigger an event
-	    _trigger: function _trigger(eventName) {
-	      return this.trigger('field:' + eventName);
-	    },
-
-	    // Internal only
-	    // Handles whitespace in a value
-	    // Use `data-parsley-whitespace="squish"` to auto squish input value
-	    // Use `data-parsley-whitespace="trim"` to auto trim input value
-	    _handleWhitespace: function _handleWhitespace(value) {
-	      if (true === this.options.trimValue) ParsleyUtils__default.warnOnce('data-parsley-trim-value="true" is deprecated, please use data-parsley-whitespace="trim"');
-
-	      if ('squish' === this.options.whitespace) value = value.replace(/\s{2,}/g, ' ');
-
-	      if ('trim' === this.options.whitespace || 'squish' === this.options.whitespace || true === this.options.trimValue) value = ParsleyUtils__default.trimString(value);
-
-	      return value;
-	    },
-
-	    // Internal only.
-	    // Returns the constraints, grouped by descending priority.
-	    // The result is thus an array of arrays of constraints.
-	    _getGroupedConstraints: function _getGroupedConstraints() {
-	      if (false === this.options.priorityEnabled) return [this.constraints];
-
-	      var groupedConstraints = [];
-	      var index = {};
-
-	      // Create array unique of priorities
-	      for (var i = 0; i < this.constraints.length; i++) {
-	        var p = this.constraints[i].priority;
-	        if (!index[p]) groupedConstraints.push(index[p] = []);
-	        index[p].push(this.constraints[i]);
-	      }
-	      // Sort them by priority DESC
-	      groupedConstraints.sort(function (a, b) {
-	        return b[0].priority - a[0].priority;
-	      });
-
-	      return groupedConstraints;
-	    }
-
-	  };
-
-	  var parsley_field = ParsleyField;
-
-	  var ParsleyMultiple = function ParsleyMultiple() {
-	    this.__class__ = 'ParsleyFieldMultiple';
-	  };
-
-	  ParsleyMultiple.prototype = {
-	    // Add new `$element` sibling for multiple field
-	    addElement: function addElement($element) {
-	      this.$elements.push($element);
-
-	      return this;
-	    },
-
-	    // See `ParsleyField.refreshConstraints()`
-	    refreshConstraints: function refreshConstraints() {
-	      var fieldConstraints;
-
-	      this.constraints = [];
-
-	      // Select multiple special treatment
-	      if (this.$element.is('select')) {
-	        this.actualizeOptions()._bindConstraints();
-
-	        return this;
-	      }
-
-	      // Gather all constraints for each input in the multiple group
-	      for (var i = 0; i < this.$elements.length; i++) {
-
-	        // Check if element have not been dynamically removed since last binding
-	        if (!$('html').has(this.$elements[i]).length) {
-	          this.$elements.splice(i, 1);
-	          continue;
-	        }
-
-	        fieldConstraints = this.$elements[i].data('ParsleyFieldMultiple').refreshConstraints().constraints;
-
-	        for (var j = 0; j < fieldConstraints.length; j++) this.addConstraint(fieldConstraints[j].name, fieldConstraints[j].requirements, fieldConstraints[j].priority, fieldConstraints[j].isDomConstraint);
-	      }
-
-	      return this;
-	    },
-
-	    // See `ParsleyField.getValue()`
-	    getValue: function getValue() {
-	      // Value could be overriden in DOM
-	      if ('function' === typeof this.options.value) return this.options.value(this);else if ('undefined' !== typeof this.options.value) return this.options.value;
-
-	      // Radio input case
-	      if (this.$element.is('input[type=radio]')) return this._findRelated().filter(':checked').val() || '';
-
-	      // checkbox input case
-	      if (this.$element.is('input[type=checkbox]')) {
-	        var values = [];
-
-	        this._findRelated().filter(':checked').each(function () {
-	          values.push($(this).val());
-	        });
-
-	        return values;
-	      }
-
-	      // Select multiple case
-	      if (this.$element.is('select') && null === this.$element.val()) return [];
-
-	      // Default case that should never happen
-	      return this.$element.val();
-	    },
-
-	    _init: function _init() {
-	      this.$elements = [this.$element];
-
-	      return this;
-	    }
-	  };
-
-	  var ParsleyFactory = function ParsleyFactory(element, options, parsleyFormInstance) {
-	    this.$element = $(element);
-
-	    // If the element has already been bound, returns its saved Parsley instance
-	    var savedparsleyFormInstance = this.$element.data('Parsley');
-	    if (savedparsleyFormInstance) {
-
-	      // If the saved instance has been bound without a ParsleyForm parent and there is one given in this call, add it
-	      if ('undefined' !== typeof parsleyFormInstance && savedparsleyFormInstance.parent === window.Parsley) {
-	        savedparsleyFormInstance.parent = parsleyFormInstance;
-	        savedparsleyFormInstance._resetOptions(savedparsleyFormInstance.options);
-	      }
-
-	      return savedparsleyFormInstance;
-	    }
-
-	    // Parsley must be instantiated with a DOM element or jQuery $element
-	    if (!this.$element.length) throw new Error('You must bind Parsley on an existing element.');
-
-	    if ('undefined' !== typeof parsleyFormInstance && 'ParsleyForm' !== parsleyFormInstance.__class__) throw new Error('Parent instance must be a ParsleyForm instance');
-
-	    this.parent = parsleyFormInstance || window.Parsley;
-	    return this.init(options);
-	  };
-
-	  ParsleyFactory.prototype = {
-	    init: function init(options) {
-	      this.__class__ = 'Parsley';
-	      this.__version__ = '2.3.11';
-	      this.__id__ = ParsleyUtils__default.generateID();
-
-	      // Pre-compute options
-	      this._resetOptions(options);
-
-	      // A ParsleyForm instance is obviously a `<form>` element but also every node that is not an input and has the `data-parsley-validate` attribute
-	      if (this.$element.is('form') || ParsleyUtils__default.checkAttr(this.$element, this.options.namespace, 'validate') && !this.$element.is(this.options.inputs)) return this.bind('parsleyForm');
-
-	      // Every other element is bound as a `ParsleyField` or `ParsleyFieldMultiple`
-	      return this.isMultiple() ? this.handleMultiple() : this.bind('parsleyField');
-	    },
-
-	    isMultiple: function isMultiple() {
-	      return this.$element.is('input[type=radio], input[type=checkbox]') || this.$element.is('select') && 'undefined' !== typeof this.$element.attr('multiple');
-	    },
-
-	    // Multiples fields are a real nightmare :(
-	    // Maybe some refactoring would be appreciated here...
-	    handleMultiple: function handleMultiple() {
-	      var _this12 = this;
-
-	      var name;
-	      var multiple;
-	      var parsleyMultipleInstance;
-
-	      // Handle multiple name
-	      if (this.options.multiple) ; // We already have our 'multiple' identifier
-	      else if ('undefined' !== typeof this.$element.attr('name') && this.$element.attr('name').length) this.options.multiple = name = this.$element.attr('name');else if ('undefined' !== typeof this.$element.attr('id') && this.$element.attr('id').length) this.options.multiple = this.$element.attr('id');
-
-	      // Special select multiple input
-	      if (this.$element.is('select') && 'undefined' !== typeof this.$element.attr('multiple')) {
-	        this.options.multiple = this.options.multiple || this.__id__;
-	        return this.bind('parsleyFieldMultiple');
-
-	        // Else for radio / checkboxes, we need a `name` or `data-parsley-multiple` to properly bind it
-	      } else if (!this.options.multiple) {
-	          ParsleyUtils__default.warn('To be bound by Parsley, a radio, a checkbox and a multiple select input must have either a name or a multiple option.', this.$element);
-	          return this;
-	        }
-
-	      // Remove special chars
-	      this.options.multiple = this.options.multiple.replace(/(:|\.|\[|\]|\{|\}|\$)/g, '');
-
-	      // Add proper `data-parsley-multiple` to siblings if we have a valid multiple name
-	      if ('undefined' !== typeof name) {
-	        $('input[name="' + name + '"]').each(function (i, input) {
-	          if ($(input).is('input[type=radio], input[type=checkbox]')) $(input).attr(_this12.options.namespace + 'multiple', _this12.options.multiple);
-	        });
-	      }
-
-	      // Check here if we don't already have a related multiple instance saved
-	      var $previouslyRelated = this._findRelated();
-	      for (var i = 0; i < $previouslyRelated.length; i++) {
-	        parsleyMultipleInstance = $($previouslyRelated.get(i)).data('Parsley');
-	        if ('undefined' !== typeof parsleyMultipleInstance) {
-
-	          if (!this.$element.data('ParsleyFieldMultiple')) {
-	            parsleyMultipleInstance.addElement(this.$element);
-	          }
-
-	          break;
-	        }
-	      }
-
-	      // Create a secret ParsleyField instance for every multiple field. It will be stored in `data('ParsleyFieldMultiple')`
-	      // And will be useful later to access classic `ParsleyField` stuff while being in a `ParsleyFieldMultiple` instance
-	      this.bind('parsleyField', true);
-
-	      return parsleyMultipleInstance || this.bind('parsleyFieldMultiple');
-	    },
-
-	    // Return proper `ParsleyForm`, `ParsleyField` or `ParsleyFieldMultiple`
-	    bind: function bind(type, doNotStore) {
-	      var parsleyInstance;
-
-	      switch (type) {
-	        case 'parsleyForm':
-	          parsleyInstance = $.extend(new ParsleyForm(this.$element, this.domOptions, this.options), new ParsleyAbstract(), window.ParsleyExtend)._bindFields();
-	          break;
-	        case 'parsleyField':
-	          parsleyInstance = $.extend(new parsley_field(this.$element, this.domOptions, this.options, this.parent), new ParsleyAbstract(), window.ParsleyExtend);
-	          break;
-	        case 'parsleyFieldMultiple':
-	          parsleyInstance = $.extend(new parsley_field(this.$element, this.domOptions, this.options, this.parent), new ParsleyMultiple(), new ParsleyAbstract(), window.ParsleyExtend)._init();
-	          break;
-	        default:
-	          throw new Error(type + 'is not a supported Parsley type');
-	      }
-
-	      if (this.options.multiple) ParsleyUtils__default.setAttr(this.$element, this.options.namespace, 'multiple', this.options.multiple);
-
-	      if ('undefined' !== typeof doNotStore) {
-	        this.$element.data('ParsleyFieldMultiple', parsleyInstance);
-
-	        return parsleyInstance;
-	      }
-
-	      // Store the freshly bound instance in a DOM element for later access using jQuery `data()`
-	      this.$element.data('Parsley', parsleyInstance);
-
-	      // Tell the world we have a new ParsleyForm or ParsleyField instance!
-	      parsleyInstance._actualizeTriggers();
-	      parsleyInstance._trigger('init');
-
-	      return parsleyInstance;
-	    }
-	  };
-
-	  var vernums = $.fn.jquery.split('.');
-	  if (parseInt(vernums[0]) <= 1 && parseInt(vernums[1]) < 8) {
-	    throw "The loaded version of jQuery is too old. Please upgrade to 1.8.x or better.";
-	  }
-	  if (!vernums.forEach) {
-	    ParsleyUtils__default.warn('Parsley requires ES5 to run properly. Please include https://github.com/es-shims/es5-shim');
-	  }
-	  // Inherit `on`, `off` & `trigger` to Parsley:
-	  var Parsley = $.extend(new ParsleyAbstract(), {
-	    $element: $(document),
-	    actualizeOptions: null,
-	    _resetOptions: null,
-	    Factory: ParsleyFactory,
-	    version: '2.3.11'
-	  });
-
-	  // Supplement ParsleyField and Form with ParsleyAbstract
-	  // This way, the constructors will have access to those methods
-	  $.extend(parsley_field.prototype, ParsleyUI.Field, ParsleyAbstract.prototype);
-	  $.extend(ParsleyForm.prototype, ParsleyUI.Form, ParsleyAbstract.prototype);
-	  // Inherit actualizeOptions and _resetOptions:
-	  $.extend(ParsleyFactory.prototype, ParsleyAbstract.prototype);
-
-	  // ### jQuery API
-	  // `$('.elem').parsley(options)` or `$('.elem').psly(options)`
-	  $.fn.parsley = $.fn.psly = function (options) {
-	    if (this.length > 1) {
-	      var instances = [];
-
-	      this.each(function () {
-	        instances.push($(this).parsley(options));
-	      });
-
-	      return instances;
-	    }
-
-	    // Return undefined if applied to non existing DOM element
-	    if (!$(this).length) {
-	      ParsleyUtils__default.warn('You must bind Parsley on an existing element.');
-
-	      return;
-	    }
-
-	    return new ParsleyFactory(this, options);
-	  };
-
-	  // ### ParsleyField and ParsleyForm extension
-	  // Ensure the extension is now defined if it wasn't previously
-	  if ('undefined' === typeof window.ParsleyExtend) window.ParsleyExtend = {};
-
-	  // ### Parsley config
-	  // Inherit from ParsleyDefault, and copy over any existing values
-	  Parsley.options = $.extend(ParsleyUtils__default.objectCreate(ParsleyDefaults), window.ParsleyConfig);
-	  window.ParsleyConfig = Parsley.options; // Old way of accessing global options
-
-	  // ### Globals
-	  window.Parsley = window.psly = Parsley;
-	  window.ParsleyUtils = ParsleyUtils__default;
-
-	  // ### Define methods that forward to the registry, and deprecate all access except through window.Parsley
-	  var registry = window.Parsley._validatorRegistry = new ParsleyValidatorRegistry(window.ParsleyConfig.validators, window.ParsleyConfig.i18n);
-	  window.ParsleyValidator = {};
-	  $.each('setLocale addCatalog addMessage addMessages getErrorMessage formatMessage addValidator updateValidator removeValidator'.split(' '), function (i, method) {
-	    window.Parsley[method] = $.proxy(registry, method);
-	    window.ParsleyValidator[method] = function () {
-	      var _window$Parsley;
-
-	      ParsleyUtils__default.warnOnce('Accessing the method \'' + method + '\' through ParsleyValidator is deprecated. Simply call \'window.Parsley.' + method + '(...)\'');
-	      return (_window$Parsley = window.Parsley)[method].apply(_window$Parsley, arguments);
-	    };
-	  });
-
-	  // ### ParsleyUI
-	  // Deprecated global object
-	  window.Parsley.UI = ParsleyUI;
-	  window.ParsleyUI = {
-	    removeError: function removeError(instance, name, doNotUpdateClass) {
-	      var updateClass = true !== doNotUpdateClass;
-	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'removeError\' on the instance directly. Please comment in issue 1073 as to your need to call this method.');
-	      return instance.removeError(name, { updateClass: updateClass });
-	    },
-	    getErrorsMessages: function getErrorsMessages(instance) {
-	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'getErrorsMessages\' on the instance directly.');
-	      return instance.getErrorsMessages();
-	    }
-	  };
-	  $.each('addError updateError'.split(' '), function (i, method) {
-	    window.ParsleyUI[method] = function (instance, name, message, assert, doNotUpdateClass) {
-	      var updateClass = true !== doNotUpdateClass;
-	      ParsleyUtils__default.warnOnce('Accessing ParsleyUI is deprecated. Call \'' + method + '\' on the instance directly. Please comment in issue 1073 as to your need to call this method.');
-	      return instance[method](name, { message: message, assert: assert, updateClass: updateClass });
-	    };
-	  });
-
-	  // ### PARSLEY auto-binding
-	  // Prevent it by setting `ParsleyConfig.autoBind` to `false`
-	  if (false !== window.ParsleyConfig.autoBind) {
-	    $(function () {
-	      // Works only on `data-parsley-validate`.
-	      if ($('[data-parsley-validate]').length) $('[data-parsley-validate]').parsley();
-	    });
-	  }
-
-	  var o = $({});
-	  var deprecated = function deprecated() {
-	    ParsleyUtils__default.warnOnce("Parsley's pubsub module is deprecated; use the 'on' and 'off' methods on parsley instances or window.Parsley");
-	  };
-
-	  // Returns an event handler that calls `fn` with the arguments it expects
-	  function adapt(fn, context) {
-	    // Store to allow unbinding
-	    if (!fn.parsleyAdaptedCallback) {
-	      fn.parsleyAdaptedCallback = function () {
-	        var args = Array.prototype.slice.call(arguments, 0);
-	        args.unshift(this);
-	        fn.apply(context || o, args);
-	      };
-	    }
-	    return fn.parsleyAdaptedCallback;
-	  }
-
-	  var eventPrefix = 'parsley:';
-	  // Converts 'parsley:form:validate' into 'form:validate'
-	  function eventName(name) {
-	    if (name.lastIndexOf(eventPrefix, 0) === 0) return name.substr(eventPrefix.length);
-	    return name;
-	  }
-
-	  // $.listen is deprecated. Use Parsley.on instead.
-	  $.listen = function (name, callback) {
-	    var context;
-	    deprecated();
-	    if ('object' === typeof arguments[1] && 'function' === typeof arguments[2]) {
-	      context = arguments[1];
-	      callback = arguments[2];
-	    }
-
-	    if ('function' !== typeof callback) throw new Error('Wrong parameters');
-
-	    window.Parsley.on(eventName(name), adapt(callback, context));
-	  };
-
-	  $.listenTo = function (instance, name, fn) {
-	    deprecated();
-	    if (!(instance instanceof parsley_field) && !(instance instanceof ParsleyForm)) throw new Error('Must give Parsley instance');
-
-	    if ('string' !== typeof name || 'function' !== typeof fn) throw new Error('Wrong parameters');
-
-	    instance.on(eventName(name), adapt(fn));
-	  };
-
-	  $.unsubscribe = function (name, fn) {
-	    deprecated();
-	    if ('string' !== typeof name || 'function' !== typeof fn) throw new Error('Wrong arguments');
-	    window.Parsley.off(eventName(name), fn.parsleyAdaptedCallback);
-	  };
-
-	  $.unsubscribeTo = function (instance, name) {
-	    deprecated();
-	    if (!(instance instanceof parsley_field) && !(instance instanceof ParsleyForm)) throw new Error('Must give Parsley instance');
-	    instance.off(eventName(name));
-	  };
-
-	  $.unsubscribeAll = function (name) {
-	    deprecated();
-	    window.Parsley.off(eventName(name));
-	    $('form,input,textarea,select').each(function () {
-	      var instance = $(this).data('Parsley');
-	      if (instance) {
-	        instance.off(eventName(name));
-	      }
-	    });
-	  };
-
-	  // $.emit is deprecated. Use jQuery events instead.
-	  $.emit = function (name, instance) {
-	    var _instance;
-
-	    deprecated();
-	    var instanceGiven = instance instanceof parsley_field || instance instanceof ParsleyForm;
-	    var args = Array.prototype.slice.call(arguments, instanceGiven ? 2 : 1);
-	    args.unshift(eventName(name));
-	    if (!instanceGiven) {
-	      instance = window.Parsley;
-	    }
-	    (_instance = instance).trigger.apply(_instance, _toConsumableArray(args));
-	  };
-
-	  var pubsub = {};
-
-	  $.extend(true, Parsley, {
-	    asyncValidators: {
-	      'default': {
-	        fn: function fn(xhr) {
-	          // By default, only status 2xx are deemed successful.
-	          // Note: we use status instead of state() because responses with status 200
-	          // but invalid messages (e.g. an empty body for content type set to JSON) will
-	          // result in state() === 'rejected'.
-	          return xhr.status >= 200 && xhr.status < 300;
-	        },
-	        url: false
-	      },
-	      reverse: {
-	        fn: function fn(xhr) {
-	          // If reverse option is set, a failing ajax request is considered successful
-	          return xhr.status < 200 || xhr.status >= 300;
-	        },
-	        url: false
-	      }
-	    },
-
-	    addAsyncValidator: function addAsyncValidator(name, fn, url, options) {
-	      Parsley.asyncValidators[name] = {
-	        fn: fn,
-	        url: url || false,
-	        options: options || {}
-	      };
-
-	      return this;
-	    }
-
-	  });
-
-	  Parsley.addValidator('remote', {
-	    requirementType: {
-	      '': 'string',
-	      'validator': 'string',
-	      'reverse': 'boolean',
-	      'options': 'object'
-	    },
-
-	    validateString: function validateString(value, url, options, instance) {
-	      var data = {};
-	      var ajaxOptions;
-	      var csr;
-	      var validator = options.validator || (true === options.reverse ? 'reverse' : 'default');
-
-	      if ('undefined' === typeof Parsley.asyncValidators[validator]) throw new Error('Calling an undefined async validator: `' + validator + '`');
-
-	      url = Parsley.asyncValidators[validator].url || url;
-
-	      // Fill current value
-	      if (url.indexOf('{value}') > -1) {
-	        url = url.replace('{value}', encodeURIComponent(value));
-	      } else {
-	        data[instance.$element.attr('name') || instance.$element.attr('id')] = value;
-	      }
-
-	      // Merge options passed in from the function with the ones in the attribute
-	      var remoteOptions = $.extend(true, options.options || {}, Parsley.asyncValidators[validator].options);
-
-	      // All `$.ajax(options)` could be overridden or extended directly from DOM in `data-parsley-remote-options`
-	      ajaxOptions = $.extend(true, {}, {
-	        url: url,
-	        data: data,
-	        type: 'GET'
-	      }, remoteOptions);
-
-	      // Generate store key based on ajax options
-	      instance.trigger('field:ajaxoptions', instance, ajaxOptions);
-
-	      csr = $.param(ajaxOptions);
-
-	      // Initialise querry cache
-	      if ('undefined' === typeof Parsley._remoteCache) Parsley._remoteCache = {};
-
-	      // Try to retrieve stored xhr
-	      var xhr = Parsley._remoteCache[csr] = Parsley._remoteCache[csr] || $.ajax(ajaxOptions);
-
-	      var handleXhr = function handleXhr() {
-	        var result = Parsley.asyncValidators[validator].fn.call(instance, xhr, url, options);
-	        if (!result) // Map falsy results to rejected promise
-	          result = $.Deferred().reject();
-	        return $.when(result);
-	      };
-
-	      return xhr.then(handleXhr, handleXhr);
-	    },
-
-	    priority: -1
-	  });
-
-	  Parsley.on('form:submit', function () {
-	    Parsley._remoteCache = {};
-	  });
-
-	  window.ParsleyExtend.addAsyncValidator = function () {
-	    ParsleyUtils.warnOnce('Accessing the method `addAsyncValidator` through an instance is deprecated. Simply call `Parsley.addAsyncValidator(...)`');
-	    return Parsley.addAsyncValidator.apply(Parsley, arguments);
-	  };
-
-	  // This is included with the Parsley library itself,
-	  // thus there is no use in adding it to your project.
-	  Parsley.addMessages('en', {
-	    defaultMessage: "This value seems to be invalid.",
-	    type: {
-	      email: "This value should be a valid email.",
-	      url: "This value should be a valid url.",
-	      number: "This value should be a valid number.",
-	      integer: "This value should be a valid integer.",
-	      digits: "This value should be digits.",
-	      alphanum: "This value should be alphanumeric."
-	    },
-	    notblank: "This value should not be blank.",
-	    required: "This value is required.",
-	    pattern: "This value seems to be invalid.",
-	    min: "This value should be greater than or equal to %s.",
-	    max: "This value should be lower than or equal to %s.",
-	    range: "This value should be between %s and %s.",
-	    minlength: "This value is too short. It should have %s characters or more.",
-	    maxlength: "This value is too long. It should have %s characters or fewer.",
-	    length: "This value length is invalid. It should be between %s and %s characters long.",
-	    mincheck: "You must select at least %s choices.",
-	    maxcheck: "You must select %s choices or fewer.",
-	    check: "You must select between %s and %s choices.",
-	    equalto: "This value should be the same."
-	  });
-
-	  Parsley.setLocale('en');
-
-	  /**
-	   * inputevent - Alleviate browser bugs for input events
-	   * https://github.com/marcandre/inputevent
-	   * @version v0.0.3 - (built Thu, Apr 14th 2016, 5:58 pm)
-	   * @author Marc-Andre Lafortune <github@marc-andre.ca>
-	   * @license MIT
-	   */
-
-	  function InputEvent() {
-	    var _this13 = this;
-
-	    var globals = window || global;
-
-	    // Slightly odd way construct our object. This way methods are force bound.
-	    // Used to test for duplicate library.
-	    $.extend(this, {
-
-	      // For browsers that do not support isTrusted, assumes event is native.
-	      isNativeEvent: function isNativeEvent(evt) {
-	        return evt.originalEvent && evt.originalEvent.isTrusted !== false;
-	      },
-
-	      fakeInputEvent: function fakeInputEvent(evt) {
-	        if (_this13.isNativeEvent(evt)) {
-	          $(evt.target).trigger('input');
-	        }
-	      },
-
-	      misbehaves: function misbehaves(evt) {
-	        if (_this13.isNativeEvent(evt)) {
-	          _this13.behavesOk(evt);
-	          $(document).on('change.inputevent', evt.data.selector, _this13.fakeInputEvent);
-	          _this13.fakeInputEvent(evt);
-	        }
-	      },
-
-	      behavesOk: function behavesOk(evt) {
-	        if (_this13.isNativeEvent(evt)) {
-	          $(document) // Simply unbinds the testing handler
-	          .off('input.inputevent', evt.data.selector, _this13.behavesOk).off('change.inputevent', evt.data.selector, _this13.misbehaves);
-	        }
-	      },
-
-	      // Bind the testing handlers
-	      install: function install() {
-	        if (globals.inputEventPatched) {
-	          return;
-	        }
-	        globals.inputEventPatched = '0.0.3';
-	        var _arr = ['select', 'input[type="checkbox"]', 'input[type="radio"]', 'input[type="file"]'];
-	        for (var _i = 0; _i < _arr.length; _i++) {
-	          var selector = _arr[_i];
-	          $(document).on('input.inputevent', selector, { selector: selector }, _this13.behavesOk).on('change.inputevent', selector, { selector: selector }, _this13.misbehaves);
-	        }
-	      },
-
-	      uninstall: function uninstall() {
-	        delete globals.inputEventPatched;
-	        $(document).off('.inputevent');
-	      }
-
-	    });
-	  };
-
-	  var inputevent = new InputEvent();
-
-	  inputevent.install();
-
-	  var parsley = Parsley;
-
-	  return parsley;
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
 	});
-	//# sourceMappingURL=parsley.js.map
+	exports.Calendar = undefined;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	window.$ = window.jQuery = __webpack_require__(168);
+
+	__webpack_require__(170);
+
+	var Calendar = exports.Calendar = function (_React$Component) {
+	    _inherits(Calendar, _React$Component);
+
+	    function Calendar() {
+	        _classCallCheck(this, Calendar);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Calendar).apply(this, arguments));
+	    }
+
+	    _createClass(Calendar, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _this2 = this;
+
+	            var calendar = this.refs.calendar;
+
+	            $(calendar).fullCalendar({
+	                lang: 'sk',
+	                editable: true,
+	                header: {
+	                    left: 'prev,next',
+	                    center: 'title',
+	                    right: 'month,agendaWeek,agendaDay'
+	                },
+	                events: function events(start, end, timezone, callback) {
+	                    var url = _this2.props.url;
+	                    console.log(url);
+	                    if (_this2.props.url.includes("?")) {
+	                        url = url + "&";
+	                    } else {
+	                        url = url + "?";
+	                    }
+	                    url = url + "start=" + start + "&end=" + end;
+	                    $.getJSON({ url: url, success: function success(result) {
+	                            callback(result);
+	                        } });
+	                },
+	                timeFormat: 'H:mm',
+	                eventDrop: function (event, delta, revertFunc) {
+	                    event.start.add(delta);
+	                    if (event.end !== null) {
+	                        event.end.add(delta);
+	                    }
+	                    this.props.updateEventOnServer(event, revertFunc);
+	                }.bind(this),
+	                eventResize: function eventResize(event, delta, revertFunc) {
+	                    if (event.end !== null) {
+	                        event.end.add(delta);
+	                    }
+	                    this.props.updateEventOnServer(event, revertFunc);
+	                },
+	                eventClick: function (event, jsEvent, view) {
+	                    this.props.openEvent(event, false);
+	                }.bind(this),
+	                dayClick: function (date, jsEvent, view) {
+	                    if (!this.props.viewOnly()) {
+	                        var event = { title: "", start: date, end: date, categories: [], groups: [], public: false, allDay: false };
+	                        this.props.editEvent(event, true);
+	                    }
+	                }.bind(this),
+	                eventLimit: true
+	            });
+	            this.intervalId = setInterval(function () {
+	                $(calendar).fullCalendar('refetchEvents');
+	            }, 30000);
+	        }
+	    }, {
+	        key: 'componentWillUnmount',
+	        value: function componentWillUnmount() {
+	            var calendar = this.refs.calendar;
+
+	            clearInterval(this.intervalId);
+	            $(calendar).fullCalendar('destroy');
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var calendar = this.refs.calendar;
+
+	            $(calendar).fullCalendar('refetchEvents');
+	            return _react2.default.createElement('div', { ref: 'calendar' });
+	        }
+	    }]);
+
+	    return Calendar;
+	}(_react2.default.Component);
 
 /***/ },
 /* 170 */
@@ -62411,22 +58559,3420 @@
 /* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
-	__webpack_require__(272)
-	__webpack_require__(273)
-	__webpack_require__(274)
-	__webpack_require__(275)
-	__webpack_require__(276)
-	__webpack_require__(277)
-	__webpack_require__(278)
-	__webpack_require__(279)
-	__webpack_require__(280)
-	__webpack_require__(281)
-	__webpack_require__(282)
-	__webpack_require__(283)
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.GroupList = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Group = function (_React$Component) {
+	    _inherits(Group, _React$Component);
+
+	    function Group() {
+	        _classCallCheck(this, Group);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Group).apply(this, arguments));
+	    }
+
+	    _createClass(Group, [{
+	        key: "render",
+	        value: function render() {
+	            var active = "btn " + (this.props.value ? " btn-primary active" : "btn-default");
+	            return _react2.default.createElement(
+	                "button",
+	                { type: "button", className: active, onClick: this.props.onChange },
+	                this.props.name
+	            );
+	        }
+	    }]);
+
+	    return Group;
+	}(_react2.default.Component);
+
+	var GroupList = exports.GroupList = function (_React$Component2) {
+	    _inherits(GroupList, _React$Component2);
+
+	    function GroupList() {
+	        _classCallCheck(this, GroupList);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(GroupList).apply(this, arguments));
+	    }
+
+	    _createClass(GroupList, [{
+	        key: "render",
+	        value: function render() {
+	            var groups = this.props.data.map(function (group) {
+	                var _this3 = this;
+
+	                return _react2.default.createElement(Group, { name: group.name, key: group.id,
+	                    value: group.value,
+	                    onChange: function onChange(e) {
+	                        return _this3.props.groupChanged(group.id);
+	                    } });
+	            }.bind(this));
+	            return _react2.default.createElement(
+	                "div",
+	                null,
+	                " ",
+	                _react2.default.createElement(
+	                    "h5",
+	                    null,
+	                    _react2.default.createElement(
+	                        "strong",
+	                        null,
+	                        this.props.groupListName
+	                    )
+	                ),
+	                " ",
+	                _react2.default.createElement(
+	                    "span",
+	                    { className: "btn-group btn-group-xs", role: "group", "aria-label": "..." },
+	                    groups
+	                )
+	            );
+	        }
+	    }]);
+
+	    return GroupList;
+	}(_react2.default.Component);
 
 /***/ },
 /* 272 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.CategoryGroupList = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Category = function (_React$Component) {
+	    _inherits(Category, _React$Component);
+
+	    function Category() {
+	        _classCallCheck(this, Category);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(Category).apply(this, arguments));
+	    }
+
+	    _createClass(Category, [{
+	        key: "render",
+	        value: function render() {
+	            var active = "btn " + (this.props.value ? " btn-primary active" : "btn-default");
+	            return _react2.default.createElement(
+	                "button",
+	                { type: "button", className: active, onClick: this.props.onChange },
+	                this.props.title
+	            );
+	        }
+	    }]);
+
+	    return Category;
+	}(_react2.default.Component);
+
+	var CategoryGroup = function (_React$Component2) {
+	    _inherits(CategoryGroup, _React$Component2);
+
+	    function CategoryGroup() {
+	        _classCallCheck(this, CategoryGroup);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroup).apply(this, arguments));
+	    }
+
+	    _createClass(CategoryGroup, [{
+	        key: "render",
+	        value: function render() {
+	            var categories = this.props.data.map(function (category) {
+	                var _this3 = this;
+
+	                if (category.category_group === this.props.id) {
+	                    return _react2.default.createElement(Category, { title: category.title, value: category.value, key: category.id, onChange: function onChange(e) {
+	                            return _this3.props.onChange(category.id);
+	                        } });
+	                }
+	            }.bind(this));
+	            var newCategories = [];
+	            for (var i = 0; i < categories.length; i++) {
+	                if (categories[i] !== undefined) {
+	                    newCategories.push(categories[i]);
+	                }
+	            }
+	            return _react2.default.createElement(
+	                "div",
+	                { className: "row" },
+	                _react2.default.createElement(
+	                    "div",
+	                    { className: "col-sm-5" },
+	                    this.props.title,
+	                    ":"
+	                ),
+	                _react2.default.createElement(
+	                    "div",
+	                    { className: "col-sm-7" },
+	                    _react2.default.createElement(
+	                        "span",
+	                        { className: "btn-group btn-group-xs", role: "group", "aria-label": "..." },
+	                        newCategories
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return CategoryGroup;
+	}(_react2.default.Component);
+
+	var CategoryGroupList = exports.CategoryGroupList = function (_React$Component3) {
+	    _inherits(CategoryGroupList, _React$Component3);
+
+	    function CategoryGroupList() {
+	        _classCallCheck(this, CategoryGroupList);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroupList).apply(this, arguments));
+	    }
+
+	    _createClass(CategoryGroupList, [{
+	        key: "render",
+	        value: function render() {
+	            var categoryGroups = this.props.categoryGroups.map(function (categorygroup) {
+	                return _react2.default.createElement(CategoryGroup, { title: categorygroup.title, key: categorygroup.id, id: categorygroup.id, data: this.props.categories, onChange: this.props.categoryChanged });
+	            }.bind(this));
+	            console.log("categoryGroups");
+	            console.log(categoryGroups);
+	            return _react2.default.createElement(
+	                "div",
+	                null,
+	                _react2.default.createElement(
+	                    "h5",
+	                    null,
+	                    _react2.default.createElement(
+	                        "strong",
+	                        null,
+	                        "Kategórie"
+	                    )
+	                ),
+	                categoryGroups
+	            );
+	        }
+	    }]);
+
+	    return CategoryGroupList;
+	}(_react2.default.Component);
+
+/***/ },
+/* 273 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.IcsExport = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var IcsExport = exports.IcsExport = function (_React$Component) {
+	    _inherits(IcsExport, _React$Component);
+
+	    function IcsExport(props) {
+	        _classCallCheck(this, IcsExport);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(IcsExport).call(this, props));
+
+	        _this.state = { name: [] };
+	        _this.handleChange = _this.handleChange.bind(_this);
+	        _this.exportCall = _this.exportCall.bind(_this);
+
+	        return _this;
+	    }
+
+	    _createClass(IcsExport, [{
+	        key: "handleChange",
+	        value: function handleChange(e) {
+	            this.setState({ name: e.target.value });
+	        }
+	    }, {
+	        key: "exportCall",
+	        value: function exportCall() {
+	            this.props.onClick(this.state.name);
+	        }
+	    }, {
+	        key: "render",
+	        value: function render() {
+	            return _react2.default.createElement(
+	                "div",
+	                null,
+	                _react2.default.createElement(
+	                    "div",
+	                    { className: "input-group" },
+	                    _react2.default.createElement("input", { type: "text", className: "form-control", placeholder: "Calendar name", onChange: this.handleChange }),
+	                    _react2.default.createElement(
+	                        "span",
+	                        { className: "input-group-btn" },
+	                        _react2.default.createElement(
+	                            "button",
+	                            { className: "btn btn-default", type: "button", onClick: this.exportCall },
+	                            "Export"
+	                        )
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    "div",
+	                    { className: "input-group" },
+	                    _react2.default.createElement(
+	                        "span",
+	                        { className: "input-group-addon", id: "basic-addon1" },
+	                        "ICS url:"
+	                    ),
+	                    _react2.default.createElement("input", { type: "text", className: "form-control", value: this.props.url, readOnly: true, placeholder: "Username", "aria-describedby": "basic-addon1", size: "45" })
+	                )
+	            );
+	        }
+	    }]);
+
+	    return IcsExport;
+	}(_react2.default.Component);
+
+/***/ },
+/* 274 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.CalEvent = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _groups = __webpack_require__(271);
+
+	var _categories = __webpack_require__(272);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var DateTimeField = __webpack_require__(275);
+
+	var moment = __webpack_require__(171);
+
+	var CalEvent = exports.CalEvent = function (_React$Component) {
+	    _inherits(CalEvent, _React$Component);
+
+	    function CalEvent(props) {
+	        _classCallCheck(this, CalEvent);
+
+	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CalEvent).call(this, props));
+
+	        _this.state = {
+	            start: _this.props.event.start,
+	            end: _this.props.event.end
+	        };
+	        return _this;
+	    }
+
+	    _createClass(CalEvent, [{
+	        key: 'setStartDate',
+	        value: function setStartDate(date) {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.start = moment(date);
+	            newEvent.end = moment(newEvent.end);
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'setEndDate',
+	        value: function setEndDate(date) {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.end = moment(date);
+	            newEvent.start = moment(newEvent.start);
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'setTitle',
+	        value: function setTitle(e) {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.end = moment(newEvent.end);
+	            newEvent.start = moment(newEvent.start);
+	            newEvent.title = e.target.value;
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'groupChanged',
+	        value: function groupChanged(id) {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.end = moment(newEvent.end);
+	            newEvent.start = moment(newEvent.start);
+	            var index = newEvent.groups.indexOf(id);
+	            if (index > -1) {
+	                newEvent.groups.splice(index, 1);
+	            } else {
+	                newEvent.groups.push(id);
+	            }
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'categoryChanged',
+	        value: function categoryChanged(id) {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.end = moment(newEvent.end);
+	            newEvent.start = moment(newEvent.start);
+	            var index = newEvent.categories.indexOf(id);
+	            if (index > -1) {
+	                newEvent.categories.splice(index, 1);
+	            } else {
+	                newEvent.categories.push(id);
+	            }
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'allDayChanged',
+	        value: function allDayChanged() {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            console.log(newEvent.start);
+	            newEvent.end = moment(newEvent.end);
+	            newEvent.start = moment(newEvent.start);
+	            console.log(newEvent.start);
+	            newEvent.allDay = !newEvent.allDay;
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'publicChanged',
+	        value: function publicChanged() {
+	            var newEvent = $.parseJSON(JSON.stringify(this.props.event));
+	            newEvent.end = moment(newEvent.end);
+	            newEvent.start = moment(newEvent.start);
+	            newEvent.public = !newEvent.public;
+	            this.props.updateEvent(newEvent);
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var _this2 = this;
+
+	            var publicEvent = "btn btn-default " + (this.props.event.public ? "active" : "");
+	            var alldayEvent = "btn btn-default " + (this.props.event.allDay ? "active" : "");
+	            return _react2.default.createElement(
+	                'div',
+	                { id: 'fullCalModalEdit', className: 'modal fade' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'modal-dialog' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'modal-content' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'modal-header' },
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button', className: 'close', 'data-dismiss': 'modal' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { 'aria-hidden': 'true' },
+	                                    '×'
+	                                ),
+	                                ' ',
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { className: 'sr-only' },
+	                                    'close'
+	                                )
+	                            ),
+	                            'názov: ',
+	                            _react2.default.createElement('input', { type: 'text', className: 'form-control', value: this.props.event.title, onChange: this.setTitle.bind(this) })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { id: 'modalBody', className: 'modal-body' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                _react2.default.createElement(
+	                                    'button',
+	                                    { type: 'button', className: publicEvent, onClick: this.publicChanged.bind(this) },
+	                                    'Verejná'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'button',
+	                                    { type: 'button', className: alldayEvent, onClick: this.allDayChanged.bind(this) },
+	                                    'Celodenná'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                'od: ',
+	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventstart, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setStartDate.bind(this) }),
+	                                'do: ',
+	                                _react2.default.createElement(DateTimeField, { dateTime: this.props.eventend, format: 'YYYY-MM-DD HH:mm', inputFormat: 'YYYY-MM-DD HH:mm', onChange: this.setEndDate.bind(this) })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                _react2.default.createElement(_groups.GroupList, { data: this.props.groups, groupChanged: this.groupChanged.bind(this), groupListName: "Skupiny" }),
+	                                _react2.default.createElement(_groups.GroupList, { data: this.props.otherGroups, groupChanged: this.groupChanged.bind(this), groupListName: "Ostatné skupiny" }),
+	                                _react2.default.createElement(_categories.CategoryGroupList, { categories: this.props.categories, categoryGroups: this.props.categoryGroups, categoryChanged: this.categoryChanged.bind(this) })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'modal-footer' },
+	                            _react2.default.createElement(
+	                                'button',
+	                                { className: 'btn btn-danger pull-left', 'data-dismiss': 'modal', onClick: function onClick(e) {
+	                                        return _this2.props.deleteEvent(_this2.props.event.id);
+	                                    } },
+	                                'Zmazať'
+	                            ),
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button', className: 'btn btn-default', 'data-dismiss': 'modal' },
+	                                'Zavrieť'
+	                            ),
+	                            _react2.default.createElement(
+	                                'button',
+	                                { className: 'btn btn-primary', 'data-dismiss': 'modal', onClick: function onClick(e) {
+	                                        return _this2.props.saveEvent(_this2.props.event);
+	                                    } },
+	                                'Uložiť'
+	                            )
+	                        )
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return CalEvent;
+	}(_react2.default.Component);
+
+/***/ },
+/* 275 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _extends = __webpack_require__(305)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _moment = __webpack_require__(171);
+
+	var _moment2 = _interopRequireDefault(_moment);
+
+	var _classnames = __webpack_require__(312);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _DateTimePickerJs = __webpack_require__(313);
+
+	var _DateTimePickerJs2 = _interopRequireDefault(_DateTimePickerJs);
+
+	var _ConstantsJs = __webpack_require__(323);
+
+	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
+
+	var DateTimeField = (function (_Component) {
+	  _inherits(DateTimeField, _Component);
+
+	  function DateTimeField() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimeField);
+
+	    _get(Object.getPrototypeOf(DateTimeField.prototype), "constructor", this).apply(this, arguments);
+
+	    this.resolvePropsInputFormat = function () {
+	      if (_this.props.inputFormat) {
+	        return _this.props.inputFormat;
+	      }
+	      switch (_this.props.mode) {
+	        case _ConstantsJs2["default"].MODE_TIME:
+	          return "h:mm A";
+	        case _ConstantsJs2["default"].MODE_DATE:
+	          return "MM/DD/YY";
+	        default:
+	          return "MM/DD/YY h:mm A";
+	      }
+	    };
+
+	    this.state = {
+	      showDatePicker: this.props.mode !== _ConstantsJs2["default"].MODE_TIME,
+	      showTimePicker: this.props.mode === _ConstantsJs2["default"].MODE_TIME,
+	      inputFormat: this.resolvePropsInputFormat(),
+	      buttonIcon: this.props.mode === _ConstantsJs2["default"].MODE_TIME ? "glyphicon-time" : "glyphicon-calendar",
+	      widgetStyle: {
+	        display: "block",
+	        position: "absolute",
+	        left: -9999,
+	        zIndex: "9999 !important"
+	      },
+	      viewDate: (0, _moment2["default"])(this.props.dateTime, this.props.format, true).startOf("month"),
+	      selectedDate: (0, _moment2["default"])(this.props.dateTime, this.props.format, true),
+	      inputValue: typeof this.props.defaultText !== "undefined" ? this.props.defaultText : (0, _moment2["default"])(this.props.dateTime, this.props.format, true).format(this.resolvePropsInputFormat())
+	    };
+
+	    this.componentWillReceiveProps = function (nextProps) {
+	      var state = {};
+	      if (nextProps.inputFormat !== _this.props.inputFormat) {
+	        state.inputFormat = nextProps.inputFormat;
+	        state.inputValue = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).format(nextProps.inputFormat);
+	      }
+
+	      if (nextProps.dateTime !== _this.props.dateTime && (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).isValid()) {
+	        state.viewDate = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).startOf("month");
+	        state.selectedDate = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true);
+	        state.inputValue = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).format(nextProps.inputFormat ? nextProps.inputFormat : _this.state.inputFormat);
+	      }
+	      return _this.setState(state);
+	    };
+
+	    this.onChange = function (event) {
+	      var value = event.target == null ? event : event.target.value;
+	      if ((0, _moment2["default"])(value, _this.state.inputFormat, true).isValid()) {
+	        _this.setState({
+	          selectedDate: (0, _moment2["default"])(value, _this.state.inputFormat, true),
+	          viewDate: (0, _moment2["default"])(value, _this.state.inputFormat, true).startOf("month")
+	        });
+	      }
+
+	      return _this.setState({
+	        inputValue: value
+	      }, function () {
+	        return this.props.onChange((0, _moment2["default"])(this.state.inputValue, this.state.inputFormat, true).format(this.props.format), value);
+	      });
+	    };
+
+	    this.getValue = function () {
+	      return (0, _moment2["default"])(_this.state.inputValue, _this.props.inputFormat, true).format(_this.props.format);
+	    };
+
+	    this.setSelectedDate = function (e) {
+	      var target = e.target;
+
+	      if (target.className && !target.className.match(/disabled/g)) {
+	        var month = undefined;
+	        if (target.className.indexOf("new") >= 0) month = _this.state.viewDate.month() + 1;else if (target.className.indexOf("old") >= 0) month = _this.state.viewDate.month() - 1;else month = _this.state.viewDate.month();
+	        return _this.setState({
+	          selectedDate: _this.state.viewDate.clone().month(month).date(parseInt(e.target.innerHTML)).hour(_this.state.selectedDate.hours()).minute(_this.state.selectedDate.minutes())
+	        }, function () {
+	          this.closePicker();
+	          this.props.onChange(this.state.selectedDate.format(this.props.format));
+	          return this.setState({
+	            inputValue: this.state.selectedDate.format(this.state.inputFormat)
+	          });
+	        });
+	      }
+	    };
+
+	    this.setSelectedHour = function (e) {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().hour(parseInt(e.target.innerHTML)).minute(_this.state.selectedDate.minutes())
+	      }, function () {
+	        this.closePicker();
+	        this.props.onChange(this.state.selectedDate.format(this.props.format));
+	        return this.setState({
+	          inputValue: this.state.selectedDate.format(this.state.inputFormat)
+	        });
+	      });
+	    };
+
+	    this.setSelectedMinute = function (e) {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().hour(_this.state.selectedDate.hours()).minute(parseInt(e.target.innerHTML))
+	      }, function () {
+	        this.closePicker();
+	        this.props.onChange(this.state.selectedDate.format(this.props.format));
+	        return this.setState({
+	          inputValue: this.state.selectedDate.format(this.state.inputFormat)
+	        });
+	      });
+	    };
+
+	    this.setViewMonth = function (month) {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.clone().month(month)
+	      });
+	    };
+
+	    this.setViewYear = function (year) {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.clone().year(year)
+	      });
+	    };
+
+	    this.addMinute = function () {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().add(1, "minutes")
+	      }, function () {
+	        this.props.onChange(this.state.selectedDate.format(this.props.format));
+	        return this.setState({
+	          inputValue: this.state.selectedDate.format(this.resolvePropsInputFormat())
+	        });
+	      });
+	    };
+
+	    this.addHour = function () {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().add(1, "hours")
+	      }, function () {
+	        this.props.onChange(this.state.selectedDate.format(this.props.format));
+	        return this.setState({
+	          inputValue: this.state.selectedDate.format(this.resolvePropsInputFormat())
+	        });
+	      });
+	    };
+
+	    this.addMonth = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.add(1, "months")
+	      });
+	    };
+
+	    this.addYear = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.add(1, "years")
+	      });
+	    };
+
+	    this.addDecade = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.add(10, "years")
+	      });
+	    };
+
+	    this.subtractMinute = function () {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().subtract(1, "minutes")
+	      }, function () {
+	        _this.props.onChange(_this.state.selectedDate.format(_this.props.format));
+	        return _this.setState({
+	          inputValue: _this.state.selectedDate.format(_this.resolvePropsInputFormat())
+	        });
+	      });
+	    };
+
+	    this.subtractHour = function () {
+	      return _this.setState({
+	        selectedDate: _this.state.selectedDate.clone().subtract(1, "hours")
+	      }, function () {
+	        _this.props.onChange(_this.state.selectedDate.format(_this.props.format));
+	        return _this.setState({
+	          inputValue: _this.state.selectedDate.format(_this.resolvePropsInputFormat())
+	        });
+	      });
+	    };
+
+	    this.subtractMonth = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.subtract(1, "months")
+	      });
+	    };
+
+	    this.subtractYear = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.subtract(1, "years")
+	      });
+	    };
+
+	    this.subtractDecade = function () {
+	      return _this.setState({
+	        viewDate: _this.state.viewDate.subtract(10, "years")
+	      });
+	    };
+
+	    this.togglePeriod = function () {
+	      if (_this.state.selectedDate.hour() > 12) {
+	        return _this.onChange(_this.state.selectedDate.clone().subtract(12, "hours").format(_this.state.inputFormat));
+	      } else {
+	        return _this.onChange(_this.state.selectedDate.clone().add(12, "hours").format(_this.state.inputFormat));
+	      }
+	    };
+
+	    this.togglePicker = function () {
+	      return _this.setState({
+	        showDatePicker: !_this.state.showDatePicker,
+	        showTimePicker: !_this.state.showTimePicker
+	      });
+	    };
+
+	    this.onClick = function () {
+	      var classes = undefined,
+	          gBCR = undefined,
+	          offset = undefined,
+	          placePosition = undefined,
+	          scrollTop = undefined,
+	          styles = undefined;
+	      if (_this.state.showPicker) {
+	        return _this.closePicker();
+	      } else {
+	        _this.setState({
+	          showPicker: true
+	        });
+	        gBCR = _this.refs.dtpbutton.getBoundingClientRect();
+	        classes = {
+	          "bootstrap-datetimepicker-widget": true,
+	          "dropdown-menu": true
+	        };
+	        offset = {
+	          top: gBCR.top + window.pageYOffset - document.documentElement.clientTop,
+	          left: gBCR.left + window.pageXOffset - document.documentElement.clientLeft
+	        };
+	        offset.top = offset.top + _this.refs.datetimepicker.offsetHeight;
+	        scrollTop = window.pageYOffset !== undefined ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+	        placePosition = _this.props.direction === "up" ? "top" : _this.props.direction === "bottom" ? "bottom" : _this.props.direction === "auto" ? offset.top + _this.refs.widget.offsetHeight > window.offsetHeight + scrollTop && _this.refs.widget.offsetHeight + _this.refs.datetimepicker.offsetHeight > offset.top ? "top" : "bottom" : void 0;
+	        if (placePosition === "top") {
+	          offset.top = -_this.refs.widget.offsetHeight - _this.clientHeight - 2;
+	          classes.top = true;
+	          classes.bottom = false;
+	          classes["pull-right"] = true;
+	        } else {
+	          offset.top = 40;
+	          classes.top = false;
+	          classes.bottom = true;
+	          classes["pull-right"] = true;
+	        }
+	        styles = {
+	          display: "block",
+	          position: "absolute",
+	          top: offset.top,
+	          left: "auto",
+	          right: 40
+	        };
+	        return _this.setState({
+	          widgetStyle: styles,
+	          widgetClasses: classes
+	        });
+	      }
+	    };
+
+	    this.closePicker = function () {
+	      var style = _extends({}, _this.state.widgetStyle);
+	      style.left = -9999;
+	      style.display = "none";
+	      return _this.setState({
+	        showPicker: false,
+	        widgetStyle: style
+	      });
+	    };
+
+	    this.size = function () {
+	      switch (_this.props.size) {
+	        case _ConstantsJs2["default"].SIZE_SMALL:
+	          return "form-group-sm";
+	        case _ConstantsJs2["default"].SIZE_LARGE:
+	          return "form-group-lg";
+	      }
+
+	      return "";
+	    };
+
+	    this.renderOverlay = function () {
+	      var styles = {
+	        position: "fixed",
+	        top: 0,
+	        bottom: 0,
+	        left: 0,
+	        right: 0,
+	        zIndex: "999"
+	      };
+	      if (_this.state.showPicker) {
+	        return _react2["default"].createElement("div", { onClick: _this.closePicker, style: styles });
+	      } else {
+	        return _react2["default"].createElement("span", null);
+	      }
+	    };
+	  }
+
+	  _createClass(DateTimeField, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        null,
+	        this.renderOverlay(),
+	        _react2["default"].createElement(_DateTimePickerJs2["default"], {
+	          addDecade: this.addDecade,
+	          addHour: this.addHour,
+	          addMinute: this.addMinute,
+	          addMonth: this.addMonth,
+	          addYear: this.addYear,
+	          daysOfWeekDisabled: this.props.daysOfWeekDisabled,
+	          maxDate: this.props.maxDate,
+	          minDate: this.props.minDate,
+	          mode: this.props.mode,
+	          ref: "widget",
+	          selectedDate: this.state.selectedDate,
+	          setSelectedDate: this.setSelectedDate,
+	          setSelectedHour: this.setSelectedHour,
+	          setSelectedMinute: this.setSelectedMinute,
+	          setViewMonth: this.setViewMonth,
+	          setViewYear: this.setViewYear,
+	          showDatePicker: this.state.showDatePicker,
+	          showTimePicker: this.state.showTimePicker,
+	          showToday: this.props.showToday,
+	          subtractDecade: this.subtractDecade,
+	          subtractHour: this.subtractHour,
+	          subtractMinute: this.subtractMinute,
+	          subtractMonth: this.subtractMonth,
+	          subtractYear: this.subtractYear,
+	          togglePeriod: this.togglePeriod,
+	          togglePicker: this.togglePicker,
+	          viewDate: this.state.viewDate,
+	          viewMode: this.props.viewMode,
+	          widgetClasses: this.state.widgetClasses,
+	          widgetStyle: this.state.widgetStyle
+	        }),
+	        _react2["default"].createElement(
+	          "div",
+	          { className: "input-group date " + this.size(), ref: "datetimepicker" },
+	          _react2["default"].createElement("input", _extends({ className: "form-control", onChange: this.onChange, type: "text", value: this.state.inputValue }, this.props.inputProps)),
+	          _react2["default"].createElement(
+	            "span",
+	            { className: "input-group-addon", onBlur: this.onBlur, onClick: this.onClick, ref: "dtpbutton" },
+	            _react2["default"].createElement("span", { className: (0, _classnames2["default"])("glyphicon", this.state.buttonIcon) })
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "defaultProps",
+	    value: {
+	      dateTime: (0, _moment2["default"])().format("x"),
+	      format: "x",
+	      showToday: true,
+	      viewMode: "days",
+	      daysOfWeekDisabled: [],
+	      size: _ConstantsJs2["default"].SIZE_MEDIUM,
+	      mode: _ConstantsJs2["default"].MODE_DATETIME,
+	      onChange: function onChange(x) {
+	        console.log(x);
+	      }
+	    },
+	    enumerable: true
+	  }, {
+	    key: "propTypes",
+	    value: {
+	      dateTime: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
+	      onChange: _react.PropTypes.func,
+	      format: _react.PropTypes.string,
+	      inputProps: _react.PropTypes.object,
+	      inputFormat: _react.PropTypes.string,
+	      defaultText: _react.PropTypes.string,
+	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME]),
+	      minDate: _react.PropTypes.object,
+	      maxDate: _react.PropTypes.object,
+	      direction: _react.PropTypes.string,
+	      showToday: _react.PropTypes.bool,
+	      viewMode: _react.PropTypes.string,
+	      size: _react.PropTypes.oneOf([_ConstantsJs2["default"].SIZE_SMALL, _ConstantsJs2["default"].SIZE_MEDIUM, _ConstantsJs2["default"].SIZE_LARGE]),
+	      daysOfWeekDisabled: _react.PropTypes.arrayOf(_react.PropTypes.number)
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimeField;
+	})(_react.Component);
+
+	exports["default"] = DateTimeField;
+	module.exports = exports["default"];
+
+/***/ },
+/* 276 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _Object$getOwnPropertyDescriptor = __webpack_require__(277)["default"];
+
+	exports["default"] = function get(_x, _x2, _x3) {
+	  var _again = true;
+
+	  _function: while (_again) {
+	    var object = _x,
+	        property = _x2,
+	        receiver = _x3;
+	    _again = false;
+	    if (object === null) object = Function.prototype;
+
+	    var desc = _Object$getOwnPropertyDescriptor(object, property);
+
+	    if (desc === undefined) {
+	      var parent = Object.getPrototypeOf(object);
+
+	      if (parent === null) {
+	        return undefined;
+	      } else {
+	        _x = parent;
+	        _x2 = property;
+	        _x3 = receiver;
+	        _again = true;
+	        desc = parent = undefined;
+	        continue _function;
+	      }
+	    } else if ("value" in desc) {
+	      return desc.value;
+	    } else {
+	      var getter = desc.get;
+
+	      if (getter === undefined) {
+	        return undefined;
+	      }
+
+	      return getter.call(receiver);
+	    }
+	  }
+	};
+
+	exports.__esModule = true;
+
+/***/ },
+/* 277 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(278), __esModule: true };
+
+/***/ },
+/* 278 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(279);
+	__webpack_require__(280);
+	module.exports = function getOwnPropertyDescriptor(it, key){
+	  return $.getDesc(it, key);
+	};
+
+/***/ },
+/* 279 */
+/***/ function(module, exports) {
+
+	var $Object = Object;
+	module.exports = {
+	  create:     $Object.create,
+	  getProto:   $Object.getPrototypeOf,
+	  isEnum:     {}.propertyIsEnumerable,
+	  getDesc:    $Object.getOwnPropertyDescriptor,
+	  setDesc:    $Object.defineProperty,
+	  setDescs:   $Object.defineProperties,
+	  getKeys:    $Object.keys,
+	  getNames:   $Object.getOwnPropertyNames,
+	  getSymbols: $Object.getOwnPropertySymbols,
+	  each:       [].forEach
+	};
+
+/***/ },
+/* 280 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
+	var toIObject = __webpack_require__(281);
+
+	__webpack_require__(285)('getOwnPropertyDescriptor', function($getOwnPropertyDescriptor){
+	  return function getOwnPropertyDescriptor(it, key){
+	    return $getOwnPropertyDescriptor(toIObject(it), key);
+	  };
+	});
+
+/***/ },
+/* 281 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// to indexed object, toObject with fallback for non-array-like ES3 strings
+	var IObject = __webpack_require__(282)
+	  , defined = __webpack_require__(284);
+	module.exports = function(it){
+	  return IObject(defined(it));
+	};
+
+/***/ },
+/* 282 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// fallback for non-array-like ES3 and non-enumerable old V8 strings
+	var cof = __webpack_require__(283);
+	module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
+	  return cof(it) == 'String' ? it.split('') : Object(it);
+	};
+
+/***/ },
+/* 283 */
+/***/ function(module, exports) {
+
+	var toString = {}.toString;
+
+	module.exports = function(it){
+	  return toString.call(it).slice(8, -1);
+	};
+
+/***/ },
+/* 284 */
+/***/ function(module, exports) {
+
+	// 7.2.1 RequireObjectCoercible(argument)
+	module.exports = function(it){
+	  if(it == undefined)throw TypeError("Can't call method on  " + it);
+	  return it;
+	};
+
+/***/ },
+/* 285 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// most Object methods by ES6 should accept primitives
+	var $export = __webpack_require__(286)
+	  , core    = __webpack_require__(288)
+	  , fails   = __webpack_require__(291);
+	module.exports = function(KEY, exec){
+	  var fn  = (core.Object || {})[KEY] || Object[KEY]
+	    , exp = {};
+	  exp[KEY] = exec(fn);
+	  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
+	};
+
+/***/ },
+/* 286 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var global    = __webpack_require__(287)
+	  , core      = __webpack_require__(288)
+	  , ctx       = __webpack_require__(289)
+	  , PROTOTYPE = 'prototype';
+
+	var $export = function(type, name, source){
+	  var IS_FORCED = type & $export.F
+	    , IS_GLOBAL = type & $export.G
+	    , IS_STATIC = type & $export.S
+	    , IS_PROTO  = type & $export.P
+	    , IS_BIND   = type & $export.B
+	    , IS_WRAP   = type & $export.W
+	    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
+	    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
+	    , key, own, out;
+	  if(IS_GLOBAL)source = name;
+	  for(key in source){
+	    // contains in native
+	    own = !IS_FORCED && target && key in target;
+	    if(own && key in exports)continue;
+	    // export native or passed
+	    out = own ? target[key] : source[key];
+	    // prevent global pollution for namespaces
+	    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
+	    // bind timers to global for call from export context
+	    : IS_BIND && own ? ctx(out, global)
+	    // wrap global constructors for prevent change them in library
+	    : IS_WRAP && target[key] == out ? (function(C){
+	      var F = function(param){
+	        return this instanceof C ? new C(param) : C(param);
+	      };
+	      F[PROTOTYPE] = C[PROTOTYPE];
+	      return F;
+	    // make static versions for prototype methods
+	    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
+	    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
+	  }
+	};
+	// type bitmap
+	$export.F = 1;  // forced
+	$export.G = 2;  // global
+	$export.S = 4;  // static
+	$export.P = 8;  // proto
+	$export.B = 16; // bind
+	$export.W = 32; // wrap
+	module.exports = $export;
+
+/***/ },
+/* 287 */
+/***/ function(module, exports) {
+
+	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+	var global = module.exports = typeof window != 'undefined' && window.Math == Math
+	  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+	if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
+
+/***/ },
+/* 288 */
+/***/ function(module, exports) {
+
+	var core = module.exports = {version: '1.2.6'};
+	if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
+
+/***/ },
+/* 289 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// optional / simple context binding
+	var aFunction = __webpack_require__(290);
+	module.exports = function(fn, that, length){
+	  aFunction(fn);
+	  if(that === undefined)return fn;
+	  switch(length){
+	    case 1: return function(a){
+	      return fn.call(that, a);
+	    };
+	    case 2: return function(a, b){
+	      return fn.call(that, a, b);
+	    };
+	    case 3: return function(a, b, c){
+	      return fn.call(that, a, b, c);
+	    };
+	  }
+	  return function(/* ...args */){
+	    return fn.apply(that, arguments);
+	  };
+	};
+
+/***/ },
+/* 290 */
+/***/ function(module, exports) {
+
+	module.exports = function(it){
+	  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
+	  return it;
+	};
+
+/***/ },
+/* 291 */
+/***/ function(module, exports) {
+
+	module.exports = function(exec){
+	  try {
+	    return !!exec();
+	  } catch(e){
+	    return true;
+	  }
+	};
+
+/***/ },
+/* 292 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _Object$create = __webpack_require__(293)["default"];
+
+	var _Object$setPrototypeOf = __webpack_require__(295)["default"];
+
+	exports["default"] = function (subClass, superClass) {
+	  if (typeof superClass !== "function" && superClass !== null) {
+	    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+	  }
+
+	  subClass.prototype = _Object$create(superClass && superClass.prototype, {
+	    constructor: {
+	      value: subClass,
+	      enumerable: false,
+	      writable: true,
+	      configurable: true
+	    }
+	  });
+	  if (superClass) _Object$setPrototypeOf ? _Object$setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+	};
+
+	exports.__esModule = true;
+
+/***/ },
+/* 293 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(294), __esModule: true };
+
+/***/ },
+/* 294 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(279);
+	module.exports = function create(P, D){
+	  return $.create(P, D);
+	};
+
+/***/ },
+/* 295 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(296), __esModule: true };
+
+/***/ },
+/* 296 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(297);
+	module.exports = __webpack_require__(288).Object.setPrototypeOf;
+
+/***/ },
+/* 297 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.3.19 Object.setPrototypeOf(O, proto)
+	var $export = __webpack_require__(286);
+	$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(298).set});
+
+/***/ },
+/* 298 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Works with __proto__ only. Old v8 can't work with null proto objects.
+	/* eslint-disable no-proto */
+	var getDesc  = __webpack_require__(279).getDesc
+	  , isObject = __webpack_require__(299)
+	  , anObject = __webpack_require__(300);
+	var check = function(O, proto){
+	  anObject(O);
+	  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
+	};
+	module.exports = {
+	  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
+	    function(test, buggy, set){
+	      try {
+	        set = __webpack_require__(289)(Function.call, getDesc(Object.prototype, '__proto__').set, 2);
+	        set(test, []);
+	        buggy = !(test instanceof Array);
+	      } catch(e){ buggy = true; }
+	      return function setPrototypeOf(O, proto){
+	        check(O, proto);
+	        if(buggy)O.__proto__ = proto;
+	        else set(O, proto);
+	        return O;
+	      };
+	    }({}, false) : undefined),
+	  check: check
+	};
+
+/***/ },
+/* 299 */
+/***/ function(module, exports) {
+
+	module.exports = function(it){
+	  return typeof it === 'object' ? it !== null : typeof it === 'function';
+	};
+
+/***/ },
+/* 300 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isObject = __webpack_require__(299);
+	module.exports = function(it){
+	  if(!isObject(it))throw TypeError(it + ' is not an object!');
+	  return it;
+	};
+
+/***/ },
+/* 301 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _Object$defineProperty = __webpack_require__(302)["default"];
+
+	exports["default"] = (function () {
+	  function defineProperties(target, props) {
+	    for (var i = 0; i < props.length; i++) {
+	      var descriptor = props[i];
+	      descriptor.enumerable = descriptor.enumerable || false;
+	      descriptor.configurable = true;
+	      if ("value" in descriptor) descriptor.writable = true;
+
+	      _Object$defineProperty(target, descriptor.key, descriptor);
+	    }
+	  }
+
+	  return function (Constructor, protoProps, staticProps) {
+	    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	    if (staticProps) defineProperties(Constructor, staticProps);
+	    return Constructor;
+	  };
+	})();
+
+	exports.__esModule = true;
+
+/***/ },
+/* 302 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(303), __esModule: true };
+
+/***/ },
+/* 303 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var $ = __webpack_require__(279);
+	module.exports = function defineProperty(it, key, desc){
+	  return $.setDesc(it, key, desc);
+	};
+
+/***/ },
+/* 304 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	exports["default"] = function (instance, Constructor) {
+	  if (!(instance instanceof Constructor)) {
+	    throw new TypeError("Cannot call a class as a function");
+	  }
+	};
+
+	exports.__esModule = true;
+
+/***/ },
+/* 305 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _Object$assign = __webpack_require__(306)["default"];
+
+	exports["default"] = _Object$assign || function (target) {
+	  for (var i = 1; i < arguments.length; i++) {
+	    var source = arguments[i];
+
+	    for (var key in source) {
+	      if (Object.prototype.hasOwnProperty.call(source, key)) {
+	        target[key] = source[key];
+	      }
+	    }
+	  }
+
+	  return target;
+	};
+
+	exports.__esModule = true;
+
+/***/ },
+/* 306 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(307), __esModule: true };
+
+/***/ },
+/* 307 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(308);
+	module.exports = __webpack_require__(288).Object.assign;
+
+/***/ },
+/* 308 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.3.1 Object.assign(target, source)
+	var $export = __webpack_require__(286);
+
+	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(309)});
+
+/***/ },
+/* 309 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.1 Object.assign(target, source, ...)
+	var $        = __webpack_require__(279)
+	  , toObject = __webpack_require__(310)
+	  , IObject  = __webpack_require__(282);
+
+	// should work with symbols and should have deterministic property order (V8 bug)
+	module.exports = __webpack_require__(291)(function(){
+	  var a = Object.assign
+	    , A = {}
+	    , B = {}
+	    , S = Symbol()
+	    , K = 'abcdefghijklmnopqrst';
+	  A[S] = 7;
+	  K.split('').forEach(function(k){ B[k] = k; });
+	  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
+	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
+	  var T     = toObject(target)
+	    , $$    = arguments
+	    , $$len = $$.length
+	    , index = 1
+	    , getKeys    = $.getKeys
+	    , getSymbols = $.getSymbols
+	    , isEnum     = $.isEnum;
+	  while($$len > index){
+	    var S      = IObject($$[index++])
+	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
+	      , length = keys.length
+	      , j      = 0
+	      , key;
+	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+	  }
+	  return T;
+	} : Object.assign;
+
+/***/ },
+/* 310 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 7.1.13 ToObject(argument)
+	var defined = __webpack_require__(284);
+	module.exports = function(it){
+	  return Object(defined(it));
+	};
+
+/***/ },
+/* 311 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	exports["default"] = function (obj) {
+	  return obj && obj.__esModule ? obj : {
+	    "default": obj
+	  };
+	};
+
+	exports.__esModule = true;
+
+/***/ },
+/* 312 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 313 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(312);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _DateTimePickerDateJs = __webpack_require__(314);
+
+	var _DateTimePickerDateJs2 = _interopRequireDefault(_DateTimePickerDateJs);
+
+	var _DateTimePickerTimeJs = __webpack_require__(321);
+
+	var _DateTimePickerTimeJs2 = _interopRequireDefault(_DateTimePickerTimeJs);
+
+	var _ConstantsJs = __webpack_require__(323);
+
+	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
+
+	var DateTimePicker = (function (_Component) {
+	  _inherits(DateTimePicker, _Component);
+
+	  function DateTimePicker() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePicker);
+
+	    _get(Object.getPrototypeOf(DateTimePicker.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderDatePicker = function () {
+	      if (_this.props.showDatePicker) {
+	        return _react2["default"].createElement(
+	          "li",
+	          null,
+	          _react2["default"].createElement(_DateTimePickerDateJs2["default"], {
+	            addDecade: _this.props.addDecade,
+	            addMonth: _this.props.addMonth,
+	            addYear: _this.props.addYear,
+	            daysOfWeekDisabled: _this.props.daysOfWeekDisabled,
+	            maxDate: _this.props.maxDate,
+	            minDate: _this.props.minDate,
+	            selectedDate: _this.props.selectedDate,
+	            setSelectedDate: _this.props.setSelectedDate,
+	            setViewMonth: _this.props.setViewMonth,
+	            setViewYear: _this.props.setViewYear,
+	            showToday: _this.props.showToday,
+	            subtractDecade: _this.props.subtractDecade,
+	            subtractMonth: _this.props.subtractMonth,
+	            subtractYear: _this.props.subtractYear,
+	            viewDate: _this.props.viewDate,
+	            viewMode: _this.props.viewMode
+	          })
+	        );
+	      }
+	    };
+
+	    this.renderTimePicker = function () {
+	      if (_this.props.showTimePicker) {
+	        return _react2["default"].createElement(
+	          "li",
+	          null,
+	          _react2["default"].createElement(_DateTimePickerTimeJs2["default"], {
+	            addHour: _this.props.addHour,
+	            addMinute: _this.props.addMinute,
+	            mode: _this.props.mode,
+	            selectedDate: _this.props.selectedDate,
+	            setSelectedHour: _this.props.setSelectedHour,
+	            setSelectedMinute: _this.props.setSelectedMinute,
+	            subtractHour: _this.props.subtractHour,
+	            subtractMinute: _this.props.subtractMinute,
+	            togglePeriod: _this.props.togglePeriod,
+	            viewDate: _this.props.viewDate
+	          })
+	        );
+	      }
+	    };
+
+	    this.renderSwitchButton = function () {
+	      return _this.props.mode === _ConstantsJs2["default"].MODE_DATETIME ? _react2["default"].createElement(
+	        "li",
+	        null,
+	        _react2["default"].createElement(
+	          "span",
+	          { className: "btn picker-switch", onClick: _this.props.togglePicker, style: { width: "100%" } },
+	          _react2["default"].createElement("span", { className: (0, _classnames2["default"])("glyphicon", _this.props.showTimePicker ? "glyphicon-calendar" : "glyphicon-time") })
+	        )
+	      ) : null;
+	    };
+	  }
+
+	  _createClass(DateTimePicker, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: (0, _classnames2["default"])(this.props.widgetClasses), style: this.props.widgetStyle },
+	        _react2["default"].createElement(
+	          "ul",
+	          { className: "list-unstyled" },
+	          this.renderDatePicker(),
+	          this.renderSwitchButton(),
+	          this.renderTimePicker()
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      showDatePicker: _react.PropTypes.bool,
+	      showTimePicker: _react.PropTypes.bool,
+	      subtractMonth: _react.PropTypes.func.isRequired,
+	      addMonth: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      showToday: _react.PropTypes.bool,
+	      viewMode: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
+	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME]),
+	      daysOfWeekDisabled: _react.PropTypes.array,
+	      setSelectedDate: _react.PropTypes.func.isRequired,
+	      subtractYear: _react.PropTypes.func.isRequired,
+	      addYear: _react.PropTypes.func.isRequired,
+	      setViewMonth: _react.PropTypes.func.isRequired,
+	      setViewYear: _react.PropTypes.func.isRequired,
+	      subtractHour: _react.PropTypes.func.isRequired,
+	      addHour: _react.PropTypes.func.isRequired,
+	      subtractMinute: _react.PropTypes.func.isRequired,
+	      addMinute: _react.PropTypes.func.isRequired,
+	      addDecade: _react.PropTypes.func.isRequired,
+	      subtractDecade: _react.PropTypes.func.isRequired,
+	      togglePeriod: _react.PropTypes.func.isRequired,
+	      minDate: _react.PropTypes.object,
+	      maxDate: _react.PropTypes.object,
+	      widgetClasses: _react.PropTypes.object,
+	      widgetStyle: _react.PropTypes.object,
+	      togglePicker: _react.PropTypes.func,
+	      setSelectedHour: _react.PropTypes.func,
+	      setSelectedMinute: _react.PropTypes.func
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePicker;
+	})(_react.Component);
+
+	exports["default"] = DateTimePicker;
+	module.exports = exports["default"];
+
+/***/ },
+/* 314 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _Object$keys = __webpack_require__(315)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _DateTimePickerDays = __webpack_require__(318);
+
+	var _DateTimePickerDays2 = _interopRequireDefault(_DateTimePickerDays);
+
+	var _DateTimePickerMonths = __webpack_require__(319);
+
+	var _DateTimePickerMonths2 = _interopRequireDefault(_DateTimePickerMonths);
+
+	var _DateTimePickerYears = __webpack_require__(320);
+
+	var _DateTimePickerYears2 = _interopRequireDefault(_DateTimePickerYears);
+
+	var DateTimePickerDate = (function (_Component) {
+	  _inherits(DateTimePickerDate, _Component);
+
+	  _createClass(DateTimePickerDate, null, [{
+	    key: "propTypes",
+	    value: {
+	      subtractMonth: _react.PropTypes.func.isRequired,
+	      addMonth: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      showToday: _react.PropTypes.bool,
+	      viewMode: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
+	      daysOfWeekDisabled: _react.PropTypes.array,
+	      setSelectedDate: _react.PropTypes.func.isRequired,
+	      subtractYear: _react.PropTypes.func.isRequired,
+	      addYear: _react.PropTypes.func.isRequired,
+	      setViewMonth: _react.PropTypes.func.isRequired,
+	      setViewYear: _react.PropTypes.func.isRequired,
+	      addDecade: _react.PropTypes.func.isRequired,
+	      subtractDecade: _react.PropTypes.func.isRequired,
+	      minDate: _react.PropTypes.object,
+	      maxDate: _react.PropTypes.object
+	    },
+	    enumerable: true
+	  }]);
+
+	  function DateTimePickerDate(props) {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerDate);
+
+	    _get(Object.getPrototypeOf(DateTimePickerDate.prototype), "constructor", this).call(this, props);
+
+	    this.showMonths = function () {
+	      return _this.setState({
+	        daysDisplayed: false,
+	        monthsDisplayed: true
+	      });
+	    };
+
+	    this.showYears = function () {
+	      return _this.setState({
+	        monthsDisplayed: false,
+	        yearsDisplayed: true
+	      });
+	    };
+
+	    this.setViewYear = function (e) {
+	      _this.props.setViewYear(e.target.innerHTML);
+	      return _this.setState({
+	        yearsDisplayed: false,
+	        monthsDisplayed: true
+	      });
+	    };
+
+	    this.setViewMonth = function (e) {
+	      _this.props.setViewMonth(e.target.innerHTML);
+	      return _this.setState({
+	        monthsDisplayed: false,
+	        daysDisplayed: true
+	      });
+	    };
+
+	    this.renderDays = function () {
+	      if (_this.state.daysDisplayed) {
+	        return _react2["default"].createElement(_DateTimePickerDays2["default"], {
+	          addMonth: _this.props.addMonth,
+	          daysOfWeekDisabled: _this.props.daysOfWeekDisabled,
+	          maxDate: _this.props.maxDate,
+	          minDate: _this.props.minDate,
+	          selectedDate: _this.props.selectedDate,
+	          setSelectedDate: _this.props.setSelectedDate,
+	          showMonths: _this.showMonths,
+	          showToday: _this.props.showToday,
+	          subtractMonth: _this.props.subtractMonth,
+	          viewDate: _this.props.viewDate
+	        });
+	      } else {
+	        return null;
+	      }
+	    };
+
+	    this.renderMonths = function () {
+	      if (_this.state.monthsDisplayed) {
+	        return _react2["default"].createElement(_DateTimePickerMonths2["default"], {
+	          addYear: _this.props.addYear,
+	          selectedDate: _this.props.selectedDate,
+	          setViewMonth: _this.setViewMonth,
+	          showYears: _this.showYears,
+	          subtractYear: _this.props.subtractYear,
+	          viewDate: _this.props.viewDate
+	        });
+	      } else {
+	        return null;
+	      }
+	    };
+
+	    this.renderYears = function () {
+	      if (_this.state.yearsDisplayed) {
+	        return _react2["default"].createElement(_DateTimePickerYears2["default"], {
+	          addDecade: _this.props.addDecade,
+	          selectedDate: _this.props.selectedDate,
+	          setViewYear: _this.setViewYear,
+	          subtractDecade: _this.props.subtractDecade,
+	          viewDate: _this.props.viewDate
+	        });
+	      } else {
+	        return null;
+	      }
+	    };
+
+	    var viewModes = {
+	      "days": {
+	        daysDisplayed: true,
+	        monthsDisplayed: false,
+	        yearsDisplayed: false
+	      },
+	      "months": {
+	        daysDisplayed: false,
+	        monthsDisplayed: true,
+	        yearsDisplayed: false
+	      },
+	      "years": {
+	        daysDisplayed: false,
+	        monthsDisplayed: false,
+	        yearsDisplayed: true
+	      }
+	    };
+	    this.state = viewModes[this.props.viewMode] || viewModes[_Object$keys(viewModes)[this.props.viewMode]] || viewModes.days;
+	  }
+
+	  _createClass(DateTimePickerDate, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "datepicker" },
+	        this.renderDays(),
+	        this.renderMonths(),
+	        this.renderYears()
+	      );
+	    }
+	  }]);
+
+	  return DateTimePickerDate;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerDate;
+	module.exports = exports["default"];
+
+/***/ },
+/* 315 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(316), __esModule: true };
+
+/***/ },
+/* 316 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(317);
+	module.exports = __webpack_require__(288).Object.keys;
+
+/***/ },
+/* 317 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.14 Object.keys(O)
+	var toObject = __webpack_require__(310);
+
+	__webpack_require__(285)('keys', function($keys){
+	  return function keys(it){
+	    return $keys(toObject(it));
+	  };
+	});
+
+/***/ },
+/* 318 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _moment = __webpack_require__(171);
+
+	var _moment2 = _interopRequireDefault(_moment);
+
+	var _classnames = __webpack_require__(312);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var DateTimePickerDays = (function (_Component) {
+	  _inherits(DateTimePickerDays, _Component);
+
+	  function DateTimePickerDays() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerDays);
+
+	    _get(Object.getPrototypeOf(DateTimePickerDays.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderDays = function () {
+	      var cells, classes, days, html, month, nextMonth, prevMonth, minDate, maxDate, row, year;
+	      year = _this.props.viewDate.year();
+	      month = _this.props.viewDate.month();
+	      prevMonth = _this.props.viewDate.clone().subtract(1, "months");
+	      days = prevMonth.daysInMonth();
+	      prevMonth.date(days).startOf("week");
+	      nextMonth = (0, _moment2["default"])(prevMonth).clone().add(42, "d");
+	      minDate = _this.props.minDate ? _this.props.minDate.clone().subtract(1, "days") : _this.props.minDate;
+	      maxDate = _this.props.maxDate ? _this.props.maxDate.clone() : _this.props.maxDate;
+	      html = [];
+	      cells = [];
+	      while (prevMonth.isBefore(nextMonth)) {
+	        classes = {
+	          day: true
+	        };
+	        if (prevMonth.year() < year || prevMonth.year() === year && prevMonth.month() < month) {
+	          classes.old = true;
+	        } else if (prevMonth.year() > year || prevMonth.year() === year && prevMonth.month() > month) {
+	          classes["new"] = true;
+	        }
+	        if (prevMonth.isSame((0, _moment2["default"])({
+	          y: _this.props.selectedDate.year(),
+	          M: _this.props.selectedDate.month(),
+	          d: _this.props.selectedDate.date()
+	        }))) {
+	          classes.active = true;
+	        }
+	        if (_this.props.showToday) {
+	          if (prevMonth.isSame((0, _moment2["default"])(), "day")) {
+	            classes.today = true;
+	          }
+	        }
+	        if (minDate && prevMonth.isBefore(minDate) || maxDate && prevMonth.isAfter(maxDate)) {
+	          classes.disabled = true;
+	        }
+	        if (_this.props.daysOfWeekDisabled.length > 0) classes.disabled = _this.props.daysOfWeekDisabled.indexOf(prevMonth.day()) !== -1;
+	        cells.push(_react2["default"].createElement(
+	          "td",
+	          { className: (0, _classnames2["default"])(classes), key: prevMonth.month() + "-" + prevMonth.date(), onClick: _this.props.setSelectedDate },
+	          prevMonth.date()
+	        ));
+	        if (prevMonth.weekday() === (0, _moment2["default"])().endOf("week").weekday()) {
+	          row = _react2["default"].createElement(
+	            "tr",
+	            { key: prevMonth.month() + "-" + prevMonth.date() },
+	            cells
+	          );
+	          html.push(row);
+	          cells = [];
+	        }
+	        prevMonth.add(1, "d");
+	      }
+	      return html;
+	    };
+	  }
+
+	  _createClass(DateTimePickerDays, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "datepicker-days", style: { display: "block" } },
+	        _react2["default"].createElement(
+	          "table",
+	          { className: "table-condensed" },
+	          _react2["default"].createElement(
+	            "thead",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "prev", onClick: this.props.subtractMonth },
+	                _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-left" })
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "switch", colSpan: "5", onClick: this.props.showMonths },
+	                _moment2["default"].months()[this.props.viewDate.month()],
+	                " ",
+	                this.props.viewDate.year()
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "next", onClick: this.props.addMonth },
+	                _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-right" })
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Su"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Mo"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Tu"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "We"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Th"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Fr"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "dow" },
+	                "Sa"
+	              )
+	            )
+	          ),
+	          _react2["default"].createElement(
+	            "tbody",
+	            null,
+	            this.renderDays()
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      subtractMonth: _react.PropTypes.func.isRequired,
+	      addMonth: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      showToday: _react.PropTypes.bool,
+	      daysOfWeekDisabled: _react.PropTypes.array,
+	      setSelectedDate: _react.PropTypes.func.isRequired,
+	      showMonths: _react.PropTypes.func.isRequired,
+	      minDate: _react.PropTypes.object,
+	      maxDate: _react.PropTypes.object
+	    },
+	    enumerable: true
+	  }, {
+	    key: "defaultProps",
+	    value: {
+	      showToday: true
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerDays;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerDays;
+	module.exports = exports["default"];
+
+/***/ },
+/* 319 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(312);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _moment = __webpack_require__(171);
+
+	var _moment2 = _interopRequireDefault(_moment);
+
+	var DateTimePickerMonths = (function (_Component) {
+	  _inherits(DateTimePickerMonths, _Component);
+
+	  function DateTimePickerMonths() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerMonths);
+
+	    _get(Object.getPrototypeOf(DateTimePickerMonths.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderMonths = function () {
+	      var classes, i, month, months, monthsShort;
+	      month = _this.props.selectedDate.month();
+	      monthsShort = _moment2["default"].monthsShort();
+	      i = 0;
+	      months = [];
+	      while (i < 12) {
+	        classes = {
+	          month: true,
+	          "active": i === month && _this.props.viewDate.year() === _this.props.selectedDate.year()
+	        };
+	        months.push(_react2["default"].createElement(
+	          "span",
+	          { className: (0, _classnames2["default"])(classes), key: i, onClick: _this.props.setViewMonth },
+	          monthsShort[i]
+	        ));
+	        i++;
+	      }
+	      return months;
+	    };
+	  }
+
+	  _createClass(DateTimePickerMonths, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "datepicker-months", style: { display: "block" } },
+	        _react2["default"].createElement(
+	          "table",
+	          { className: "table-condensed" },
+	          _react2["default"].createElement(
+	            "thead",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "prev", onClick: this.props.subtractYear },
+	                "‹"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "switch", colSpan: "5", onClick: this.props.showYears },
+	                this.props.viewDate.year()
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "next", onClick: this.props.addYear },
+	                "›"
+	              )
+	            )
+	          ),
+	          _react2["default"].createElement(
+	            "tbody",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { colSpan: "7" },
+	                this.renderMonths()
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      subtractYear: _react.PropTypes.func.isRequired,
+	      addYear: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      showYears: _react.PropTypes.func.isRequired,
+	      setViewMonth: _react.PropTypes.func.isRequired
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerMonths;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerMonths;
+	module.exports = exports["default"];
+
+/***/ },
+/* 320 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(312);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var DateTimePickerYears = (function (_Component) {
+	  _inherits(DateTimePickerYears, _Component);
+
+	  function DateTimePickerYears() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerYears);
+
+	    _get(Object.getPrototypeOf(DateTimePickerYears.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderYears = function () {
+	      var classes, i, year, years;
+	      years = [];
+	      year = parseInt(_this.props.viewDate.year() / 10, 10) * 10;
+	      year--;
+	      i = -1;
+	      while (i < 11) {
+	        classes = {
+	          year: true,
+	          old: i === -1 | i === 10,
+	          active: _this.props.selectedDate.year() === year
+	        };
+	        years.push(_react2["default"].createElement(
+	          "span",
+	          { className: (0, _classnames2["default"])(classes), key: year, onClick: _this.props.setViewYear },
+	          year
+	        ));
+	        year++;
+	        i++;
+	      }
+	      return years;
+	    };
+	  }
+
+	  _createClass(DateTimePickerYears, [{
+	    key: "render",
+	    value: function render() {
+	      var year;
+	      year = parseInt(this.props.viewDate.year() / 10, 10) * 10;
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "datepicker-years", style: { display: "block" } },
+	        _react2["default"].createElement(
+	          "table",
+	          { className: "table-condensed" },
+	          _react2["default"].createElement(
+	            "thead",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "prev", onClick: this.props.subtractDecade },
+	                "‹"
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "switch", colSpan: "5" },
+	                year,
+	                " - ",
+	                year + 9
+	              ),
+	              _react2["default"].createElement(
+	                "th",
+	                { className: "next", onClick: this.props.addDecade },
+	                "›"
+	              )
+	            )
+	          ),
+	          _react2["default"].createElement(
+	            "tbody",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { colSpan: "7" },
+	                this.renderYears()
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      subtractDecade: _react.PropTypes.func.isRequired,
+	      addDecade: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      setViewYear: _react.PropTypes.func.isRequired
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerYears;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerYears;
+	module.exports = exports["default"];
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _extends = __webpack_require__(305)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _DateTimePickerMinutes = __webpack_require__(322);
+
+	var _DateTimePickerMinutes2 = _interopRequireDefault(_DateTimePickerMinutes);
+
+	var _DateTimePickerHours = __webpack_require__(324);
+
+	var _DateTimePickerHours2 = _interopRequireDefault(_DateTimePickerHours);
+
+	var _ConstantsJs = __webpack_require__(323);
+
+	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
+
+	var DateTimePickerTime = (function (_Component) {
+	  _inherits(DateTimePickerTime, _Component);
+
+	  function DateTimePickerTime() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerTime);
+
+	    _get(Object.getPrototypeOf(DateTimePickerTime.prototype), "constructor", this).apply(this, arguments);
+
+	    this.state = {
+	      minutesDisplayed: false,
+	      hoursDisplayed: false
+	    };
+
+	    this.goBack = function () {
+	      return _this.setState({
+	        minutesDisplayed: false,
+	        hoursDisplayed: false
+	      });
+	    };
+
+	    this.showMinutes = function () {
+	      return _this.setState({
+	        minutesDisplayed: true
+	      });
+	    };
+
+	    this.showHours = function () {
+	      return _this.setState({
+	        hoursDisplayed: true
+	      });
+	    };
+
+	    this.renderMinutes = function () {
+	      if (_this.state.minutesDisplayed) {
+	        return _react2["default"].createElement(_DateTimePickerMinutes2["default"], _extends({}, _this.props, { onSwitch: _this.goBack }));
+	      } else {
+	        return null;
+	      }
+	    };
+
+	    this.renderHours = function () {
+	      if (_this.state.hoursDisplayed) {
+	        return _react2["default"].createElement(_DateTimePickerHours2["default"], _extends({}, _this.props, { onSwitch: _this.goBack }));
+	      } else {
+	        return null;
+	      }
+	    };
+
+	    this.renderPicker = function () {
+	      if (!_this.state.minutesDisplayed && !_this.state.hoursDisplayed) {
+	        return _react2["default"].createElement(
+	          "div",
+	          { className: "timepicker-picker" },
+	          _react2["default"].createElement(
+	            "table",
+	            { className: "table-condensed" },
+	            _react2["default"].createElement(
+	              "tbody",
+	              null,
+	              _react2["default"].createElement(
+	                "tr",
+	                null,
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "a",
+	                    { className: "btn", onClick: _this.props.addHour },
+	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-up" })
+	                  )
+	                ),
+	                _react2["default"].createElement("td", { className: "separator" }),
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "a",
+	                    { className: "btn", onClick: _this.props.addMinute },
+	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-up" })
+	                  )
+	                ),
+	                _react2["default"].createElement("td", { className: "separator" })
+	              ),
+	              _react2["default"].createElement(
+	                "tr",
+	                null,
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "span",
+	                    { className: "timepicker-hour", onClick: _this.showHours },
+	                    _this.props.selectedDate.format("h")
+	                  )
+	                ),
+	                _react2["default"].createElement(
+	                  "td",
+	                  { className: "separator" },
+	                  ":"
+	                ),
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "span",
+	                    { className: "timepicker-minute", onClick: _this.showMinutes },
+	                    _this.props.selectedDate.format("mm")
+	                  )
+	                ),
+	                _react2["default"].createElement("td", { className: "separator" }),
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "button",
+	                    { className: "btn btn-primary", onClick: _this.props.togglePeriod, type: "button" },
+	                    _this.props.selectedDate.format("A")
+	                  )
+	                )
+	              ),
+	              _react2["default"].createElement(
+	                "tr",
+	                null,
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "a",
+	                    { className: "btn", onClick: _this.props.subtractHour },
+	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-down" })
+	                  )
+	                ),
+	                _react2["default"].createElement("td", { className: "separator" }),
+	                _react2["default"].createElement(
+	                  "td",
+	                  null,
+	                  _react2["default"].createElement(
+	                    "a",
+	                    { className: "btn", onClick: _this.props.subtractMinute },
+	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-down" })
+	                  )
+	                ),
+	                _react2["default"].createElement("td", { className: "separator" })
+	              )
+	            )
+	          )
+	        );
+	      } else {
+	        return "";
+	      }
+	    };
+	  }
+
+	  _createClass(DateTimePickerTime, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "timepicker" },
+	        this.renderPicker(),
+	        this.renderHours(),
+	        this.renderMinutes()
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      setSelectedHour: _react.PropTypes.func.isRequired,
+	      setSelectedMinute: _react.PropTypes.func.isRequired,
+	      subtractHour: _react.PropTypes.func.isRequired,
+	      addHour: _react.PropTypes.func.isRequired,
+	      subtractMinute: _react.PropTypes.func.isRequired,
+	      addMinute: _react.PropTypes.func.isRequired,
+	      viewDate: _react.PropTypes.object.isRequired,
+	      selectedDate: _react.PropTypes.object.isRequired,
+	      togglePeriod: _react.PropTypes.func.isRequired,
+	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME])
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerTime;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerTime;
+
+	module.exports = DateTimePickerTime;
+	module.exports = exports["default"];
+
+/***/ },
+/* 322 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _ConstantsJs = __webpack_require__(323);
+
+	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
+
+	var DateTimePickerMinutes = (function (_Component) {
+	  _inherits(DateTimePickerMinutes, _Component);
+
+	  function DateTimePickerMinutes() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerMinutes);
+
+	    _get(Object.getPrototypeOf(DateTimePickerMinutes.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderSwitchButton = function () {
+	      return _this.props.mode === _ConstantsJs2["default"].MODE_TIME ? _react2["default"].createElement(
+	        "ul",
+	        { className: "list-unstyled" },
+	        _react2["default"].createElement(
+	          "li",
+	          null,
+	          _react2["default"].createElement(
+	            "span",
+	            { className: "btn picker-switch", onClick: _this.props.onSwitch, style: { width: "100%" } },
+	            _react2["default"].createElement("span", { className: "glyphicon glyphicon-time" })
+	          )
+	        )
+	      ) : null;
+	    };
+	  }
+
+	  _createClass(DateTimePickerMinutes, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "timepicker-minutes", "data-action": "selectMinute", style: { display: "block" } },
+	        this.renderSwitchButton(),
+	        _react2["default"].createElement(
+	          "table",
+	          { className: "table-condensed" },
+	          _react2["default"].createElement(
+	            "tbody",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "00"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "05"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "10"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "15"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "20"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "25"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "30"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "35"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "40"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "45"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "50"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "minute", onClick: this.props.setSelectedMinute },
+	                "55"
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      setSelectedMinute: _react.PropTypes.func.isRequired,
+	      onSwitch: _react.PropTypes.func.isRequired,
+	      mode: _react.PropTypes.string.isRequired
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerMinutes;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerMinutes;
+	module.exports = exports["default"];
+
+/***/ },
+/* 323 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = {
+	    MODE_DATE: "date",
+	    MODE_DATETIME: "datetime",
+	    MODE_TIME: "time",
+
+	    SIZE_SMALL: "sm",
+	    SIZE_MEDIUM: "md",
+	    SIZE_LARGE: "lg"
+	};
+
+/***/ },
+/* 324 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _get = __webpack_require__(276)["default"];
+
+	var _inherits = __webpack_require__(292)["default"];
+
+	var _createClass = __webpack_require__(301)["default"];
+
+	var _classCallCheck = __webpack_require__(304)["default"];
+
+	var _interopRequireDefault = __webpack_require__(311)["default"];
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _ConstantsJs = __webpack_require__(323);
+
+	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
+
+	var DateTimePickerHours = (function (_Component) {
+	  _inherits(DateTimePickerHours, _Component);
+
+	  function DateTimePickerHours() {
+	    var _this = this;
+
+	    _classCallCheck(this, DateTimePickerHours);
+
+	    _get(Object.getPrototypeOf(DateTimePickerHours.prototype), "constructor", this).apply(this, arguments);
+
+	    this.renderSwitchButton = function () {
+	      return _this.props.mode === _ConstantsJs2["default"].MODE_TIME ? _react2["default"].createElement(
+	        "ul",
+	        { className: "list-unstyled" },
+	        _react2["default"].createElement(
+	          "li",
+	          null,
+	          _react2["default"].createElement(
+	            "span",
+	            { className: "btn picker-switch", onClick: _this.props.onSwitch, style: { width: "100%" } },
+	            _react2["default"].createElement("span", { className: "glyphicon glyphicon-time" })
+	          )
+	        )
+	      ) : null;
+	    };
+	  }
+
+	  _createClass(DateTimePickerHours, [{
+	    key: "render",
+	    value: function render() {
+	      return _react2["default"].createElement(
+	        "div",
+	        { className: "timepicker-hours", "data-action": "selectHour", style: { display: "block" } },
+	        this.renderSwitchButton(),
+	        _react2["default"].createElement(
+	          "table",
+	          { className: "table-condensed" },
+	          _react2["default"].createElement(
+	            "tbody",
+	            null,
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "01"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "02"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "03"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "04"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "05"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "06"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "07"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "08"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "09"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "10"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "11"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "12"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "13"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "14"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "15"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "16"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "17"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "18"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "19"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "20"
+	              )
+	            ),
+	            _react2["default"].createElement(
+	              "tr",
+	              null,
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "21"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "22"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "23"
+	              ),
+	              _react2["default"].createElement(
+	                "td",
+	                { className: "hour", onClick: this.props.setSelectedHour },
+	                "24"
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }], [{
+	    key: "propTypes",
+	    value: {
+	      setSelectedHour: _react.PropTypes.func.isRequired,
+	      onSwitch: _react.PropTypes.func.isRequired,
+	      mode: _react.PropTypes.string.isRequired
+	    },
+	    enumerable: true
+	  }]);
+
+	  return DateTimePickerHours;
+	})(_react.Component);
+
+	exports["default"] = DateTimePickerHours;
+	module.exports = exports["default"];
+
+/***/ },
+/* 325 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.CalEventView = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _groups = __webpack_require__(271);
+
+	var _categories = __webpack_require__(272);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var moment = __webpack_require__(171);
+
+	var CategoryView = function (_React$Component) {
+	    _inherits(CategoryView, _React$Component);
+
+	    function CategoryView() {
+	        _classCallCheck(this, CategoryView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryView).apply(this, arguments));
+	    }
+
+	    _createClass(CategoryView, [{
+	        key: 'render',
+	        value: function render() {
+	            var active = "btn disabled " + (this.props.value ? "btn-primary" : "btn-default");
+	            return _react2.default.createElement(
+	                'button',
+	                { type: 'button', className: active, onClick: this.props.onChange },
+	                this.props.title
+	            );
+	        }
+	    }]);
+
+	    return CategoryView;
+	}(_react2.default.Component);
+
+	var CategoryGroupView = function (_React$Component2) {
+	    _inherits(CategoryGroupView, _React$Component2);
+
+	    function CategoryGroupView() {
+	        _classCallCheck(this, CategoryGroupView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroupView).apply(this, arguments));
+	    }
+
+	    _createClass(CategoryGroupView, [{
+	        key: 'render',
+	        value: function render() {
+	            var categories = this.props.data.map(function (category) {
+	                var _this3 = this;
+
+	                if (category.category_group === this.props.id) {
+	                    return _react2.default.createElement(CategoryView, { title: category.title, value: category.value, key: category.id, onChange: function onChange(e) {
+	                            return _this3.props.onChange(category.id);
+	                        } });
+	                }
+	            }.bind(this));
+	            var newCategories = [];
+	            for (var i = 0; i < categories.length; i++) {
+	                if (categories[i] !== undefined) {
+	                    newCategories.push(categories[i]);
+	                }
+	            }
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'row' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-5' },
+	                    this.props.title,
+	                    ':'
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'col-sm-7' },
+	                    _react2.default.createElement(
+	                        'span',
+	                        { className: 'btn-group btn-group-xs', role: 'group', 'aria-label': '...' },
+	                        newCategories
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return CategoryGroupView;
+	}(_react2.default.Component);
+
+	var CategoryGroupListView = function (_React$Component3) {
+	    _inherits(CategoryGroupListView, _React$Component3);
+
+	    function CategoryGroupListView() {
+	        _classCallCheck(this, CategoryGroupListView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CategoryGroupListView).apply(this, arguments));
+	    }
+
+	    _createClass(CategoryGroupListView, [{
+	        key: 'render',
+	        value: function render() {
+	            var categoryGroups = this.props.categoryGroups.map(function (categorygroup) {
+	                return _react2.default.createElement(CategoryGroupView, { title: categorygroup.title, key: categorygroup.id, id: categorygroup.id, data: this.props.categories, onChange: this.props.categoryChanged });
+	            }.bind(this));
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'h5',
+	                    null,
+	                    _react2.default.createElement(
+	                        'strong',
+	                        null,
+	                        'Kategórie'
+	                    )
+	                ),
+	                categoryGroups
+	            );
+	        }
+	    }]);
+
+	    return CategoryGroupListView;
+	}(_react2.default.Component);
+
+	var GroupView = function (_React$Component4) {
+	    _inherits(GroupView, _React$Component4);
+
+	    function GroupView() {
+	        _classCallCheck(this, GroupView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(GroupView).apply(this, arguments));
+	    }
+
+	    _createClass(GroupView, [{
+	        key: 'render',
+	        value: function render() {
+	            var active = "btn disabled " + (this.props.value ? "btn-primary" : "btn-default");
+	            return _react2.default.createElement(
+	                'button',
+	                { type: 'button', className: active, onClick: this.props.onChange },
+	                this.props.name
+	            );
+	        }
+	    }]);
+
+	    return GroupView;
+	}(_react2.default.Component);
+
+	var GroupListView = function (_React$Component5) {
+	    _inherits(GroupListView, _React$Component5);
+
+	    function GroupListView() {
+	        _classCallCheck(this, GroupListView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(GroupListView).apply(this, arguments));
+	    }
+
+	    _createClass(GroupListView, [{
+	        key: 'render',
+	        value: function render() {
+	            var groups = this.props.data.map(function (group) {
+	                var _this7 = this;
+
+	                return _react2.default.createElement(GroupView, { name: group.name, key: group.id,
+	                    value: group.value,
+	                    onChange: function onChange(e) {
+	                        return _this7.props.groupChanged(group.id);
+	                    } });
+	            }.bind(this));
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                ' ',
+	                _react2.default.createElement(
+	                    'h5',
+	                    null,
+	                    _react2.default.createElement(
+	                        'strong',
+	                        null,
+	                        this.props.groupListName
+	                    )
+	                ),
+	                ' ',
+	                _react2.default.createElement(
+	                    'span',
+	                    { className: 'btn-group btn-group-xs', role: 'group', 'aria-label': '...' },
+	                    groups
+	                )
+	            );
+	        }
+	    }]);
+
+	    return GroupListView;
+	}(_react2.default.Component);
+
+	var CalEventView = exports.CalEventView = function (_React$Component6) {
+	    _inherits(CalEventView, _React$Component6);
+
+	    function CalEventView() {
+	        _classCallCheck(this, CalEventView);
+
+	        return _possibleConstructorReturn(this, Object.getPrototypeOf(CalEventView).apply(this, arguments));
+	    }
+
+	    _createClass(CalEventView, [{
+	        key: 'render',
+	        value: function render() {
+	            var _this9 = this;
+
+	            var publicEvent = "btn disabled " + (this.props.event.public ? "btn-primary" : "btn-default");
+	            var alldayEvent = "btn disabled " + (this.props.event.allDay ? "btn-primary" : "btn-default");
+	            return _react2.default.createElement(
+	                'div',
+	                { id: 'fullCalModalView', className: 'modal fade' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'modal-dialog' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'modal-content' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'modal-header' },
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button', className: 'close', 'data-dismiss': 'modal' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { 'aria-hidden': 'true' },
+	                                    '×'
+	                                ),
+	                                ' ',
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { className: 'sr-only' },
+	                                    'close'
+	                                )
+	                            ),
+	                            this.props.event.title
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { id: 'modalBody', className: 'modal-body' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                _react2.default.createElement(
+	                                    'button',
+	                                    { type: 'button', className: publicEvent },
+	                                    'Verejná'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'button',
+	                                    { type: 'button', className: alldayEvent },
+	                                    'Celodenná'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                'od: ',
+	                                this.props.eventstart,
+	                                ' ',
+	                                _react2.default.createElement('br', null),
+	                                'do: ',
+	                                this.props.eventend
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'form-group' },
+	                                this.props.groups.length > 0 && _react2.default.createElement(GroupListView, { data: this.props.groups, groupListName: "Skupiny" }),
+	                                this.props.groups.length > 0 && _react2.default.createElement(GroupListView, { data: this.props.otherGroups, groupListName: "Ostatné skupiny" }),
+	                                _react2.default.createElement(CategoryGroupListView, { categories: this.props.categories, categoryGroups: this.props.categoryGroups })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'modal-footer' },
+	                            this.props.groups.length > 0 && _react2.default.createElement(
+	                                'button',
+	                                { className: 'btn btn-warning pull-left', 'data-dismiss': 'modal', onClick: function onClick(e) {
+	                                        return _this9.props.editEvent(_this9.props.event.id);
+	                                    } },
+	                                'Upraviť'
+	                            ),
+	                            _react2.default.createElement(
+	                                'button',
+	                                { type: 'button', className: 'btn btn-default', 'data-dismiss': 'modal' },
+	                                'Zavrieť'
+	                            )
+	                        )
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return CalEventView;
+	}(_react2.default.Component);
+
+/***/ },
+/* 326 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
+	__webpack_require__(327)
+	__webpack_require__(328)
+	__webpack_require__(329)
+	__webpack_require__(330)
+	__webpack_require__(331)
+	__webpack_require__(332)
+	__webpack_require__(333)
+	__webpack_require__(334)
+	__webpack_require__(335)
+	__webpack_require__(336)
+	__webpack_require__(337)
+	__webpack_require__(338)
+
+/***/ },
+/* 327 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -62491,7 +62037,7 @@
 
 
 /***/ },
-/* 273 */
+/* 328 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -62591,7 +62137,7 @@
 
 
 /***/ },
-/* 274 */
+/* 329 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -62717,7 +62263,7 @@
 
 
 /***/ },
-/* 275 */
+/* 330 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -62960,7 +62506,7 @@
 
 
 /***/ },
-/* 276 */
+/* 331 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -63177,7 +62723,7 @@
 
 
 /***/ },
-/* 277 */
+/* 332 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -63348,7 +62894,7 @@
 
 
 /***/ },
-/* 278 */
+/* 333 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -63691,7 +63237,7 @@
 
 
 /***/ },
-/* 279 */
+/* 334 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -64211,7 +63757,7 @@
 
 
 /***/ },
-/* 280 */
+/* 335 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -64325,7 +63871,7 @@
 
 
 /***/ },
-/* 281 */
+/* 336 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -64503,7 +64049,7 @@
 
 
 /***/ },
-/* 282 */
+/* 337 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -64664,7 +64210,7 @@
 
 
 /***/ },
-/* 283 */
+/* 338 */
 /***/ function(module, exports) {
 
 	/* ========================================================================
@@ -64830,2542 +64376,6 @@
 
 	}(jQuery);
 
-
-/***/ },
-/* 284 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _extends = __webpack_require__(314)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _moment = __webpack_require__(171);
-
-	var _moment2 = _interopRequireDefault(_moment);
-
-	var _classnames = __webpack_require__(321);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var _DateTimePickerJs = __webpack_require__(322);
-
-	var _DateTimePickerJs2 = _interopRequireDefault(_DateTimePickerJs);
-
-	var _ConstantsJs = __webpack_require__(332);
-
-	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
-
-	var DateTimeField = (function (_Component) {
-	  _inherits(DateTimeField, _Component);
-
-	  function DateTimeField() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimeField);
-
-	    _get(Object.getPrototypeOf(DateTimeField.prototype), "constructor", this).apply(this, arguments);
-
-	    this.resolvePropsInputFormat = function () {
-	      if (_this.props.inputFormat) {
-	        return _this.props.inputFormat;
-	      }
-	      switch (_this.props.mode) {
-	        case _ConstantsJs2["default"].MODE_TIME:
-	          return "h:mm A";
-	        case _ConstantsJs2["default"].MODE_DATE:
-	          return "MM/DD/YY";
-	        default:
-	          return "MM/DD/YY h:mm A";
-	      }
-	    };
-
-	    this.state = {
-	      showDatePicker: this.props.mode !== _ConstantsJs2["default"].MODE_TIME,
-	      showTimePicker: this.props.mode === _ConstantsJs2["default"].MODE_TIME,
-	      inputFormat: this.resolvePropsInputFormat(),
-	      buttonIcon: this.props.mode === _ConstantsJs2["default"].MODE_TIME ? "glyphicon-time" : "glyphicon-calendar",
-	      widgetStyle: {
-	        display: "block",
-	        position: "absolute",
-	        left: -9999,
-	        zIndex: "9999 !important"
-	      },
-	      viewDate: (0, _moment2["default"])(this.props.dateTime, this.props.format, true).startOf("month"),
-	      selectedDate: (0, _moment2["default"])(this.props.dateTime, this.props.format, true),
-	      inputValue: typeof this.props.defaultText !== "undefined" ? this.props.defaultText : (0, _moment2["default"])(this.props.dateTime, this.props.format, true).format(this.resolvePropsInputFormat())
-	    };
-
-	    this.componentWillReceiveProps = function (nextProps) {
-	      var state = {};
-	      if (nextProps.inputFormat !== _this.props.inputFormat) {
-	        state.inputFormat = nextProps.inputFormat;
-	        state.inputValue = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).format(nextProps.inputFormat);
-	      }
-
-	      if (nextProps.dateTime !== _this.props.dateTime && (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).isValid()) {
-	        state.viewDate = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).startOf("month");
-	        state.selectedDate = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true);
-	        state.inputValue = (0, _moment2["default"])(nextProps.dateTime, nextProps.format, true).format(nextProps.inputFormat ? nextProps.inputFormat : _this.state.inputFormat);
-	      }
-	      return _this.setState(state);
-	    };
-
-	    this.onChange = function (event) {
-	      var value = event.target == null ? event : event.target.value;
-	      if ((0, _moment2["default"])(value, _this.state.inputFormat, true).isValid()) {
-	        _this.setState({
-	          selectedDate: (0, _moment2["default"])(value, _this.state.inputFormat, true),
-	          viewDate: (0, _moment2["default"])(value, _this.state.inputFormat, true).startOf("month")
-	        });
-	      }
-
-	      return _this.setState({
-	        inputValue: value
-	      }, function () {
-	        return this.props.onChange((0, _moment2["default"])(this.state.inputValue, this.state.inputFormat, true).format(this.props.format), value);
-	      });
-	    };
-
-	    this.getValue = function () {
-	      return (0, _moment2["default"])(_this.state.inputValue, _this.props.inputFormat, true).format(_this.props.format);
-	    };
-
-	    this.setSelectedDate = function (e) {
-	      var target = e.target;
-
-	      if (target.className && !target.className.match(/disabled/g)) {
-	        var month = undefined;
-	        if (target.className.indexOf("new") >= 0) month = _this.state.viewDate.month() + 1;else if (target.className.indexOf("old") >= 0) month = _this.state.viewDate.month() - 1;else month = _this.state.viewDate.month();
-	        return _this.setState({
-	          selectedDate: _this.state.viewDate.clone().month(month).date(parseInt(e.target.innerHTML)).hour(_this.state.selectedDate.hours()).minute(_this.state.selectedDate.minutes())
-	        }, function () {
-	          this.closePicker();
-	          this.props.onChange(this.state.selectedDate.format(this.props.format));
-	          return this.setState({
-	            inputValue: this.state.selectedDate.format(this.state.inputFormat)
-	          });
-	        });
-	      }
-	    };
-
-	    this.setSelectedHour = function (e) {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().hour(parseInt(e.target.innerHTML)).minute(_this.state.selectedDate.minutes())
-	      }, function () {
-	        this.closePicker();
-	        this.props.onChange(this.state.selectedDate.format(this.props.format));
-	        return this.setState({
-	          inputValue: this.state.selectedDate.format(this.state.inputFormat)
-	        });
-	      });
-	    };
-
-	    this.setSelectedMinute = function (e) {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().hour(_this.state.selectedDate.hours()).minute(parseInt(e.target.innerHTML))
-	      }, function () {
-	        this.closePicker();
-	        this.props.onChange(this.state.selectedDate.format(this.props.format));
-	        return this.setState({
-	          inputValue: this.state.selectedDate.format(this.state.inputFormat)
-	        });
-	      });
-	    };
-
-	    this.setViewMonth = function (month) {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.clone().month(month)
-	      });
-	    };
-
-	    this.setViewYear = function (year) {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.clone().year(year)
-	      });
-	    };
-
-	    this.addMinute = function () {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().add(1, "minutes")
-	      }, function () {
-	        this.props.onChange(this.state.selectedDate.format(this.props.format));
-	        return this.setState({
-	          inputValue: this.state.selectedDate.format(this.resolvePropsInputFormat())
-	        });
-	      });
-	    };
-
-	    this.addHour = function () {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().add(1, "hours")
-	      }, function () {
-	        this.props.onChange(this.state.selectedDate.format(this.props.format));
-	        return this.setState({
-	          inputValue: this.state.selectedDate.format(this.resolvePropsInputFormat())
-	        });
-	      });
-	    };
-
-	    this.addMonth = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.add(1, "months")
-	      });
-	    };
-
-	    this.addYear = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.add(1, "years")
-	      });
-	    };
-
-	    this.addDecade = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.add(10, "years")
-	      });
-	    };
-
-	    this.subtractMinute = function () {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().subtract(1, "minutes")
-	      }, function () {
-	        _this.props.onChange(_this.state.selectedDate.format(_this.props.format));
-	        return _this.setState({
-	          inputValue: _this.state.selectedDate.format(_this.resolvePropsInputFormat())
-	        });
-	      });
-	    };
-
-	    this.subtractHour = function () {
-	      return _this.setState({
-	        selectedDate: _this.state.selectedDate.clone().subtract(1, "hours")
-	      }, function () {
-	        _this.props.onChange(_this.state.selectedDate.format(_this.props.format));
-	        return _this.setState({
-	          inputValue: _this.state.selectedDate.format(_this.resolvePropsInputFormat())
-	        });
-	      });
-	    };
-
-	    this.subtractMonth = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.subtract(1, "months")
-	      });
-	    };
-
-	    this.subtractYear = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.subtract(1, "years")
-	      });
-	    };
-
-	    this.subtractDecade = function () {
-	      return _this.setState({
-	        viewDate: _this.state.viewDate.subtract(10, "years")
-	      });
-	    };
-
-	    this.togglePeriod = function () {
-	      if (_this.state.selectedDate.hour() > 12) {
-	        return _this.onChange(_this.state.selectedDate.clone().subtract(12, "hours").format(_this.state.inputFormat));
-	      } else {
-	        return _this.onChange(_this.state.selectedDate.clone().add(12, "hours").format(_this.state.inputFormat));
-	      }
-	    };
-
-	    this.togglePicker = function () {
-	      return _this.setState({
-	        showDatePicker: !_this.state.showDatePicker,
-	        showTimePicker: !_this.state.showTimePicker
-	      });
-	    };
-
-	    this.onClick = function () {
-	      var classes = undefined,
-	          gBCR = undefined,
-	          offset = undefined,
-	          placePosition = undefined,
-	          scrollTop = undefined,
-	          styles = undefined;
-	      if (_this.state.showPicker) {
-	        return _this.closePicker();
-	      } else {
-	        _this.setState({
-	          showPicker: true
-	        });
-	        gBCR = _this.refs.dtpbutton.getBoundingClientRect();
-	        classes = {
-	          "bootstrap-datetimepicker-widget": true,
-	          "dropdown-menu": true
-	        };
-	        offset = {
-	          top: gBCR.top + window.pageYOffset - document.documentElement.clientTop,
-	          left: gBCR.left + window.pageXOffset - document.documentElement.clientLeft
-	        };
-	        offset.top = offset.top + _this.refs.datetimepicker.offsetHeight;
-	        scrollTop = window.pageYOffset !== undefined ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-	        placePosition = _this.props.direction === "up" ? "top" : _this.props.direction === "bottom" ? "bottom" : _this.props.direction === "auto" ? offset.top + _this.refs.widget.offsetHeight > window.offsetHeight + scrollTop && _this.refs.widget.offsetHeight + _this.refs.datetimepicker.offsetHeight > offset.top ? "top" : "bottom" : void 0;
-	        if (placePosition === "top") {
-	          offset.top = -_this.refs.widget.offsetHeight - _this.clientHeight - 2;
-	          classes.top = true;
-	          classes.bottom = false;
-	          classes["pull-right"] = true;
-	        } else {
-	          offset.top = 40;
-	          classes.top = false;
-	          classes.bottom = true;
-	          classes["pull-right"] = true;
-	        }
-	        styles = {
-	          display: "block",
-	          position: "absolute",
-	          top: offset.top,
-	          left: "auto",
-	          right: 40
-	        };
-	        return _this.setState({
-	          widgetStyle: styles,
-	          widgetClasses: classes
-	        });
-	      }
-	    };
-
-	    this.closePicker = function () {
-	      var style = _extends({}, _this.state.widgetStyle);
-	      style.left = -9999;
-	      style.display = "none";
-	      return _this.setState({
-	        showPicker: false,
-	        widgetStyle: style
-	      });
-	    };
-
-	    this.size = function () {
-	      switch (_this.props.size) {
-	        case _ConstantsJs2["default"].SIZE_SMALL:
-	          return "form-group-sm";
-	        case _ConstantsJs2["default"].SIZE_LARGE:
-	          return "form-group-lg";
-	      }
-
-	      return "";
-	    };
-
-	    this.renderOverlay = function () {
-	      var styles = {
-	        position: "fixed",
-	        top: 0,
-	        bottom: 0,
-	        left: 0,
-	        right: 0,
-	        zIndex: "999"
-	      };
-	      if (_this.state.showPicker) {
-	        return _react2["default"].createElement("div", { onClick: _this.closePicker, style: styles });
-	      } else {
-	        return _react2["default"].createElement("span", null);
-	      }
-	    };
-	  }
-
-	  _createClass(DateTimeField, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        null,
-	        this.renderOverlay(),
-	        _react2["default"].createElement(_DateTimePickerJs2["default"], {
-	          addDecade: this.addDecade,
-	          addHour: this.addHour,
-	          addMinute: this.addMinute,
-	          addMonth: this.addMonth,
-	          addYear: this.addYear,
-	          daysOfWeekDisabled: this.props.daysOfWeekDisabled,
-	          maxDate: this.props.maxDate,
-	          minDate: this.props.minDate,
-	          mode: this.props.mode,
-	          ref: "widget",
-	          selectedDate: this.state.selectedDate,
-	          setSelectedDate: this.setSelectedDate,
-	          setSelectedHour: this.setSelectedHour,
-	          setSelectedMinute: this.setSelectedMinute,
-	          setViewMonth: this.setViewMonth,
-	          setViewYear: this.setViewYear,
-	          showDatePicker: this.state.showDatePicker,
-	          showTimePicker: this.state.showTimePicker,
-	          showToday: this.props.showToday,
-	          subtractDecade: this.subtractDecade,
-	          subtractHour: this.subtractHour,
-	          subtractMinute: this.subtractMinute,
-	          subtractMonth: this.subtractMonth,
-	          subtractYear: this.subtractYear,
-	          togglePeriod: this.togglePeriod,
-	          togglePicker: this.togglePicker,
-	          viewDate: this.state.viewDate,
-	          viewMode: this.props.viewMode,
-	          widgetClasses: this.state.widgetClasses,
-	          widgetStyle: this.state.widgetStyle
-	        }),
-	        _react2["default"].createElement(
-	          "div",
-	          { className: "input-group date " + this.size(), ref: "datetimepicker" },
-	          _react2["default"].createElement("input", _extends({ className: "form-control", onChange: this.onChange, type: "text", value: this.state.inputValue }, this.props.inputProps)),
-	          _react2["default"].createElement(
-	            "span",
-	            { className: "input-group-addon", onBlur: this.onBlur, onClick: this.onClick, ref: "dtpbutton" },
-	            _react2["default"].createElement("span", { className: (0, _classnames2["default"])("glyphicon", this.state.buttonIcon) })
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "defaultProps",
-	    value: {
-	      dateTime: (0, _moment2["default"])().format("x"),
-	      format: "x",
-	      showToday: true,
-	      viewMode: "days",
-	      daysOfWeekDisabled: [],
-	      size: _ConstantsJs2["default"].SIZE_MEDIUM,
-	      mode: _ConstantsJs2["default"].MODE_DATETIME,
-	      onChange: function onChange(x) {
-	        console.log(x);
-	      }
-	    },
-	    enumerable: true
-	  }, {
-	    key: "propTypes",
-	    value: {
-	      dateTime: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
-	      onChange: _react.PropTypes.func,
-	      format: _react.PropTypes.string,
-	      inputProps: _react.PropTypes.object,
-	      inputFormat: _react.PropTypes.string,
-	      defaultText: _react.PropTypes.string,
-	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME]),
-	      minDate: _react.PropTypes.object,
-	      maxDate: _react.PropTypes.object,
-	      direction: _react.PropTypes.string,
-	      showToday: _react.PropTypes.bool,
-	      viewMode: _react.PropTypes.string,
-	      size: _react.PropTypes.oneOf([_ConstantsJs2["default"].SIZE_SMALL, _ConstantsJs2["default"].SIZE_MEDIUM, _ConstantsJs2["default"].SIZE_LARGE]),
-	      daysOfWeekDisabled: _react.PropTypes.arrayOf(_react.PropTypes.number)
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimeField;
-	})(_react.Component);
-
-	exports["default"] = DateTimeField;
-	module.exports = exports["default"];
-
-/***/ },
-/* 285 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _Object$getOwnPropertyDescriptor = __webpack_require__(286)["default"];
-
-	exports["default"] = function get(_x, _x2, _x3) {
-	  var _again = true;
-
-	  _function: while (_again) {
-	    var object = _x,
-	        property = _x2,
-	        receiver = _x3;
-	    _again = false;
-	    if (object === null) object = Function.prototype;
-
-	    var desc = _Object$getOwnPropertyDescriptor(object, property);
-
-	    if (desc === undefined) {
-	      var parent = Object.getPrototypeOf(object);
-
-	      if (parent === null) {
-	        return undefined;
-	      } else {
-	        _x = parent;
-	        _x2 = property;
-	        _x3 = receiver;
-	        _again = true;
-	        desc = parent = undefined;
-	        continue _function;
-	      }
-	    } else if ("value" in desc) {
-	      return desc.value;
-	    } else {
-	      var getter = desc.get;
-
-	      if (getter === undefined) {
-	        return undefined;
-	      }
-
-	      return getter.call(receiver);
-	    }
-	  }
-	};
-
-	exports.__esModule = true;
-
-/***/ },
-/* 286 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(287), __esModule: true };
-
-/***/ },
-/* 287 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(288);
-	__webpack_require__(289);
-	module.exports = function getOwnPropertyDescriptor(it, key){
-	  return $.getDesc(it, key);
-	};
-
-/***/ },
-/* 288 */
-/***/ function(module, exports) {
-
-	var $Object = Object;
-	module.exports = {
-	  create:     $Object.create,
-	  getProto:   $Object.getPrototypeOf,
-	  isEnum:     {}.propertyIsEnumerable,
-	  getDesc:    $Object.getOwnPropertyDescriptor,
-	  setDesc:    $Object.defineProperty,
-	  setDescs:   $Object.defineProperties,
-	  getKeys:    $Object.keys,
-	  getNames:   $Object.getOwnPropertyNames,
-	  getSymbols: $Object.getOwnPropertySymbols,
-	  each:       [].forEach
-	};
-
-/***/ },
-/* 289 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
-	var toIObject = __webpack_require__(290);
-
-	__webpack_require__(294)('getOwnPropertyDescriptor', function($getOwnPropertyDescriptor){
-	  return function getOwnPropertyDescriptor(it, key){
-	    return $getOwnPropertyDescriptor(toIObject(it), key);
-	  };
-	});
-
-/***/ },
-/* 290 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// to indexed object, toObject with fallback for non-array-like ES3 strings
-	var IObject = __webpack_require__(291)
-	  , defined = __webpack_require__(293);
-	module.exports = function(it){
-	  return IObject(defined(it));
-	};
-
-/***/ },
-/* 291 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// fallback for non-array-like ES3 and non-enumerable old V8 strings
-	var cof = __webpack_require__(292);
-	module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
-	  return cof(it) == 'String' ? it.split('') : Object(it);
-	};
-
-/***/ },
-/* 292 */
-/***/ function(module, exports) {
-
-	var toString = {}.toString;
-
-	module.exports = function(it){
-	  return toString.call(it).slice(8, -1);
-	};
-
-/***/ },
-/* 293 */
-/***/ function(module, exports) {
-
-	// 7.2.1 RequireObjectCoercible(argument)
-	module.exports = function(it){
-	  if(it == undefined)throw TypeError("Can't call method on  " + it);
-	  return it;
-	};
-
-/***/ },
-/* 294 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// most Object methods by ES6 should accept primitives
-	var $export = __webpack_require__(295)
-	  , core    = __webpack_require__(297)
-	  , fails   = __webpack_require__(300);
-	module.exports = function(KEY, exec){
-	  var fn  = (core.Object || {})[KEY] || Object[KEY]
-	    , exp = {};
-	  exp[KEY] = exec(fn);
-	  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
-	};
-
-/***/ },
-/* 295 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var global    = __webpack_require__(296)
-	  , core      = __webpack_require__(297)
-	  , ctx       = __webpack_require__(298)
-	  , PROTOTYPE = 'prototype';
-
-	var $export = function(type, name, source){
-	  var IS_FORCED = type & $export.F
-	    , IS_GLOBAL = type & $export.G
-	    , IS_STATIC = type & $export.S
-	    , IS_PROTO  = type & $export.P
-	    , IS_BIND   = type & $export.B
-	    , IS_WRAP   = type & $export.W
-	    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
-	    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
-	    , key, own, out;
-	  if(IS_GLOBAL)source = name;
-	  for(key in source){
-	    // contains in native
-	    own = !IS_FORCED && target && key in target;
-	    if(own && key in exports)continue;
-	    // export native or passed
-	    out = own ? target[key] : source[key];
-	    // prevent global pollution for namespaces
-	    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
-	    // bind timers to global for call from export context
-	    : IS_BIND && own ? ctx(out, global)
-	    // wrap global constructors for prevent change them in library
-	    : IS_WRAP && target[key] == out ? (function(C){
-	      var F = function(param){
-	        return this instanceof C ? new C(param) : C(param);
-	      };
-	      F[PROTOTYPE] = C[PROTOTYPE];
-	      return F;
-	    // make static versions for prototype methods
-	    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-	    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
-	  }
-	};
-	// type bitmap
-	$export.F = 1;  // forced
-	$export.G = 2;  // global
-	$export.S = 4;  // static
-	$export.P = 8;  // proto
-	$export.B = 16; // bind
-	$export.W = 32; // wrap
-	module.exports = $export;
-
-/***/ },
-/* 296 */
-/***/ function(module, exports) {
-
-	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-	var global = module.exports = typeof window != 'undefined' && window.Math == Math
-	  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
-	if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-
-/***/ },
-/* 297 */
-/***/ function(module, exports) {
-
-	var core = module.exports = {version: '1.2.6'};
-	if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-
-/***/ },
-/* 298 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// optional / simple context binding
-	var aFunction = __webpack_require__(299);
-	module.exports = function(fn, that, length){
-	  aFunction(fn);
-	  if(that === undefined)return fn;
-	  switch(length){
-	    case 1: return function(a){
-	      return fn.call(that, a);
-	    };
-	    case 2: return function(a, b){
-	      return fn.call(that, a, b);
-	    };
-	    case 3: return function(a, b, c){
-	      return fn.call(that, a, b, c);
-	    };
-	  }
-	  return function(/* ...args */){
-	    return fn.apply(that, arguments);
-	  };
-	};
-
-/***/ },
-/* 299 */
-/***/ function(module, exports) {
-
-	module.exports = function(it){
-	  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
-	  return it;
-	};
-
-/***/ },
-/* 300 */
-/***/ function(module, exports) {
-
-	module.exports = function(exec){
-	  try {
-	    return !!exec();
-	  } catch(e){
-	    return true;
-	  }
-	};
-
-/***/ },
-/* 301 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _Object$create = __webpack_require__(302)["default"];
-
-	var _Object$setPrototypeOf = __webpack_require__(304)["default"];
-
-	exports["default"] = function (subClass, superClass) {
-	  if (typeof superClass !== "function" && superClass !== null) {
-	    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-	  }
-
-	  subClass.prototype = _Object$create(superClass && superClass.prototype, {
-	    constructor: {
-	      value: subClass,
-	      enumerable: false,
-	      writable: true,
-	      configurable: true
-	    }
-	  });
-	  if (superClass) _Object$setPrototypeOf ? _Object$setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-	};
-
-	exports.__esModule = true;
-
-/***/ },
-/* 302 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(303), __esModule: true };
-
-/***/ },
-/* 303 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(288);
-	module.exports = function create(P, D){
-	  return $.create(P, D);
-	};
-
-/***/ },
-/* 304 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(305), __esModule: true };
-
-/***/ },
-/* 305 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(306);
-	module.exports = __webpack_require__(297).Object.setPrototypeOf;
-
-/***/ },
-/* 306 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.3.19 Object.setPrototypeOf(O, proto)
-	var $export = __webpack_require__(295);
-	$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(307).set});
-
-/***/ },
-/* 307 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Works with __proto__ only. Old v8 can't work with null proto objects.
-	/* eslint-disable no-proto */
-	var getDesc  = __webpack_require__(288).getDesc
-	  , isObject = __webpack_require__(308)
-	  , anObject = __webpack_require__(309);
-	var check = function(O, proto){
-	  anObject(O);
-	  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
-	};
-	module.exports = {
-	  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
-	    function(test, buggy, set){
-	      try {
-	        set = __webpack_require__(298)(Function.call, getDesc(Object.prototype, '__proto__').set, 2);
-	        set(test, []);
-	        buggy = !(test instanceof Array);
-	      } catch(e){ buggy = true; }
-	      return function setPrototypeOf(O, proto){
-	        check(O, proto);
-	        if(buggy)O.__proto__ = proto;
-	        else set(O, proto);
-	        return O;
-	      };
-	    }({}, false) : undefined),
-	  check: check
-	};
-
-/***/ },
-/* 308 */
-/***/ function(module, exports) {
-
-	module.exports = function(it){
-	  return typeof it === 'object' ? it !== null : typeof it === 'function';
-	};
-
-/***/ },
-/* 309 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isObject = __webpack_require__(308);
-	module.exports = function(it){
-	  if(!isObject(it))throw TypeError(it + ' is not an object!');
-	  return it;
-	};
-
-/***/ },
-/* 310 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _Object$defineProperty = __webpack_require__(311)["default"];
-
-	exports["default"] = (function () {
-	  function defineProperties(target, props) {
-	    for (var i = 0; i < props.length; i++) {
-	      var descriptor = props[i];
-	      descriptor.enumerable = descriptor.enumerable || false;
-	      descriptor.configurable = true;
-	      if ("value" in descriptor) descriptor.writable = true;
-
-	      _Object$defineProperty(target, descriptor.key, descriptor);
-	    }
-	  }
-
-	  return function (Constructor, protoProps, staticProps) {
-	    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-	    if (staticProps) defineProperties(Constructor, staticProps);
-	    return Constructor;
-	  };
-	})();
-
-	exports.__esModule = true;
-
-/***/ },
-/* 311 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(312), __esModule: true };
-
-/***/ },
-/* 312 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(288);
-	module.exports = function defineProperty(it, key, desc){
-	  return $.setDesc(it, key, desc);
-	};
-
-/***/ },
-/* 313 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	exports["default"] = function (instance, Constructor) {
-	  if (!(instance instanceof Constructor)) {
-	    throw new TypeError("Cannot call a class as a function");
-	  }
-	};
-
-	exports.__esModule = true;
-
-/***/ },
-/* 314 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _Object$assign = __webpack_require__(315)["default"];
-
-	exports["default"] = _Object$assign || function (target) {
-	  for (var i = 1; i < arguments.length; i++) {
-	    var source = arguments[i];
-
-	    for (var key in source) {
-	      if (Object.prototype.hasOwnProperty.call(source, key)) {
-	        target[key] = source[key];
-	      }
-	    }
-	  }
-
-	  return target;
-	};
-
-	exports.__esModule = true;
-
-/***/ },
-/* 315 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(316), __esModule: true };
-
-/***/ },
-/* 316 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(317);
-	module.exports = __webpack_require__(297).Object.assign;
-
-/***/ },
-/* 317 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.3.1 Object.assign(target, source)
-	var $export = __webpack_require__(295);
-
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(318)});
-
-/***/ },
-/* 318 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.1 Object.assign(target, source, ...)
-	var $        = __webpack_require__(288)
-	  , toObject = __webpack_require__(319)
-	  , IObject  = __webpack_require__(291);
-
-	// should work with symbols and should have deterministic property order (V8 bug)
-	module.exports = __webpack_require__(300)(function(){
-	  var a = Object.assign
-	    , A = {}
-	    , B = {}
-	    , S = Symbol()
-	    , K = 'abcdefghijklmnopqrst';
-	  A[S] = 7;
-	  K.split('').forEach(function(k){ B[k] = k; });
-	  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
-	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
-	  var T     = toObject(target)
-	    , $$    = arguments
-	    , $$len = $$.length
-	    , index = 1
-	    , getKeys    = $.getKeys
-	    , getSymbols = $.getSymbols
-	    , isEnum     = $.isEnum;
-	  while($$len > index){
-	    var S      = IObject($$[index++])
-	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
-	      , length = keys.length
-	      , j      = 0
-	      , key;
-	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
-	  }
-	  return T;
-	} : Object.assign;
-
-/***/ },
-/* 319 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 7.1.13 ToObject(argument)
-	var defined = __webpack_require__(293);
-	module.exports = function(it){
-	  return Object(defined(it));
-	};
-
-/***/ },
-/* 320 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	exports["default"] = function (obj) {
-	  return obj && obj.__esModule ? obj : {
-	    "default": obj
-	  };
-	};
-
-	exports.__esModule = true;
-
-/***/ },
-/* 321 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-	/* global define */
-
-	(function () {
-		'use strict';
-
-		var hasOwn = {}.hasOwnProperty;
-
-		function classNames () {
-			var classes = [];
-
-			for (var i = 0; i < arguments.length; i++) {
-				var arg = arguments[i];
-				if (!arg) continue;
-
-				var argType = typeof arg;
-
-				if (argType === 'string' || argType === 'number') {
-					classes.push(arg);
-				} else if (Array.isArray(arg)) {
-					classes.push(classNames.apply(null, arg));
-				} else if (argType === 'object') {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				}
-			}
-
-			return classes.join(' ');
-		}
-
-		if (typeof module !== 'undefined' && module.exports) {
-			module.exports = classNames;
-		} else if (true) {
-			// register as 'classnames', consistent with npm package name
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-				return classNames;
-			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		} else {
-			window.classNames = classNames;
-		}
-	}());
-
-
-/***/ },
-/* 322 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _classnames = __webpack_require__(321);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var _DateTimePickerDateJs = __webpack_require__(323);
-
-	var _DateTimePickerDateJs2 = _interopRequireDefault(_DateTimePickerDateJs);
-
-	var _DateTimePickerTimeJs = __webpack_require__(330);
-
-	var _DateTimePickerTimeJs2 = _interopRequireDefault(_DateTimePickerTimeJs);
-
-	var _ConstantsJs = __webpack_require__(332);
-
-	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
-
-	var DateTimePicker = (function (_Component) {
-	  _inherits(DateTimePicker, _Component);
-
-	  function DateTimePicker() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePicker);
-
-	    _get(Object.getPrototypeOf(DateTimePicker.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderDatePicker = function () {
-	      if (_this.props.showDatePicker) {
-	        return _react2["default"].createElement(
-	          "li",
-	          null,
-	          _react2["default"].createElement(_DateTimePickerDateJs2["default"], {
-	            addDecade: _this.props.addDecade,
-	            addMonth: _this.props.addMonth,
-	            addYear: _this.props.addYear,
-	            daysOfWeekDisabled: _this.props.daysOfWeekDisabled,
-	            maxDate: _this.props.maxDate,
-	            minDate: _this.props.minDate,
-	            selectedDate: _this.props.selectedDate,
-	            setSelectedDate: _this.props.setSelectedDate,
-	            setViewMonth: _this.props.setViewMonth,
-	            setViewYear: _this.props.setViewYear,
-	            showToday: _this.props.showToday,
-	            subtractDecade: _this.props.subtractDecade,
-	            subtractMonth: _this.props.subtractMonth,
-	            subtractYear: _this.props.subtractYear,
-	            viewDate: _this.props.viewDate,
-	            viewMode: _this.props.viewMode
-	          })
-	        );
-	      }
-	    };
-
-	    this.renderTimePicker = function () {
-	      if (_this.props.showTimePicker) {
-	        return _react2["default"].createElement(
-	          "li",
-	          null,
-	          _react2["default"].createElement(_DateTimePickerTimeJs2["default"], {
-	            addHour: _this.props.addHour,
-	            addMinute: _this.props.addMinute,
-	            mode: _this.props.mode,
-	            selectedDate: _this.props.selectedDate,
-	            setSelectedHour: _this.props.setSelectedHour,
-	            setSelectedMinute: _this.props.setSelectedMinute,
-	            subtractHour: _this.props.subtractHour,
-	            subtractMinute: _this.props.subtractMinute,
-	            togglePeriod: _this.props.togglePeriod,
-	            viewDate: _this.props.viewDate
-	          })
-	        );
-	      }
-	    };
-
-	    this.renderSwitchButton = function () {
-	      return _this.props.mode === _ConstantsJs2["default"].MODE_DATETIME ? _react2["default"].createElement(
-	        "li",
-	        null,
-	        _react2["default"].createElement(
-	          "span",
-	          { className: "btn picker-switch", onClick: _this.props.togglePicker, style: { width: "100%" } },
-	          _react2["default"].createElement("span", { className: (0, _classnames2["default"])("glyphicon", _this.props.showTimePicker ? "glyphicon-calendar" : "glyphicon-time") })
-	        )
-	      ) : null;
-	    };
-	  }
-
-	  _createClass(DateTimePicker, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: (0, _classnames2["default"])(this.props.widgetClasses), style: this.props.widgetStyle },
-	        _react2["default"].createElement(
-	          "ul",
-	          { className: "list-unstyled" },
-	          this.renderDatePicker(),
-	          this.renderSwitchButton(),
-	          this.renderTimePicker()
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      showDatePicker: _react.PropTypes.bool,
-	      showTimePicker: _react.PropTypes.bool,
-	      subtractMonth: _react.PropTypes.func.isRequired,
-	      addMonth: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      showToday: _react.PropTypes.bool,
-	      viewMode: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
-	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME]),
-	      daysOfWeekDisabled: _react.PropTypes.array,
-	      setSelectedDate: _react.PropTypes.func.isRequired,
-	      subtractYear: _react.PropTypes.func.isRequired,
-	      addYear: _react.PropTypes.func.isRequired,
-	      setViewMonth: _react.PropTypes.func.isRequired,
-	      setViewYear: _react.PropTypes.func.isRequired,
-	      subtractHour: _react.PropTypes.func.isRequired,
-	      addHour: _react.PropTypes.func.isRequired,
-	      subtractMinute: _react.PropTypes.func.isRequired,
-	      addMinute: _react.PropTypes.func.isRequired,
-	      addDecade: _react.PropTypes.func.isRequired,
-	      subtractDecade: _react.PropTypes.func.isRequired,
-	      togglePeriod: _react.PropTypes.func.isRequired,
-	      minDate: _react.PropTypes.object,
-	      maxDate: _react.PropTypes.object,
-	      widgetClasses: _react.PropTypes.object,
-	      widgetStyle: _react.PropTypes.object,
-	      togglePicker: _react.PropTypes.func,
-	      setSelectedHour: _react.PropTypes.func,
-	      setSelectedMinute: _react.PropTypes.func
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePicker;
-	})(_react.Component);
-
-	exports["default"] = DateTimePicker;
-	module.exports = exports["default"];
-
-/***/ },
-/* 323 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _Object$keys = __webpack_require__(324)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _DateTimePickerDays = __webpack_require__(327);
-
-	var _DateTimePickerDays2 = _interopRequireDefault(_DateTimePickerDays);
-
-	var _DateTimePickerMonths = __webpack_require__(328);
-
-	var _DateTimePickerMonths2 = _interopRequireDefault(_DateTimePickerMonths);
-
-	var _DateTimePickerYears = __webpack_require__(329);
-
-	var _DateTimePickerYears2 = _interopRequireDefault(_DateTimePickerYears);
-
-	var DateTimePickerDate = (function (_Component) {
-	  _inherits(DateTimePickerDate, _Component);
-
-	  _createClass(DateTimePickerDate, null, [{
-	    key: "propTypes",
-	    value: {
-	      subtractMonth: _react.PropTypes.func.isRequired,
-	      addMonth: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      showToday: _react.PropTypes.bool,
-	      viewMode: _react.PropTypes.oneOfType([_react.PropTypes.string, _react.PropTypes.number]),
-	      daysOfWeekDisabled: _react.PropTypes.array,
-	      setSelectedDate: _react.PropTypes.func.isRequired,
-	      subtractYear: _react.PropTypes.func.isRequired,
-	      addYear: _react.PropTypes.func.isRequired,
-	      setViewMonth: _react.PropTypes.func.isRequired,
-	      setViewYear: _react.PropTypes.func.isRequired,
-	      addDecade: _react.PropTypes.func.isRequired,
-	      subtractDecade: _react.PropTypes.func.isRequired,
-	      minDate: _react.PropTypes.object,
-	      maxDate: _react.PropTypes.object
-	    },
-	    enumerable: true
-	  }]);
-
-	  function DateTimePickerDate(props) {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerDate);
-
-	    _get(Object.getPrototypeOf(DateTimePickerDate.prototype), "constructor", this).call(this, props);
-
-	    this.showMonths = function () {
-	      return _this.setState({
-	        daysDisplayed: false,
-	        monthsDisplayed: true
-	      });
-	    };
-
-	    this.showYears = function () {
-	      return _this.setState({
-	        monthsDisplayed: false,
-	        yearsDisplayed: true
-	      });
-	    };
-
-	    this.setViewYear = function (e) {
-	      _this.props.setViewYear(e.target.innerHTML);
-	      return _this.setState({
-	        yearsDisplayed: false,
-	        monthsDisplayed: true
-	      });
-	    };
-
-	    this.setViewMonth = function (e) {
-	      _this.props.setViewMonth(e.target.innerHTML);
-	      return _this.setState({
-	        monthsDisplayed: false,
-	        daysDisplayed: true
-	      });
-	    };
-
-	    this.renderDays = function () {
-	      if (_this.state.daysDisplayed) {
-	        return _react2["default"].createElement(_DateTimePickerDays2["default"], {
-	          addMonth: _this.props.addMonth,
-	          daysOfWeekDisabled: _this.props.daysOfWeekDisabled,
-	          maxDate: _this.props.maxDate,
-	          minDate: _this.props.minDate,
-	          selectedDate: _this.props.selectedDate,
-	          setSelectedDate: _this.props.setSelectedDate,
-	          showMonths: _this.showMonths,
-	          showToday: _this.props.showToday,
-	          subtractMonth: _this.props.subtractMonth,
-	          viewDate: _this.props.viewDate
-	        });
-	      } else {
-	        return null;
-	      }
-	    };
-
-	    this.renderMonths = function () {
-	      if (_this.state.monthsDisplayed) {
-	        return _react2["default"].createElement(_DateTimePickerMonths2["default"], {
-	          addYear: _this.props.addYear,
-	          selectedDate: _this.props.selectedDate,
-	          setViewMonth: _this.setViewMonth,
-	          showYears: _this.showYears,
-	          subtractYear: _this.props.subtractYear,
-	          viewDate: _this.props.viewDate
-	        });
-	      } else {
-	        return null;
-	      }
-	    };
-
-	    this.renderYears = function () {
-	      if (_this.state.yearsDisplayed) {
-	        return _react2["default"].createElement(_DateTimePickerYears2["default"], {
-	          addDecade: _this.props.addDecade,
-	          selectedDate: _this.props.selectedDate,
-	          setViewYear: _this.setViewYear,
-	          subtractDecade: _this.props.subtractDecade,
-	          viewDate: _this.props.viewDate
-	        });
-	      } else {
-	        return null;
-	      }
-	    };
-
-	    var viewModes = {
-	      "days": {
-	        daysDisplayed: true,
-	        monthsDisplayed: false,
-	        yearsDisplayed: false
-	      },
-	      "months": {
-	        daysDisplayed: false,
-	        monthsDisplayed: true,
-	        yearsDisplayed: false
-	      },
-	      "years": {
-	        daysDisplayed: false,
-	        monthsDisplayed: false,
-	        yearsDisplayed: true
-	      }
-	    };
-	    this.state = viewModes[this.props.viewMode] || viewModes[_Object$keys(viewModes)[this.props.viewMode]] || viewModes.days;
-	  }
-
-	  _createClass(DateTimePickerDate, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "datepicker" },
-	        this.renderDays(),
-	        this.renderMonths(),
-	        this.renderYears()
-	      );
-	    }
-	  }]);
-
-	  return DateTimePickerDate;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerDate;
-	module.exports = exports["default"];
-
-/***/ },
-/* 324 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(325), __esModule: true };
-
-/***/ },
-/* 325 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(326);
-	module.exports = __webpack_require__(297).Object.keys;
-
-/***/ },
-/* 326 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.14 Object.keys(O)
-	var toObject = __webpack_require__(319);
-
-	__webpack_require__(294)('keys', function($keys){
-	  return function keys(it){
-	    return $keys(toObject(it));
-	  };
-	});
-
-/***/ },
-/* 327 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _moment = __webpack_require__(171);
-
-	var _moment2 = _interopRequireDefault(_moment);
-
-	var _classnames = __webpack_require__(321);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var DateTimePickerDays = (function (_Component) {
-	  _inherits(DateTimePickerDays, _Component);
-
-	  function DateTimePickerDays() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerDays);
-
-	    _get(Object.getPrototypeOf(DateTimePickerDays.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderDays = function () {
-	      var cells, classes, days, html, month, nextMonth, prevMonth, minDate, maxDate, row, year;
-	      year = _this.props.viewDate.year();
-	      month = _this.props.viewDate.month();
-	      prevMonth = _this.props.viewDate.clone().subtract(1, "months");
-	      days = prevMonth.daysInMonth();
-	      prevMonth.date(days).startOf("week");
-	      nextMonth = (0, _moment2["default"])(prevMonth).clone().add(42, "d");
-	      minDate = _this.props.minDate ? _this.props.minDate.clone().subtract(1, "days") : _this.props.minDate;
-	      maxDate = _this.props.maxDate ? _this.props.maxDate.clone() : _this.props.maxDate;
-	      html = [];
-	      cells = [];
-	      while (prevMonth.isBefore(nextMonth)) {
-	        classes = {
-	          day: true
-	        };
-	        if (prevMonth.year() < year || prevMonth.year() === year && prevMonth.month() < month) {
-	          classes.old = true;
-	        } else if (prevMonth.year() > year || prevMonth.year() === year && prevMonth.month() > month) {
-	          classes["new"] = true;
-	        }
-	        if (prevMonth.isSame((0, _moment2["default"])({
-	          y: _this.props.selectedDate.year(),
-	          M: _this.props.selectedDate.month(),
-	          d: _this.props.selectedDate.date()
-	        }))) {
-	          classes.active = true;
-	        }
-	        if (_this.props.showToday) {
-	          if (prevMonth.isSame((0, _moment2["default"])(), "day")) {
-	            classes.today = true;
-	          }
-	        }
-	        if (minDate && prevMonth.isBefore(minDate) || maxDate && prevMonth.isAfter(maxDate)) {
-	          classes.disabled = true;
-	        }
-	        if (_this.props.daysOfWeekDisabled.length > 0) classes.disabled = _this.props.daysOfWeekDisabled.indexOf(prevMonth.day()) !== -1;
-	        cells.push(_react2["default"].createElement(
-	          "td",
-	          { className: (0, _classnames2["default"])(classes), key: prevMonth.month() + "-" + prevMonth.date(), onClick: _this.props.setSelectedDate },
-	          prevMonth.date()
-	        ));
-	        if (prevMonth.weekday() === (0, _moment2["default"])().endOf("week").weekday()) {
-	          row = _react2["default"].createElement(
-	            "tr",
-	            { key: prevMonth.month() + "-" + prevMonth.date() },
-	            cells
-	          );
-	          html.push(row);
-	          cells = [];
-	        }
-	        prevMonth.add(1, "d");
-	      }
-	      return html;
-	    };
-	  }
-
-	  _createClass(DateTimePickerDays, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "datepicker-days", style: { display: "block" } },
-	        _react2["default"].createElement(
-	          "table",
-	          { className: "table-condensed" },
-	          _react2["default"].createElement(
-	            "thead",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "prev", onClick: this.props.subtractMonth },
-	                _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-left" })
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "switch", colSpan: "5", onClick: this.props.showMonths },
-	                _moment2["default"].months()[this.props.viewDate.month()],
-	                " ",
-	                this.props.viewDate.year()
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "next", onClick: this.props.addMonth },
-	                _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-right" })
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Su"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Mo"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Tu"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "We"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Th"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Fr"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "dow" },
-	                "Sa"
-	              )
-	            )
-	          ),
-	          _react2["default"].createElement(
-	            "tbody",
-	            null,
-	            this.renderDays()
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      subtractMonth: _react.PropTypes.func.isRequired,
-	      addMonth: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      showToday: _react.PropTypes.bool,
-	      daysOfWeekDisabled: _react.PropTypes.array,
-	      setSelectedDate: _react.PropTypes.func.isRequired,
-	      showMonths: _react.PropTypes.func.isRequired,
-	      minDate: _react.PropTypes.object,
-	      maxDate: _react.PropTypes.object
-	    },
-	    enumerable: true
-	  }, {
-	    key: "defaultProps",
-	    value: {
-	      showToday: true
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerDays;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerDays;
-	module.exports = exports["default"];
-
-/***/ },
-/* 328 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _classnames = __webpack_require__(321);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var _moment = __webpack_require__(171);
-
-	var _moment2 = _interopRequireDefault(_moment);
-
-	var DateTimePickerMonths = (function (_Component) {
-	  _inherits(DateTimePickerMonths, _Component);
-
-	  function DateTimePickerMonths() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerMonths);
-
-	    _get(Object.getPrototypeOf(DateTimePickerMonths.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderMonths = function () {
-	      var classes, i, month, months, monthsShort;
-	      month = _this.props.selectedDate.month();
-	      monthsShort = _moment2["default"].monthsShort();
-	      i = 0;
-	      months = [];
-	      while (i < 12) {
-	        classes = {
-	          month: true,
-	          "active": i === month && _this.props.viewDate.year() === _this.props.selectedDate.year()
-	        };
-	        months.push(_react2["default"].createElement(
-	          "span",
-	          { className: (0, _classnames2["default"])(classes), key: i, onClick: _this.props.setViewMonth },
-	          monthsShort[i]
-	        ));
-	        i++;
-	      }
-	      return months;
-	    };
-	  }
-
-	  _createClass(DateTimePickerMonths, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "datepicker-months", style: { display: "block" } },
-	        _react2["default"].createElement(
-	          "table",
-	          { className: "table-condensed" },
-	          _react2["default"].createElement(
-	            "thead",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "prev", onClick: this.props.subtractYear },
-	                "‹"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "switch", colSpan: "5", onClick: this.props.showYears },
-	                this.props.viewDate.year()
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "next", onClick: this.props.addYear },
-	                "›"
-	              )
-	            )
-	          ),
-	          _react2["default"].createElement(
-	            "tbody",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { colSpan: "7" },
-	                this.renderMonths()
-	              )
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      subtractYear: _react.PropTypes.func.isRequired,
-	      addYear: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      showYears: _react.PropTypes.func.isRequired,
-	      setViewMonth: _react.PropTypes.func.isRequired
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerMonths;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerMonths;
-	module.exports = exports["default"];
-
-/***/ },
-/* 329 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _classnames = __webpack_require__(321);
-
-	var _classnames2 = _interopRequireDefault(_classnames);
-
-	var DateTimePickerYears = (function (_Component) {
-	  _inherits(DateTimePickerYears, _Component);
-
-	  function DateTimePickerYears() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerYears);
-
-	    _get(Object.getPrototypeOf(DateTimePickerYears.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderYears = function () {
-	      var classes, i, year, years;
-	      years = [];
-	      year = parseInt(_this.props.viewDate.year() / 10, 10) * 10;
-	      year--;
-	      i = -1;
-	      while (i < 11) {
-	        classes = {
-	          year: true,
-	          old: i === -1 | i === 10,
-	          active: _this.props.selectedDate.year() === year
-	        };
-	        years.push(_react2["default"].createElement(
-	          "span",
-	          { className: (0, _classnames2["default"])(classes), key: year, onClick: _this.props.setViewYear },
-	          year
-	        ));
-	        year++;
-	        i++;
-	      }
-	      return years;
-	    };
-	  }
-
-	  _createClass(DateTimePickerYears, [{
-	    key: "render",
-	    value: function render() {
-	      var year;
-	      year = parseInt(this.props.viewDate.year() / 10, 10) * 10;
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "datepicker-years", style: { display: "block" } },
-	        _react2["default"].createElement(
-	          "table",
-	          { className: "table-condensed" },
-	          _react2["default"].createElement(
-	            "thead",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "prev", onClick: this.props.subtractDecade },
-	                "‹"
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "switch", colSpan: "5" },
-	                year,
-	                " - ",
-	                year + 9
-	              ),
-	              _react2["default"].createElement(
-	                "th",
-	                { className: "next", onClick: this.props.addDecade },
-	                "›"
-	              )
-	            )
-	          ),
-	          _react2["default"].createElement(
-	            "tbody",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { colSpan: "7" },
-	                this.renderYears()
-	              )
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      subtractDecade: _react.PropTypes.func.isRequired,
-	      addDecade: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      setViewYear: _react.PropTypes.func.isRequired
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerYears;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerYears;
-	module.exports = exports["default"];
-
-/***/ },
-/* 330 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _extends = __webpack_require__(314)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _DateTimePickerMinutes = __webpack_require__(331);
-
-	var _DateTimePickerMinutes2 = _interopRequireDefault(_DateTimePickerMinutes);
-
-	var _DateTimePickerHours = __webpack_require__(333);
-
-	var _DateTimePickerHours2 = _interopRequireDefault(_DateTimePickerHours);
-
-	var _ConstantsJs = __webpack_require__(332);
-
-	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
-
-	var DateTimePickerTime = (function (_Component) {
-	  _inherits(DateTimePickerTime, _Component);
-
-	  function DateTimePickerTime() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerTime);
-
-	    _get(Object.getPrototypeOf(DateTimePickerTime.prototype), "constructor", this).apply(this, arguments);
-
-	    this.state = {
-	      minutesDisplayed: false,
-	      hoursDisplayed: false
-	    };
-
-	    this.goBack = function () {
-	      return _this.setState({
-	        minutesDisplayed: false,
-	        hoursDisplayed: false
-	      });
-	    };
-
-	    this.showMinutes = function () {
-	      return _this.setState({
-	        minutesDisplayed: true
-	      });
-	    };
-
-	    this.showHours = function () {
-	      return _this.setState({
-	        hoursDisplayed: true
-	      });
-	    };
-
-	    this.renderMinutes = function () {
-	      if (_this.state.minutesDisplayed) {
-	        return _react2["default"].createElement(_DateTimePickerMinutes2["default"], _extends({}, _this.props, { onSwitch: _this.goBack }));
-	      } else {
-	        return null;
-	      }
-	    };
-
-	    this.renderHours = function () {
-	      if (_this.state.hoursDisplayed) {
-	        return _react2["default"].createElement(_DateTimePickerHours2["default"], _extends({}, _this.props, { onSwitch: _this.goBack }));
-	      } else {
-	        return null;
-	      }
-	    };
-
-	    this.renderPicker = function () {
-	      if (!_this.state.minutesDisplayed && !_this.state.hoursDisplayed) {
-	        return _react2["default"].createElement(
-	          "div",
-	          { className: "timepicker-picker" },
-	          _react2["default"].createElement(
-	            "table",
-	            { className: "table-condensed" },
-	            _react2["default"].createElement(
-	              "tbody",
-	              null,
-	              _react2["default"].createElement(
-	                "tr",
-	                null,
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "a",
-	                    { className: "btn", onClick: _this.props.addHour },
-	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-up" })
-	                  )
-	                ),
-	                _react2["default"].createElement("td", { className: "separator" }),
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "a",
-	                    { className: "btn", onClick: _this.props.addMinute },
-	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-up" })
-	                  )
-	                ),
-	                _react2["default"].createElement("td", { className: "separator" })
-	              ),
-	              _react2["default"].createElement(
-	                "tr",
-	                null,
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "span",
-	                    { className: "timepicker-hour", onClick: _this.showHours },
-	                    _this.props.selectedDate.format("h")
-	                  )
-	                ),
-	                _react2["default"].createElement(
-	                  "td",
-	                  { className: "separator" },
-	                  ":"
-	                ),
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "span",
-	                    { className: "timepicker-minute", onClick: _this.showMinutes },
-	                    _this.props.selectedDate.format("mm")
-	                  )
-	                ),
-	                _react2["default"].createElement("td", { className: "separator" }),
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "button",
-	                    { className: "btn btn-primary", onClick: _this.props.togglePeriod, type: "button" },
-	                    _this.props.selectedDate.format("A")
-	                  )
-	                )
-	              ),
-	              _react2["default"].createElement(
-	                "tr",
-	                null,
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "a",
-	                    { className: "btn", onClick: _this.props.subtractHour },
-	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-down" })
-	                  )
-	                ),
-	                _react2["default"].createElement("td", { className: "separator" }),
-	                _react2["default"].createElement(
-	                  "td",
-	                  null,
-	                  _react2["default"].createElement(
-	                    "a",
-	                    { className: "btn", onClick: _this.props.subtractMinute },
-	                    _react2["default"].createElement("span", { className: "glyphicon glyphicon-chevron-down" })
-	                  )
-	                ),
-	                _react2["default"].createElement("td", { className: "separator" })
-	              )
-	            )
-	          )
-	        );
-	      } else {
-	        return "";
-	      }
-	    };
-	  }
-
-	  _createClass(DateTimePickerTime, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "timepicker" },
-	        this.renderPicker(),
-	        this.renderHours(),
-	        this.renderMinutes()
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      setSelectedHour: _react.PropTypes.func.isRequired,
-	      setSelectedMinute: _react.PropTypes.func.isRequired,
-	      subtractHour: _react.PropTypes.func.isRequired,
-	      addHour: _react.PropTypes.func.isRequired,
-	      subtractMinute: _react.PropTypes.func.isRequired,
-	      addMinute: _react.PropTypes.func.isRequired,
-	      viewDate: _react.PropTypes.object.isRequired,
-	      selectedDate: _react.PropTypes.object.isRequired,
-	      togglePeriod: _react.PropTypes.func.isRequired,
-	      mode: _react.PropTypes.oneOf([_ConstantsJs2["default"].MODE_DATE, _ConstantsJs2["default"].MODE_DATETIME, _ConstantsJs2["default"].MODE_TIME])
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerTime;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerTime;
-
-	module.exports = DateTimePickerTime;
-	module.exports = exports["default"];
-
-/***/ },
-/* 331 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _ConstantsJs = __webpack_require__(332);
-
-	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
-
-	var DateTimePickerMinutes = (function (_Component) {
-	  _inherits(DateTimePickerMinutes, _Component);
-
-	  function DateTimePickerMinutes() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerMinutes);
-
-	    _get(Object.getPrototypeOf(DateTimePickerMinutes.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderSwitchButton = function () {
-	      return _this.props.mode === _ConstantsJs2["default"].MODE_TIME ? _react2["default"].createElement(
-	        "ul",
-	        { className: "list-unstyled" },
-	        _react2["default"].createElement(
-	          "li",
-	          null,
-	          _react2["default"].createElement(
-	            "span",
-	            { className: "btn picker-switch", onClick: _this.props.onSwitch, style: { width: "100%" } },
-	            _react2["default"].createElement("span", { className: "glyphicon glyphicon-time" })
-	          )
-	        )
-	      ) : null;
-	    };
-	  }
-
-	  _createClass(DateTimePickerMinutes, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "timepicker-minutes", "data-action": "selectMinute", style: { display: "block" } },
-	        this.renderSwitchButton(),
-	        _react2["default"].createElement(
-	          "table",
-	          { className: "table-condensed" },
-	          _react2["default"].createElement(
-	            "tbody",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "00"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "05"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "10"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "15"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "20"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "25"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "30"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "35"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "40"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "45"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "50"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "minute", onClick: this.props.setSelectedMinute },
-	                "55"
-	              )
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      setSelectedMinute: _react.PropTypes.func.isRequired,
-	      onSwitch: _react.PropTypes.func.isRequired,
-	      mode: _react.PropTypes.string.isRequired
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerMinutes;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerMinutes;
-	module.exports = exports["default"];
-
-/***/ },
-/* 332 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	module.exports = {
-	    MODE_DATE: "date",
-	    MODE_DATETIME: "datetime",
-	    MODE_TIME: "time",
-
-	    SIZE_SMALL: "sm",
-	    SIZE_MEDIUM: "md",
-	    SIZE_LARGE: "lg"
-	};
-
-/***/ },
-/* 333 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var _get = __webpack_require__(285)["default"];
-
-	var _inherits = __webpack_require__(301)["default"];
-
-	var _createClass = __webpack_require__(310)["default"];
-
-	var _classCallCheck = __webpack_require__(313)["default"];
-
-	var _interopRequireDefault = __webpack_require__(320)["default"];
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _ConstantsJs = __webpack_require__(332);
-
-	var _ConstantsJs2 = _interopRequireDefault(_ConstantsJs);
-
-	var DateTimePickerHours = (function (_Component) {
-	  _inherits(DateTimePickerHours, _Component);
-
-	  function DateTimePickerHours() {
-	    var _this = this;
-
-	    _classCallCheck(this, DateTimePickerHours);
-
-	    _get(Object.getPrototypeOf(DateTimePickerHours.prototype), "constructor", this).apply(this, arguments);
-
-	    this.renderSwitchButton = function () {
-	      return _this.props.mode === _ConstantsJs2["default"].MODE_TIME ? _react2["default"].createElement(
-	        "ul",
-	        { className: "list-unstyled" },
-	        _react2["default"].createElement(
-	          "li",
-	          null,
-	          _react2["default"].createElement(
-	            "span",
-	            { className: "btn picker-switch", onClick: _this.props.onSwitch, style: { width: "100%" } },
-	            _react2["default"].createElement("span", { className: "glyphicon glyphicon-time" })
-	          )
-	        )
-	      ) : null;
-	    };
-	  }
-
-	  _createClass(DateTimePickerHours, [{
-	    key: "render",
-	    value: function render() {
-	      return _react2["default"].createElement(
-	        "div",
-	        { className: "timepicker-hours", "data-action": "selectHour", style: { display: "block" } },
-	        this.renderSwitchButton(),
-	        _react2["default"].createElement(
-	          "table",
-	          { className: "table-condensed" },
-	          _react2["default"].createElement(
-	            "tbody",
-	            null,
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "01"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "02"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "03"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "04"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "05"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "06"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "07"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "08"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "09"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "10"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "11"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "12"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "13"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "14"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "15"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "16"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "17"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "18"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "19"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "20"
-	              )
-	            ),
-	            _react2["default"].createElement(
-	              "tr",
-	              null,
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "21"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "22"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "23"
-	              ),
-	              _react2["default"].createElement(
-	                "td",
-	                { className: "hour", onClick: this.props.setSelectedHour },
-	                "24"
-	              )
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }], [{
-	    key: "propTypes",
-	    value: {
-	      setSelectedHour: _react.PropTypes.func.isRequired,
-	      onSwitch: _react.PropTypes.func.isRequired,
-	      mode: _react.PropTypes.string.isRequired
-	    },
-	    enumerable: true
-	  }]);
-
-	  return DateTimePickerHours;
-	})(_react.Component);
-
-	exports["default"] = DateTimePickerHours;
-	module.exports = exports["default"];
 
 /***/ }
 /******/ ]);

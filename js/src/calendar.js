@@ -8,7 +8,7 @@ export class Calendar extends React.Component{
         const {calendar} = this.refs;
         $(calendar).fullCalendar({
             lang: 'sk',
-            editable: true,
+            editable: !this.props.viewOnly(),
             header: {
                 left: 'prev,next',
                 center: 'title',
@@ -45,10 +45,8 @@ export class Calendar extends React.Component{
                 this.props.openEvent(event,false)
             }.bind(this),
             dayClick:function(date, jsEvent, view) {
-                if(!this.props.viewOnly()){
-                    let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
-                    this.props.editEvent(event,true)
-                }
+                let event={title:"",start:date, end:date, categories:[],groups:[],public:false,allDay:false};
+                this.props.editEvent(event,true)
             }.bind(this),
             eventLimit:true,
         });
