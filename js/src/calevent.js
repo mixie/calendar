@@ -3,6 +3,7 @@ var DateTimeField = require('react-bootstrap-datetimepicker');
 import {GroupList} from './groups.js'
 import {CategoryGroupList} from './categories.js'
 var moment = require('moment')
+require("bootstrap-validator")
 
 
 
@@ -19,14 +20,24 @@ export class CalEvent extends React.Component{
     setStartDate(date){
         let newEvent=$.parseJSON(JSON.stringify(this.props.event));
         newEvent.start=moment(date);
-        newEvent.end=moment(newEvent.end);
+        let end = moment(newEvent.end)
+        if (end.diff(newEvent.start)<0){
+            newEvent.end = moment(date)
+        }else{
+            newEvent.end = moment(newEvent.end);
+        }
         this.props.updateEvent(newEvent)
     }
 
     setEndDate(date){
         let newEvent=$.parseJSON(JSON.stringify(this.props.event));
         newEvent.end=moment(date);
-        newEvent.start=moment(newEvent.start);
+        let start = moment(newEvent.start);
+        if (start.diff(newEvent.end)>0){
+            newEvent.start = moment(date)
+        }else{
+            newEvent.start = moment(newEvent.start);
+        }
         this.props.updateEvent(newEvent)
     }
 
@@ -67,10 +78,8 @@ export class CalEvent extends React.Component{
 
     allDayChanged(){
         let newEvent=$.parseJSON(JSON.stringify(this.props.event));
-        console.log(newEvent.start)
         newEvent.end=moment(newEvent.end);
         newEvent.start=moment(newEvent.start);
-        console.log(newEvent.start)
         newEvent.allDay=!newEvent.allDay;
         this.props.updateEvent(newEvent)
     }  
@@ -81,42 +90,44 @@ export class CalEvent extends React.Component{
         newEvent.start=moment(newEvent.start);
         newEvent.public=!newEvent.public;
         this.props.updateEvent(newEvent)
-    }  
-
+    }
 
     render(){
         let publicEvent="btn btn-default "+(this.props.event.public ? "active" : "");
         let alldayEvent="btn btn-default "+(this.props.event.allDay ? "active" : "");
         return(
         <div id="fullCalModalEdit" className="modal fade">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <button type="button" className="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span className="sr-only">close</span></button>
-                        názov: <input type="text" className="form-control" value={this.props.event.title} onChange={this.setTitle.bind(this)} />
-                    </div>
-                    <div id="modalBody" className="modal-body">
-                    <div className="form-group">
-                    <button type="button" className={publicEvent}  onClick={this.publicChanged.bind(this)}>Verejná</button>
-                    <button type="button" className={alldayEvent}  onClick={this.allDayChanged.bind(this)}>Celodenná</button>
-                    </div>
-                    <div className="form-group">
-                    od: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setStartDate.bind(this)}/>
-                    do: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setEndDate.bind(this)}/>
-                    </div>
-                    <div className="form-group">
-                    <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>
-                    <GroupList data={this.props.otherGroups} groupChanged={this.groupChanged.bind(this)} groupListName={"Ostatné skupiny"}/>
-                    <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
-                    </div>
-                    </div>
-                    <div className="modal-footer">
-                        <button className="btn btn-danger pull-left"  data-dismiss="modal" onClick={(e)=>this.props.deleteEvent(this.props.event.id)}>Zmazať</button>
-                        <button type="button" className="btn btn-default" data-dismiss="modal">Zavrieť</button>
-                        <button className="btn btn-primary"  data-dismiss="modal" onClick={(e)=>this.props.saveEvent(this.props.event)}>Uložiť</button>
-                    </div>
-                </div> 
-            </div>
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                        <div className="form-group">
+                            <button type="button" className="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span className="sr-only">close</span></button>
+                            názov: <input type="text" className="form-control" required value={this.props.event.title} data-error="Názov udalosti nesmie byť prázdny" onChange={this.setTitle.bind(this)} />
+                         <div className="help-block with-errors"></div>
+                        </div>
+                        </div>
+                        <div id="modalBody" className="modal-body">
+                        <div className="form-group">
+                        <button type="button" className={publicEvent}  onClick={this.publicChanged.bind(this)}>Verejná</button>
+                        <button type="button" className={alldayEvent}  onClick={this.allDayChanged.bind(this)}>Celodenná</button>
+                        </div>
+                        <div className="form-group">
+                        od: <DateTimeField dateTime={this.props.eventstart} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setStartDate.bind(this)}/>
+                        do: <DateTimeField dateTime={this.props.eventend} format="YYYY-MM-DD HH:mm" inputFormat="YYYY-MM-DD HH:mm" onChange={this.setEndDate.bind(this)}/>
+                        </div>
+                        <div className="form-group">
+                        <GroupList data={this.props.groups} groupChanged={this.groupChanged.bind(this)} groupListName={"Skupiny"}/>
+                        <GroupList data={this.props.otherGroups} groupChanged={this.groupChanged.bind(this)} groupListName={"Ostatné skupiny"}/>
+                        <CategoryGroupList categories={this.props.categories} categoryGroups={this.props.categoryGroups} categoryChanged={this.categoryChanged.bind(this)}/>
+                        </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button className="btn btn-danger pull-left"  data-dismiss="modal" onClick={(e)=>this.props.deleteEvent(this.props.event.id)}>Zmazať</button>
+                            <button type="button" className="btn btn-default" data-dismiss="modal">Zavrieť</button>
+                            <button className="btn btn-primary" data-dismiss="modal" onClick={(e)=>this.props.saveEvent(this.props.event)}>Uložiť</button>
+                        </div>
+                    </div> 
+                </div>
         </div>
         );
     }

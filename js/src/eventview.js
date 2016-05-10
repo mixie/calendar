@@ -118,7 +118,7 @@ export class CalEventView extends React.Component{
                     </div>
                     </div>
                     <div className="modal-footer">
-                        {(this.props.groups.length>0) && <button className="btn btn-warning pull-left"  data-dismiss="modal" onClick={(e)=>this.props.editEvent(this.props.event.id)}>Upraviť</button>}
+                        {(this.props.groups.length>0) && <button className="btn btn-warning pull-left"  data-dismiss="modal" onClick={(e)=>this.props.editEvent(this.props.event)}>Upraviť</button>}
                         <button type="button" className="btn btn-default" data-dismiss="modal">Zavrieť</button>
                     </div>
                 </div> 

@@ -5,7 +5,6 @@ import ReactDOM from 'react-dom'
 require('fullcalendar')
 var moment = require('moment')
 require('bootstrap')
-import {} from 'parsleyjs'
 import {Calendar} from './calendar.js'
 import {GroupList} from './groups.js'
 import {CategoryGroupList} from './categories.js'
@@ -25,14 +24,14 @@ class App extends React.Component{
 
     openEvent(event,isNew){
         this.setState({isNew:isNew})
-        $('#fullCalModalView').modal("show");
         this.updateEventOnScreen(event)
+        $('#fullCalModalView').modal("show");
     }
 
     editEvent(event,isNew){
         this.setState({isNew:isNew})
-        $('#fullCalModalEdit').modal("show");
         this.updateEventOnScreen(event)
+        $('#fullCalModalEdit').modal("show");
     }
 
     updateEventOnScreen(event){

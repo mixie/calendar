@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.6",
+    "bootstrap-validator": "^0.10.2",
     "cookies-js": "^1.2.2",
     "fullcalendar": "^2.7.0-beta",
     "ics": "^0.5.0",
