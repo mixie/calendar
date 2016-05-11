@@ -14,6 +14,7 @@ export class Calendar extends React.Component{
                 center: 'title',
                 right: 'month,agendaWeek,agendaDay'
             },
+            timezone: "local",
             events: (start, end, timezone, callback) => {
                 let url=this.props.url
                 if((this.props.url).includes("?")){

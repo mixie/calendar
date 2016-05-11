@@ -68,9 +68,11 @@ class App extends React.Component{
     }
 
     updateEventOnServer(event,revertFunc){
+        console.log("to server")
+        console.log(event.start)
         let url="/api/events/"
-        let start = event.start.format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
-        let end = event.end.format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
+        let start = event.start.local().format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
+        let end = event.end.local().format('YYYY-MM-DDTHH:mm').replace("P","T").replace("A","T")
         let method="post"
         if(!this.state.isNew){
             url=url+event.id+"/";
